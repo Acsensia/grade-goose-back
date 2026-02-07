@@ -11,7 +11,7 @@ dotenv.config({path: './config/.env'});
 app.use(json());
 
 //passing all requests to the main router
-app.get('/', mainrouter);
+app.use('/', mainrouter);
 
 //starting the server
 app.listen(process.env.PORT, () => {
