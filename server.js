@@ -1,19 +1,17 @@
 //imports
 import express, { json } from 'express';
 import dotenv from 'dotenv';
+import mainrouter from './src/routers/mainrouters'
 
 //.setup
 const app = express();
 //.setup->environment
 dotenv.config({path: './config/.env'});
-
-//middleware?
+//.setup->middleware
 app.use(json());
 
-//routes
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-});
+//passing all requests to the main router
+app.get('/', mainrouter);
 
 //starting the server
 app.listen(process.env.PORT, () => {
