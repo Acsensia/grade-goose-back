@@ -1,7 +1,7 @@
 //imports
 import express, { json } from 'express';
 import dotenv from 'dotenv';
-import mainrouter from './src/routers/mainrouters'
+import mainrouter from './src/routers/mainrouters.js'
 
 //.setup
 const app = express();
