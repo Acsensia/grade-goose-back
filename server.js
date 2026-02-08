@@ -12,6 +12,7 @@ dotenv.config({path: './config/.env'});
 app.use(json());
 
 //database connection
+//shuts the server down if connection failed
 async function connectToDatabase() {
     try {
         const connection = await mysql.createConnection({
