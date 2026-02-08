@@ -12,5 +12,5 @@ router.get('/api/data', (req, res) => {
     res.json({ message: 'This is some data' });
 });
 
-//exporting the thing
+//exports
 export default router;
