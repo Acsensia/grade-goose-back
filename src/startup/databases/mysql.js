@@ -1,8 +1,8 @@
 //imports
 import mysql from 'mysql2/promise';
 //imports->project
-import { logParameterTypeError, logError, logSuccess } from '../messengers/mainMessengers';
-import { serverShutdown } from '../serverManagement';
+import { logParameterTypeError, logError, logSuccess } from '../messengers/mainMessengers.js';
+import { serverShutdown } from '../serverManagement.js';
 
 async function _connectMySQL(host, user, password, database) {
     if (

@@ -1,5 +1,5 @@
 //imports->project
-import { logError } from "./messengers/mainMessengers";
+import { logError } from "./messengers/mainMessengers.js";
 
 function _serverShutdown(message){
     if (message === undefined){
