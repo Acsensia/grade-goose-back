@@ -130,7 +130,11 @@ async function __checkForDatabaseExistence(host, user, password, database) {
             if (err) throw err;
             connection.query("SHOW DATABASES LIKE '" + database + "'", function (err, result) {
                 if (err) throw err;
-                if (result !== "") logSuccess("Database existence check successful, query result:\n" + result);
+                if (result !== ""){
+                    logSuccess("Database existence check successful, query result:\n" + result);
+                    return true;
+                }
+                else return false;
             });
         });
     } catch (error) {
