@@ -4,6 +4,7 @@ import mysql from 'mysql2/promise';
 import { logParameterTypeError, logError, logSuccess } from '../messengers/mainMessengers.js';
 import { serverShutdown } from '../serverManagement.js';
 
+//function for the initial connection to the database
 async function _connectMySQL(host, user, password, database) {
     if (
         host     === undefined ||
