@@ -12,6 +12,9 @@ dotenv.config({path: './config/.env'});
 //.setup->middleware
 app.use(json());
 
+//starting the server
+startServer();
+
 //server start procedure
 //allows for automatic server shutdown if db connection failed
 async function startServer() {
@@ -26,6 +29,3 @@ async function startServer() {
         console.log(`Server is running on http://localhost:${process.env.PORT}`);
     });
 }
-
-//starting the server
-startServer();
