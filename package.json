@@ -9,7 +9,8 @@
   "dependencies": {
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
-    "mysql2": "^3.16.3"
+    "mysql2": "^3.16.3",
+    "prompt-sync": "^4.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
