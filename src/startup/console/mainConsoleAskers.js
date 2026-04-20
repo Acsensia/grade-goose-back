@@ -1,6 +1,6 @@
-import { styleText } from 'node:util';
-import { prompt } from 'prompt-sync';
-import { logParameterTypeError} from 'mainConsoleLoggers.js';
+import promptSync from 'prompt-sync';
+const prompt = promptSync();
+import { logParameterTypeError } from './mainConsoleLoggers.js';
 
 function _consoleAskTwoOptions(_prompt, _optionYes, _optionNo) {
     if (typeof _prompt !== 'string'){
@@ -17,9 +17,9 @@ function _consoleAskTwoOptions(_prompt, _optionYes, _optionNo) {
     }
 
     const input = prompt(
-        styleText('yellow', _prompt) +
-        "(" + styleText('green', _optionYes) +
-        "/" + styleText('red', _optionNo) + ")"
+        _prompt +
+        "(" + _optionYes +
+        "/" + _optionNo + ") "
     );
     if (input === _optionYes) return true;
     else return false;

@@ -52,6 +52,7 @@ async function _connectMySQL(host, user, password, database) {
         const shouldCheckDBExistence = consoleAskTwoOptions("Should the program look if the database in question exists?", "Y", "N");
         if (shouldCheckDBExistence){
             const databaseExists = __checkForDatabaseExistence(host, user, password, database);
+            if (!databaseExists) serverShutdown();////TODO
         }
         else serverShutdown();
     }
@@ -134,7 +135,10 @@ async function __checkForDatabaseExistence(host, user, password, database) {
                     logSuccess("Database existence check successful, query result:\n" + result);
                     return true;
                 }
-                else return false;
+                else{
+                    logError('Existence check finished: database does not exist:\n' + result);
+                    return false;
+                }
             });
         });
     } catch (error) {
