@@ -3,7 +3,7 @@ import express, { json } from 'express';
 import dotenv from 'dotenv';
 //imports->project
 import mainrouter from './src/routers/mainrouters.js';
-import { connectMySQL } from './src/startup/databases/mysql.js';
+import { connectMySQL } from './src/startup/databases/mysql/mysqlManagement.js';
 
 //.setup
 const app = express();

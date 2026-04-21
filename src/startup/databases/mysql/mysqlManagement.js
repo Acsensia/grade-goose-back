@@ -1,9 +1,9 @@
 //imports
 import mysql from 'mysql2/promise';
 //imports->project
-import { logParameterTypeError, logError, logSuccess } from '../console/mainConsoleLoggers.js';
-import { consoleAskTwoOptions } from '../console/mainConsoleAskers.js';
-import { serverShutdown } from '../serverManagement.js';
+import { logParameterTypeError, logError, logSuccess } from '../../console/mainConsoleLoggers.js';
+import { consoleAskTwoOptions } from '../../console/mainConsoleAskers.js';
+import { serverShutdown } from '../../serverManagement.js';
 
 //function for the initial connection to the database
 async function _connectMySQL(host, user, password, database) {
@@ -73,19 +73,19 @@ async function __createDatabase(host, user, password, database) {
     }
     else{
         if (typeof host !== 'string'){
-            logParameterTypeError('host', 'string', host, '__suggestDatabaseCreation');
+            logParameterTypeError('host', 'string', host, '__createDatabase');
             return undefined;
         }
         if (typeof user !== 'string'){
-            logParameterTypeError('user', 'string', user, '__suggestDatabaseCreation');
+            logParameterTypeError('user', 'string', user, '__createDatabase');
             return undefined;
         }
         if (typeof password !== 'string'){
-            logParameterTypeError('password', 'string', password, '__suggestDatabaseCreation');
+            logParameterTypeError('password', 'string', password, '__createDatabase');
             return undefined;
         }
         if (typeof database !== 'string'){
-            logParameterTypeError('database', 'string', database, '__suggestDatabaseCreation');
+            logParameterTypeError('database', 'string', database, '__createDatabase');
             return undefined;
         }
     }
