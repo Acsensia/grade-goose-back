@@ -56,6 +56,7 @@ async function _connectMySQL(host, user, password, database) {
                 __createDatabase(host, user, password, database);
                 //TODO
             }
+            else serverShutdown();
         }
     }
 }
@@ -111,16 +112,13 @@ async function __createDatabase(host, user, password, database, areMessagesToBeD
         if (areMessagesToBeDisplayed) logSuccess('(1/3)MYSQL general connection successful');
         connection.connect(function(err) {
             if (err) throw err;
-            connection.query("CREATE DATABASE '" + database + "';" + "", function (err) {
+            connection.query("CREATE DATABASE '" + database + "'; " + "USE '" + database + "';", function (err) {
                 if (err) throw err;
-                connection.query("USE '" + database + "';" + "", function (err) {
+                if (areMessagesToBeDisplayed) logSuccess('(2/3)Pre-query creation successful');
+                connection.query(readQuery("management/createDB.sql"), function (err) {
                     if (err) throw err;
-                    if (areMessagesToBeDisplayed) logSuccess('(2/3)Pre-query creation successful');
-                    connection.query(readQuery("management/createDB.sql"), function (err) {
-                        if (err) throw err;
-                        if (areMessagesToBeDisplayed) logSuccess('(3/3)Creation successful');
-                        return true;
-                    });
+                    if (areMessagesToBeDisplayed) logSuccess('(3/3)Creation successful');
+                    return true;
                 });
             });
         });
