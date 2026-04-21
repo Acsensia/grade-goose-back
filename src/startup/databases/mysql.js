@@ -18,21 +18,23 @@ async function _connectMySQL(host, user, password, database) {
         password = process.env.DB_PASS;
         database = process.env.DB_NAME;
     }
-    if (typeof host !== 'string'){
-        logParameterTypeError('host', 'string', host, 'connectMySQL');
-        return undefined;
-    }
-    if (typeof user !== 'string'){
-        logParameterTypeError('user', 'string', user, 'connectMySQL');
-        return undefined;
-    }
-    if (typeof password !== 'string'){
-        logParameterTypeError('password', 'string', password, 'connectMySQL');
-        return undefined;
-    }
-    if (typeof database !== 'string'){
-        logParameterTypeError('database', 'string', database, 'connectMySQL');
-        return undefined;
+    else {
+        if (typeof host !== 'string'){
+            logParameterTypeError('host', 'string', host, 'connectMySQL');
+            return undefined;
+        }
+        if (typeof user !== 'string'){
+            logParameterTypeError('user', 'string', user, 'connectMySQL');
+            return undefined;
+        }
+        if (typeof password !== 'string'){
+            logParameterTypeError('password', 'string', password, 'connectMySQL');
+            return undefined;
+        }
+        if (typeof database !== 'string'){
+            logParameterTypeError('database', 'string', database, 'connectMySQL');
+            return undefined;
+        }
     }
 
     try {
@@ -48,13 +50,12 @@ async function _connectMySQL(host, user, password, database) {
     } catch (error) {
         logError('Database connection failed:\n' + error.message);
 
-        //asking to see if the database exists
-        const shouldCheckDBExistence = consoleAskTwoOptions("Should the program look if the database in question exists?", "Y", "N");
-        if (shouldCheckDBExistence){
-            const databaseExists = __checkForDatabaseExistence(host, user, password, database);
-            if (!databaseExists) serverShutdown();////TODO
+        if (__checkForDatabaseExistence(host, user, password, database, true)) {
+            if (consoleAskTwoOptions("Generate a target database?", "Y", "N")){
+                __createDatabase(host, user, password, database);
+                //TODO
+            }
         }
-        else serverShutdown();
     }
 }
 
@@ -70,27 +71,29 @@ async function __createDatabase(host, user, password, database) {
         password = process.env.DB_PASS;
         database = process.env.DB_NAME;
     }
-    if (typeof host !== 'string'){
-        logParameterTypeError('host', 'string', host, '__suggestDatabaseCreation');
-        return undefined;
-    }
-    if (typeof user !== 'string'){
-        logParameterTypeError('user', 'string', user, '__suggestDatabaseCreation');
-        return undefined;
-    }
-    if (typeof password !== 'string'){
-        logParameterTypeError('password', 'string', password, '__suggestDatabaseCreation');
-        return undefined;
-    }
-    if (typeof database !== 'string'){
-        logParameterTypeError('database', 'string', database, '__suggestDatabaseCreation');
-        return undefined;
+    else{
+        if (typeof host !== 'string'){
+            logParameterTypeError('host', 'string', host, '__suggestDatabaseCreation');
+            return undefined;
+        }
+        if (typeof user !== 'string'){
+            logParameterTypeError('user', 'string', user, '__suggestDatabaseCreation');
+            return undefined;
+        }
+        if (typeof password !== 'string'){
+            logParameterTypeError('password', 'string', password, '__suggestDatabaseCreation');
+            return undefined;
+        }
+        if (typeof database !== 'string'){
+            logParameterTypeError('database', 'string', database, '__suggestDatabaseCreation');
+            return undefined;
+        }
     }
 
     ////TODO
 }
 
-async function __checkForDatabaseExistence(host, user, password, database) {
+async function __checkForDatabaseExistence(host, user, password, database, areMessagesToBeDisplayed) {
     if (
         host     === undefined ||
         user     === undefined ||
@@ -102,21 +105,30 @@ async function __checkForDatabaseExistence(host, user, password, database) {
         password = process.env.DB_PASS;
         database = process.env.DB_NAME;
     }
-    if (typeof host !== 'string'){
-        logParameterTypeError('host', 'string', host, '__suggestDatabaseCreation');
-        return undefined;
+    else {
+        if (typeof host !== 'string'){
+            logParameterTypeError('host', 'string', host, '__checkForDatabaseExistence');
+            return undefined;
+        }
+        if (typeof user !== 'string'){
+            logParameterTypeError('user', 'string', user, '__checkForDatabaseExistence');
+            return undefined;
+        }
+        if (typeof password !== 'string'){
+            logParameterTypeError('password', 'string', password, '__checkForDatabaseExistence');
+            return undefined;
+        }
+        if (typeof database !== 'string'){
+            logParameterTypeError('database', 'string', database, '__checkForDatabaseExistence');
+            return undefined;
+        }
     }
-    if (typeof user !== 'string'){
-        logParameterTypeError('user', 'string', user, '__suggestDatabaseCreation');
-        return undefined;
-    }
-    if (typeof password !== 'string'){
-        logParameterTypeError('password', 'string', password, '__suggestDatabaseCreation');
-        return undefined;
-    }
-    if (typeof database !== 'string'){
-        logParameterTypeError('database', 'string', database, '__suggestDatabaseCreation');
-        return undefined;
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== 'boolean'){
+            logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
+            return undefined;
+        }
     }
 
     try {
@@ -132,17 +144,17 @@ async function __checkForDatabaseExistence(host, user, password, database) {
             connection.query("SHOW DATABASES LIKE '" + database + "'", function (err, result) {
                 if (err) throw err;
                 if (result !== ""){
-                    logSuccess("Database existence check successful, query result:\n" + result);
+                    if (areMessagesToBeDisplayed) logSuccess("Database existence check successful, query result:\n" + result);
                     return true;
                 }
                 else{
-                    logError('Existence check finished: database does not exist:\n' + result);
+                    if (areMessagesToBeDisplayed) logError('Existence check finished: database does not exist:\n' + result);
                     return false;
                 }
             });
         });
     } catch (error) {
-        logError('MYSQL general connection failed, database existence check failed:\n' + error.message);
+        if (areMessagesToBeDisplayed) logError('MYSQL general connection failed, database existence check failed:\n' + error.message);
         return false;
     }
 }
