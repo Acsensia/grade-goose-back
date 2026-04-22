@@ -115,6 +115,18 @@ function _logSuccess(message){
     console.log(styleText('green', message));
 }
 
+function _logFinalSuccess(message){
+    if (message === undefined){
+        _logParameterExistenceError('message', 'logSuccess');
+        return;
+    }
+    if (typeof message !== 'string'){
+        _logParameterTypeError('message', 'string', message, 'logSuccess');
+        return;
+    }
+    console.log(styleText('bgGreen', message));
+}
+
 function _logNeutral(message){
     if (message === undefined){
         _logParameterExistenceError('message', 'logNeutral');
@@ -144,5 +156,6 @@ export const logParameterExistenceError = _logParameterExistenceError;
 export const logParameterTypeError = _logParameterTypeError;
 export const logError = _logError;
 export const logSuccess = _logSuccess;
+export const logFinalSuccess = _logFinalSuccess;
 export const logNeutral = _logNeutral;
 export const logWarning = _logWarning;
