@@ -127,9 +127,22 @@ function _logNeutral(message){
     console.log(styleText('gray', message));
 }
 
+function _logWarning(message){
+    if (message === undefined){
+        _logParameterExistenceError('message', 'logWarning');
+        return;
+    }
+    if (typeof message !== 'string'){
+        _logParameterTypeError('message', 'string', message, 'logWarning');
+        return;
+    }
+    console.log(styleText('yellow', message));
+}
+
 //exports
 export const logParameterExistenceError = _logParameterExistenceError;
 export const logParameterTypeError = _logParameterTypeError;
 export const logError = _logError;
 export const logSuccess = _logSuccess;
 export const logNeutral = _logNeutral;
+export const logWarning = _logWarning;
