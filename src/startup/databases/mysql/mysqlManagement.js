@@ -246,10 +246,6 @@ async function __checkForDatabaseExistence(host, user, password, database, areMe
         if (areMessagesToBeDisplayed) logSuccess('(1/2)MYSQL general connection successful');
         try{
             const [resultingRows] = await connection.query(`SHOW DATABASES LIKE '${database}'`);
-            const [testingRows] = await connection.query(`SHOW DATABASES`);
-            testingRows.forEach(row => {
-                logNeutral(row.toString())
-            });
             if (resultingRows.length > 0) {
                 if (areMessagesToBeDisplayed) logSuccess("(2/2)Database existence check successful, query result:\n" + resultingRows);
                 return true;
