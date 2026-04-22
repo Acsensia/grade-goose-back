@@ -18,6 +18,9 @@ startServer();
 //server start procedure
 //allows for automatic server shutdown if db connection failed
 async function startServer() {
+    //clearing the console
+    console.clear();
+
     //trying to connect
     const connection = await connectMySQL();
 
