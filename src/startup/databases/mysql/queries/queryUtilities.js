@@ -68,7 +68,8 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
                     if (queryInStringFormat[curCharIndex] === '`') {
                         for (var curDatabaseNameIndex = curCharIndex + 1; ; curDatabaseNameIndex++) {
                             if ( curDatabaseNameIndex >= queryInStringFormat.length ||
-                                queryInStringFormat[curDatabaseNameIndex] === '`') {
+                                queryInStringFormat[curDatabaseNameIndex] === '`' ||
+                                queryInStringFormat[curDatabaseNameIndex] == '.') {
                                     break;
                                 }
                             else databaseName += queryInStringFormat[curDatabaseNameIndex];
@@ -111,5 +112,47 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
     }
 }
 
+function _changeDatabaseNameInQueryString(queryInStringFormat, newDatabaseName, areMessagesToBeDisplayed) {
+    if (typeof queryInStringFormat !== 'string'){
+        logParameterTypeError('queryInStringFormat', 'string', queryInStringFormat, 'changeDatabaseNameInQueryString');
+        return undefined;
+    }
+    if (typeof newDatabaseName !== 'string'){
+        logParameterTypeError('newDatabaseName', 'string', newDatabaseName, 'changeDatabaseNameInQueryString');
+        return undefined;
+    }
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== "boolean") {
+            logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, 'readQuery');
+            return undefined;
+        }
+    }
+
+    try {
+        if (areMessagesToBeDisplayed) {
+            logNeutral(`(0/changeDatabaseNameInQueryString)Trying to rename the name of the database in the query to the new name ("${newDatabaseName}")...`);
+            logNeutral(`(1/changeDatabaseNameInQueryString)Trying to find the name of the database used inside the query...`);
+        }
+        const oldDatabaseName = _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessagesToBeDisplayed);
+        if (oldDatabaseName === undefined) {
+            if (areMessagesToBeDisplayed) logError(`(!/changeDatabaseNameInQueryString)Failed to find the name of the database used inside the query!`);
+            return undefined;
+        }
+        else {
+            if (areMessagesToBeDisplayed) logSuccess(`(1/changeDatabaseNameInQueryString)Successfully found the name of the database used inside the query: "${oldDatabaseName}".`);
+        }
+
+        if (areMessagesToBeDisplayed) logNeutral(`(2/changeDatabaseNameInQueryString)Trying to replace all instances of "${oldDatabaseName}" with "${newDatabaseName}" inside the query string...`);
+        const result = queryInStringFormat.replaceAll(oldDatabaseName, newDatabaseName);
+        if (areMessagesToBeDisplayed) logSuccess(`(2/changeDatabaseNameInQueryString)Successfully replaced all instances of "${oldDatabaseName}" with "${newDatabaseName}" inside the query string!`);
+        return result;
+    } catch (error) {
+        logError(`(!/changeDatabaseNameInQueryString)Failed generally to rename the name of the database in the query to the new name ("${newDatabaseName}")! Error message: ${error}`);
+        return undefined;
+    }
+}
+
 export const readQuery = _readQuery;
 export const readCreatedDatabaseNameFromQueryString = _readCreatedDatabaseNameFromQueryString;
+export const changeDatabaseNameInQueryString = _changeDatabaseNameInQueryString;
