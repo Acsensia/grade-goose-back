@@ -39,7 +39,7 @@ function _readQuery(pathToPackageIn_queries_folder, areMessagesToBeDisplayed) {/
 
 function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessagesToBeDisplayed) {
     if (typeof queryInStringFormat !== 'string'){
-        logParameterTypeError('queryInStringFormat', 'string', queryInStringFormat, '_readCreatedDatabaseNameFromQueryString');
+        logParameterTypeError('queryInStringFormat', 'string', queryInStringFormat, 'readCreatedDatabaseNameFromQueryString');
         return undefined;
     }
     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
