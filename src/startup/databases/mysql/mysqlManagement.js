@@ -5,7 +5,7 @@ import mysql from 'mysql2/promise';
 import { logParameterTypeError, logError, logSuccess, logNeutral } from '../../console/mainConsoleLoggers.js';
 import { consoleAskTwoOptions } from '../../console/mainConsoleAskers.js';
 import { serverShutdown } from '../../serverManagement.js';
-import { readQuery } from './queries/readQuery.js';
+import { changeDatabaseNameInQueryString, readQuery } from './queries/queryUtilities.js';
 
 //function for the initial connection to the database
 async function _connectMySQL(host, user, password, database) {
@@ -111,9 +111,10 @@ async function __createDatabase(host, user, password, database, areMessagesToBeD
         }
     }
 
-    if (areMessagesToBeDisplayed) logNeutral('(0/3)Trying to create the target database...');
+    if (areMessagesToBeDisplayed) logNeutral('(0/__createDatabase)Trying to create the target database...');
     try {
         //connecting without specifying the database
+        if (areMessagesToBeDisplayed) logNeutral(`(1/__createDatabase)Trying to create a general MYSQL connection...`);
         const connection = await mysql.createConnection({
             host:host,
             user:user,
@@ -121,20 +122,111 @@ async function __createDatabase(host, user, password, database, areMessagesToBeD
             multipleStatements: true
         });
         try {
-            if (areMessagesToBeDisplayed) logSuccess('(1/3)MYSQL general connection successful');
-            await connection.query(`CREATE DATABASE \`${database}\`; USE \`${database}\`;`)
-            if (areMessagesToBeDisplayed) logSuccess('(2/3)Pre-query creation successful');
-            await connection.query(readQuery("management/createDB.sql"));
-            if (areMessagesToBeDisplayed) logSuccess('(3/3)Creation successful');
+            if (areMessagesToBeDisplayed) logSuccess('(1/__createDatabase)MYSQL general connection successful');
+
+            if (areMessagesToBeDisplayed) logNeutral(`(1/__createDatabase)Trying to load the database creation query from an sql file...`);
+            //
+            var queryString = await readQuery("management/createDB.sql", true);
+            if (queryString === undefined) {
+                if (areMessagesToBeDisplayed) logError(`(!/__createDatabase)Failed to load the database creation query from an sql file!`);
+                return false;
+            } else {
+                if (areMessagesToBeDisplayed) (`(1/__createDatabase)Successfully loaded the database creation query from an sql file.`);
+            }
+
+            if (areMessagesToBeDisplayed) logNeutral(`(2/__createDatabase)Trying to change the name of the database inside the loaded query...`);
+            queryString = changeDatabaseNameInQueryString(queryString, database, true);
+            if (queryString === undefined) {
+                if (areMessagesToBeDisplayed) logError(`(2/__createDatabase)Failed to change the name of the database inside the loaded query!`);
+                return false;
+            } else {
+                if (areMessagesToBeDisplayed) logSuccess('(2/__createDatabase)Successfully changed the name of the database inside the loaded query.');
+            }
+            
+            if (areMessagesToBeDisplayed) logNeutral(`(3/__createDatabase)Trying to run the modified query...`);
+            await connection.query(queryString);
+            if (areMessagesToBeDisplayed) logSuccess('(3/__createDatabase)Successfully changed ran the query, database created successfully.');
             return true;
         } finally{
             connection.end();
         }
     } catch (error) {
-        if (areMessagesToBeDisplayed) logError('Database creation failed:\n' + error.message);
+        if (areMessagesToBeDisplayed) logError('Database creation failed in general:\n' + error.message);
         return false;
     }
 }
+
+// async function __renameDatabase(host, user, password, databaseToBeRenamed, newDatabaseName, areMessagesToBeDisplayed) {
+//     if (
+//         host     === undefined ||
+//         user     === undefined ||
+//         password === undefined
+//     ){
+//         host = process.env.DB_HOST;
+//         user = process.env.DB_USER;
+//         password = process.env.DB_PASS;
+//     }
+//     else{
+//         if (typeof host !== 'string'){
+//             logParameterTypeError('host', 'string', host, '__renameDatabase');
+//             return undefined;
+//         }
+//         if (typeof user !== 'string'){
+//             logParameterTypeError('user', 'string', user, '__renameDatabase');
+//             return undefined;
+//         }
+//         if (typeof password !== 'string'){
+//             logParameterTypeError('password', 'string', password, '__renameDatabase');
+//             return undefined;
+//         }
+//     }
+//     if (typeof databaseToBeRenamed !== 'string'){
+//         logParameterTypeError('databaseToBeRenamed', 'string', databaseToBeRenamed, '__renameDatabase');
+//         return undefined;
+//     }
+//     if (typeof newDatabaseName !== 'string'){
+//         logParameterTypeError('newDatabaseName', 'string', newDatabaseName, '__renameDatabase');
+//         return undefined;
+//     }
+//     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+//     else {
+//         if (typeof areMessagesToBeDisplayed !== 'boolean'){
+//             logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__renameDatabase');
+//             return undefined;
+//         }
+//     }
+
+//     try{
+//         if (areMessagesToBeDisplayed) {
+//             logNeutral(`(0/)Trying to change the name of the "${databaseToBeRenamed}" database...`);
+//         }
+        
+//         //checking if the desired database exists
+//         logNeutral(`(1/)Checking if the "${databaseToBeRenamed}" database exists...`);
+//         if (__checkForDatabaseExistence(host, user, password, databaseToBeRenamed, false)) {
+//             if (areMessagesToBeDisplayed) logSuccess(`(1/)"Database named "${databaseToBeRenamed}" really exists.`);
+//         } else {
+//             if (areMessagesToBeDisplayed) logError(`(!/)Database named "${databaseToBeRenamed}" doesn't exist!`);
+//             return undefined;
+//         }
+
+//         //checking if the new name isn't already taken by another database
+//         logNeutral(`(2/)Checking if the "${newDatabaseName}" database name is not already used...`);
+//         if (!__checkForDatabaseExistence(host, user, password, newDatabaseName, false)) {
+//             if (areMessagesToBeDisplayed) logSuccess(`(2/)"Database name "${newDatabaseName}" is not used by any other database.`);
+//         } else {
+//             if (areMessagesToBeDisplayed) logError(`(!/)Database name "${newDatabaseName}" is already being used by another database!`);
+//             return undefined;
+//         }
+
+//         //creating a new database with the new name
+//     } catch (error) {
+//         if (areMessagesToBeDisplayed) {
+//             logError(`(!/)Failed while trying to change the name of the "${databaseToBeRenamed}" database! Error message: ${error}`);
+//         }
+//     }
+    
+// }
 
 async function __removeDatabase(host, user, password, database, areMessagesToBeDisplayed){
     if (
