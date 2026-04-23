@@ -266,7 +266,7 @@ async function __removeDatabase(host, user, password, database, areMessagesToBeD
         }
     }
 
-    if (areMessagesToBeDisplayed) logNeutral('(0/2)Trying to remove the target database...');
+    if (areMessagesToBeDisplayed) logNeutral('(0/__removeDatabase)Trying to remove the target database...');
     try {
         //connecting without specifying the database
         const connection = await mysql.createConnection({
@@ -274,7 +274,7 @@ async function __removeDatabase(host, user, password, database, areMessagesToBeD
             user:user,
             password:password
         });
-        if (areMessagesToBeDisplayed) logSuccess('(1/2)MYSQL general connection successful');
+        if (areMessagesToBeDisplayed) logSuccess('(1/__removeDatabase)MYSQL general connection successful');
         try {
             await connection.query(`DROP DATABASE IF EXISTS \`${database}\``);
             logSuccess('(2/2)Target database removal successful');
@@ -283,7 +283,7 @@ async function __removeDatabase(host, user, password, database, areMessagesToBeD
         }
         return true;
     } catch (error) {
-        if (areMessagesToBeDisplayed) logError('(!/2)Target database removal failed:\n' + error.message);
+        if (areMessagesToBeDisplayed) logError('(!/__removeDatabase)Target database removal failed:\n' + error.message);
         return false;
     }
 }
@@ -327,7 +327,7 @@ async function __checkForDatabaseExistence(host, user, password, database, areMe
     }
     
     try {
-        if (areMessagesToBeDisplayed) logNeutral('(0/2)Trying to check if target database exists...');
+        if (areMessagesToBeDisplayed) logNeutral('(0/__checkForDatabaseExistence)Trying to check if target database exists...');
 
         //connecting without specifying the database
         const connection = await mysql.createConnection({
@@ -335,21 +335,21 @@ async function __checkForDatabaseExistence(host, user, password, database, areMe
             user:user,
             password:password
         });
-        if (areMessagesToBeDisplayed) logSuccess('(1/2)MYSQL general connection successful');
+        if (areMessagesToBeDisplayed) logSuccess('(1/__checkForDatabaseExistence)MYSQL general connection successful');
         try{
             const [resultingRows] = await connection.query(`SHOW DATABASES LIKE '${database}'`);
             if (resultingRows.length > 0) {
-                if (areMessagesToBeDisplayed) logSuccess("(2/2)Database existence check successful, query result:\n" + resultingRows);
+                if (areMessagesToBeDisplayed) logSuccess("(2/__checkForDatabaseExistence)Database existence check successful, query result:\n" + resultingRows);
                 return true;
             } else {
-                if (areMessagesToBeDisplayed) logError('(2/2)Existence check finished: database does not exist:\n' + resultingRows);
+                if (areMessagesToBeDisplayed) logError('(2/__checkForDatabaseExistence)Existence check finished: database does not exist:\n' + resultingRows);
                 return false;
             }
         } finally {
             connection.end();
         }
     } catch (error) {
-        if (areMessagesToBeDisplayed) logError('(!/2)Database existence check failed:\n' + error.message);
+        if (areMessagesToBeDisplayed) logError('(!/__checkForDatabaseExistence)Database existence check failed:\n' + error.message);
         return false;
     }
 }

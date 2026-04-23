@@ -26,12 +26,12 @@ function _readQuery(pathToPackageIn_queries_folder, areMessagesToBeDisplayed) {/
     }
 
     try{
-        if (areMessagesToBeDisplayed) logNeutral(`(0/1)Trying to read a query from a .sql file (path to the file: ${pathToPackageIn_queries_folder})...`)
+        if (areMessagesToBeDisplayed) logNeutral(`(0/_readQuery)Trying to read a query from a .sql file (path to the file: ${pathToPackageIn_queries_folder})...`)
         const queryReadingResult = fs.readFileSync(path.join(__dirname, pathToPackageIn_queries_folder)).toString();
-        if (areMessagesToBeDisplayed) logSuccess(`(1/1)Successfully read a query from a .sql file (path to the file: ${pathToPackageIn_queries_folder})!`)
+        if (areMessagesToBeDisplayed) logSuccess(`(1/_readQuery)Successfully read a query from a .sql file (path to the file: ${pathToPackageIn_queries_folder})!`)
         return queryReadingResult;
     } catch (error) {
-        logError(`(!/1)Failed to read a query from the .sql file (path to the file: ${pathToPackageIn_queries_folder}, error message: ${error})!`)
+        logError(`(!/_readQuery)Failed to read a query from the .sql file (path to the file: ${pathToPackageIn_queries_folder}, error message: ${error})!`)
         return undefined;
     }
     
@@ -51,7 +51,7 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
     }
 
     try {
-        if (areMessagesToBeDisplayed) logNeutral(`(0/1)Trying to find out the name of the database created in a query...`);
+        if (areMessagesToBeDisplayed) logNeutral(`(0/_readCreatedDatabaseNameFromQueryString)Trying to find out the name of the database created in a query...`);
         const creationSentences = [
             "CREATE SCHEMA ",
             "CREATE SCHEMA IF NOT EXISTS ",
@@ -76,17 +76,17 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
                 }
                 if (databaseName !== "") {
                     if (areMessagesToBeDisplayed) {
-                        logSuccess(`(1/1)Successfully found out the name of the database created in the query (${databaseName})!`)
+                        logSuccess(`(1/_readCreatedDatabaseNameFromQueryString)Successfully found out the name of the database created in the query (${databaseName})!`)
                     }
                     return databaseName;
                 } else {
                     if (areMessagesToBeDisplayed) {
-                        logWarning(`(?/1)Failed to find the start of a database name after the "${curSentence}" sentence!`);
+                        logWarning(`(?/_readCreatedDatabaseNameFromQueryString)Failed to find the start of a database name after the "${curSentence}" sentence!`);
                     }
                 }
             } else {
                 if (areMessagesToBeDisplayed) {
-                    logWarning(`(?/1)Creation sentence ${curSentence} was not found within the query...`);
+                    logWarning(`(?/_readCreatedDatabaseNameFromQueryString)Creation sentence ${curSentence} was not found within the query...`);
                 }
             }
         }
@@ -94,15 +94,15 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
         // inside the main 'for' cycle or doesn't find any "creationSentences"
         if (areMessagesToBeDisplayed) {
             if (creationCommandSentenceIndex == -1) {
-                logError(`(!/1)Failed to find out the name of the database created due to neither creation sentence having been found in the query!`);
+                logError(`(!/_readCreatedDatabaseNameFromQueryString)Failed to find out the name of the database created due to neither creation sentence having been found in the query!`);
             } else {
-                logError(`(!/1)Failed to find out the name of the database created due to not having found the start of a database name after neither found creation sentence `);
+                logError(`(!/_readCreatedDatabaseNameFromQueryString)Failed to find out the name of the database created due to not having found the start of a database name after neither found creation sentence `);
             }
         }
         return undefined;
     } catch (error) {
         if (areMessagesToBeDisplayed) {
-            logError(`(!/1)Failed to find out the name of the database created in the query! Error message: ${error}`);
+            logError(`(!/_readCreatedDatabaseNameFromQueryString)Failed to find out the name of the database created in the query! Error message: ${error}`);
         }
         return undefined;
     }
