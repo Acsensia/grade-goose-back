@@ -60,20 +60,18 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
             "USE "
         ]
         var creationCommandSentenceIndex = -1;
-        creationSentences.forEach(sentence => {
-            creationCommandSentenceIndex = queryInStringFormat.indexOf(sentence);
+        for (var sentenceIndex = 0; sentenceIndex < creationSentences.length; sentenceIndex++) {
+            const curSentence = creationSentences[sentenceIndex];
+            creationCommandSentenceIndex = queryInStringFormat.indexOf(curSentence);
             if (creationCommandSentenceIndex !== -1) {
                 var databaseName = "";
                 for(var curCharIndex = creationCommandSentenceIndex; curCharIndex < queryInStringFormat.length; curCharIndex++) {
                     if (queryInStringFormat[curCharIndex] === '`') {
-                        for (var curDatabaseNameIndex = curCharIndex + 1; ; curDatabaseNameIndex++) {
-                            if ( curDatabaseNameIndex >= queryInStringFormat.length ||
-                                queryInStringFormat[curDatabaseNameIndex] === '`' ||
-                                queryInStringFormat[curDatabaseNameIndex] == '.') {
-                                    break;
-                                }
-                            else databaseName += queryInStringFormat[curDatabaseNameIndex];
+                        databaseName = "";
+                        for (var curDatabaseNameIndex = curCharIndex + 1; curDatabaseNameIndex < queryInStringFormat.length && queryInStringFormat[curDatabaseNameIndex] !== '`' && queryInStringFormat[curDatabaseNameIndex] !== '.'; curDatabaseNameIndex++) {
+                            databaseName += queryInStringFormat[curDatabaseNameIndex];
                         }
+                        break;
                     }
                 }
                 if (databaseName !== "") {
@@ -83,25 +81,25 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
                     return databaseName;
                 } else {
                     if (areMessagesToBeDisplayed) {
-                        logWarning(`(?/1)Failed to find the start of a database name after the "${sentence}" sentence!`);
+                        logWarning(`(?/1)Failed to find the start of a database name after the "${curSentence}" sentence!`);
                     }
                 }
             } else {
                 if (areMessagesToBeDisplayed) {
-                    logWarning(`(?/1)Creation sentence ${sentence} was not found within the query...`);
+                    logWarning(`(?/1)Creation sentence ${curSentence} was not found within the query...`);
                 }
             }
-        });
+        }
         //the function fails if doesn't find any "databaseName" fillings
-        // inside the forEach cycle or doesn't find any "creationSentences"
+        // inside the main 'for' cycle or doesn't find any "creationSentences"
         if (areMessagesToBeDisplayed) {
             if (creationCommandSentenceIndex == -1) {
-                logError(`(!/1)Failed to find out the name of the database created due to neither 
-                    creation sentence having been found in the query!`);
+                logError(`(!/1)Failed to find out the name of the database created due to neither creation sentence having been found in the query!`);
             } else {
                 logError(`(!/1)Failed to find out the name of the database created due to not having found the start of a database name after neither found creation sentence `);
             }
         }
+        return undefined;
     } catch (error) {
         if (areMessagesToBeDisplayed) {
             logError(`(!/1)Failed to find out the name of the database created in the query! Error message: ${error}`);
