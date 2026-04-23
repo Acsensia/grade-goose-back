@@ -99,9 +99,7 @@ function _readCreatedDatabaseNameFromQueryString(queryInStringFormat, areMessage
                 logError(`(!/1)Failed to find out the name of the database created due to neither 
                     creation sentence having been found in the query!`);
             } else {
-                logError(`(!/1)Failed to find out the name of the database created due to
-                     not having found the start of a database name after 
-                     neither found creation sentence `);
+                logError(`(!/1)Failed to find out the name of the database created due to not having found the start of a database name after neither found creation sentence `);
             }
         }
     } catch (error) {
