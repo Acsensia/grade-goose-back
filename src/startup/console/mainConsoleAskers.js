@@ -2,17 +2,17 @@ import promptSync from 'prompt-sync';
 const prompt = promptSync();
 import { logParameterTypeError } from './mainConsoleLoggers.js';
 
-function _consoleAskTwoOptions(_prompt, _optionYes, _optionNo) {
+function _askTwoOptions(_prompt, _optionYes, _optionNo) {
     if (typeof _prompt !== 'string'){
-        logParameterTypeError('_prompt', 'string', _prompt, 'consoleAskTwoOptions');
+        logParameterTypeError('_prompt', 'string', _prompt, '_askTwoOptions');
         return undefined;
     }
     if (typeof _optionYes !== 'string'){
-        logParameterTypeError('_optionYes', 'string', _optionYes, 'consoleAskTwoOptions');
+        logParameterTypeError('_optionYes', 'string', _optionYes, '_askTwoOptions');
         return undefined;
     }
     if (typeof _optionNo !== 'string'){
-        logParameterTypeError('_optionNo', 'string', _optionNo, 'consoleAskTwoOptions');
+        logParameterTypeError('_optionNo', 'string', _optionNo, '_askTwoOptions');
         return undefined;
     }
 
@@ -26,4 +26,4 @@ function _consoleAskTwoOptions(_prompt, _optionYes, _optionNo) {
 }
 
 //exports
-export const consoleAskTwoOptions = _consoleAskTwoOptions;
+export const askTwoOptions = _askTwoOptions;

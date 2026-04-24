@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 
 //imports->project
 import { logParameterTypeError, logError, logSuccess, logNeutral } from '../../console/mainConsoleLoggers.js';
-import { consoleAskTwoOptions } from '../../console/mainConsoleAskers.js';
+import { askTwoOptions } from '../../console/mainConsoleAskers.js';
 import { serverShutdown } from '../../serverManagement.js';
 import { changeDatabaseNameInQueryString, readQuery } from './queries/queryUtilities.js';
 
@@ -42,7 +42,7 @@ async function _connectMySQL(host, user, password, database) {
     if (!(await __checkForDatabaseExistence(host, user, password, database, true))) {
         await __suggestCreatingDatabase(host, user, password, database, true);
     } else {
-        if (consoleAskTwoOptions("Remove current database?", "Y", "N")) {
+        if (askTwoOptions("Remove current database?", "Y", "N")) {
             const databaseRemovalResult = await __removeDatabase(host, user, password, database, true);
             if (databaseRemovalResult) {
                 await __suggestCreatingDatabase(host, user, password, database, true);
@@ -68,8 +68,11 @@ async function _connectMySQL(host, user, password, database) {
 //incapsulates __createDatabase
 async function __suggestCreatingDatabase(host, user, password, database, areMessagesToBeDisplayed) {
     //intentionally no checks cause the inner function should work fine
-    if (consoleAskTwoOptions("Generate the target database?", "Y", "N")) {
+    if (askTwoOptions("Generate the target database?", "Y", "N")) {
         if (!(await __createDatabase(host, user, password, database, areMessagesToBeDisplayed))) serverShutdown();
+        else {
+            //TODO
+        }
     } else serverShutdown();
 }
 
