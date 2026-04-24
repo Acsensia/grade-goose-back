@@ -1,11 +1,11 @@
 //imports
-import mysql from 'mysql2/promise';
+// import mysql from 'mysql2/promise';
 
 //imports->project
 import * as consoleLoggers from '../../console/consoleLoggers.js';
-import * as consoleAskers from '../../console/consoleAskers.js';
-import * as serverManagement from '../../serverManagement.js';
-import * as queryUtilities from './queries/queryUtilities.js';
+// import * as consoleAskers from '../../console/consoleAskers.js';
+// import * as serverManagement from '../../serverManagement.js';
+// import * as queryUtilities from './queries/queryUtilities.js';
 
 //supposed to work with mysql2/promise connections
 async function _getAdministratorCount(databaseConnection, areMessagesToBeDisplayed) {
