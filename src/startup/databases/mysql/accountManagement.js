@@ -1,5 +1,6 @@
 //imports
 // import mysql from 'mysql2/promise';
+import bcrypt from 'bcrypt';
 
 //imports->project
 import * as consoleLoggers from '../../console/consoleLoggers.js';
@@ -28,5 +29,77 @@ async function _getAdministratorCount(databaseConnection, areMessagesToBeDisplay
     }
 }
 
+async function __hashPassword(password, areMessagesToBeDisplayed) {
+    if (typeof password !== 'string') {
+        consoleLoggers.logParameterTypeError('password', 'string', password, '__hashPassword');
+        return undefined;
+    }
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== 'boolean'){
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '_addAdministrator');
+            return undefined;
+        }
+    }
+
+    if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/__hashPassword)Trying to hash a password with bcrypt...`);
+    try {
+        const bcryptSaltRounds = process.env.BC_SALTS ?? 12;
+        const hash = await bcrypt.hash(password, bcryptSaltRounds);
+        if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(0/__hashPassword)Successfully hashed a password with bcrypt.`);
+        return hash;
+    } catch (error) {
+        if (areMessagesToBeDisplayed) consoleLoggers.logError(`(0/__hashPassword)Failed to hash a password with bcrypt! Error message: ${error}`);
+        return undefined;
+    }
+    
+
+}
+
+async function _addAdministrator(databaseConnection, areMessagesToBeDisplayed, _email, _password, _firstName, _lastName, _patronymicName) {
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== 'boolean'){
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '_addAdministrator');
+            return false;
+        }
+    }
+    if (typeof _email !== 'string') {
+        consoleLoggers.logParameterTypeError('_email', 'string', _email, '_addAdministrator');
+        return false;
+    }
+    if (typeof _password !== 'string') {
+        consoleLoggers.logParameterTypeError('_password', 'string', _password, '_addAdministrator');
+        return false;
+    }
+    if (typeof _firstName !== 'string') {
+        consoleLoggers.logParameterTypeError('_firstName', 'string', _firstName, '_addAdministrator');
+        return false;
+    }
+    if (typeof _lastName !== 'string') {
+        consoleLoggers.logParameterTypeError('_lastName', 'string', _lastName, '_addAdministrator');
+        return false;
+    }
+    if (typeof _patronymicName !== 'string') {
+        consoleLoggers.logParameterTypeError('_patronymicName', 'string', _patronymicName, '_addAdministrator');
+        return false;
+    }
+
+    try {
+        if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/_addAdministrator)Trying to insert the new administrator account into the table...`);
+        const _passwordHash = __hashPassword(_password, true);
+        if (_passwordHash === undefined) return false;
+        const sql = "INSERT INTO `administrators` VALUES (email, password_hash, first_name, last_name, patronymic_name)";
+        const params = [_email, _passwordHash, _firstName, _lastName, _patronymicName];
+        await databaseConnection.execute(sql, params);
+        if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(0/_addAdministrator)Successfully inserted the new administrator account into the table (email: ${_email})!`);
+        return true;
+    } catch (error) {
+        if (areMessagesToBeDisplayed) consoleLoggers.logError(`(0/_addAdministrator)Failed to insert the new administrator account into the table! Error message: ${error}`);
+        return false;
+    }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
+export const addAdministrator = _addAdministrator;
