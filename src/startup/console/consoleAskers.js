@@ -25,5 +25,15 @@ function _askTwoOptions(_prompt, _optionYes, _optionNo) {
     else return false;
 }
 
+function _ask(_prompt) {
+    if (typeof _prompt !== 'string'){
+        consoleLoggers.logParameterTypeError('_prompt', 'string', _prompt, '_ask');
+        return undefined;
+    }
+
+    return prompt(_prompt);
+}
+
 //exports
 export const askTwoOptions = _askTwoOptions;
+export const ask = _ask;
