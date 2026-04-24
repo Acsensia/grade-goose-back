@@ -1,6 +1,6 @@
 import promptSync from 'prompt-sync';
 const prompt = promptSync();
-import { logParameterTypeError } from './mainConsoleLoggers.js';
+import { logParameterTypeError } from './consoleLoggers.js';
 
 function _askTwoOptions(_prompt, _optionYes, _optionNo) {
     if (typeof _prompt !== 'string'){

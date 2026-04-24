@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 
 //imports->project
-import { logNeutral, logError, logParameterTypeError, logSuccess, logWarning } from "../../../console/mainConsoleLoggers.js";
+import { logNeutral, logError, logParameterTypeError, logSuccess, logWarning } from "../../../console/consoleLoggers.js";
 
 //don't forget to type 'multipleStatements: true' when creating connections when intending to use this function
 function _readQuery(pathToPackageIn_queries_folder, areMessagesToBeDisplayed) {//an example: "management/createDB.sql"

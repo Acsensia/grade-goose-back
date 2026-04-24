@@ -1,5 +1,5 @@
 //imports->project
-import { logError } from "./console/mainConsoleLoggers.js";
+import { logError } from "./console/consoleLoggers.js";
 
 function _serverShutdown(message){
     if (message === undefined){

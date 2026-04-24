@@ -2,8 +2,8 @@
 import mysql from 'mysql2/promise';
 
 //imports->project
-import { logParameterTypeError, logError, logSuccess, logNeutral } from '../../console/mainConsoleLoggers.js';
-import { askTwoOptions } from '../../console/mainConsoleAskers.js';
+import { logParameterTypeError, logError, logSuccess, logNeutral } from '../../console/consoleLoggers.js';
+import { askTwoOptions } from '../../console/consoleAskers.js';
 import { serverShutdown } from '../../serverManagement.js';
 import { changeDatabaseNameInQueryString, readQuery } from './queries/queryUtilities.js';
 
