@@ -3,7 +3,7 @@ import express, { json } from 'express';
 import dotenv from 'dotenv';
 //imports->project
 import mainrouter from './src/routers/mainrouters.js';
-import { connectMySQL } from './src/startup/databases/mysql/mysqlManagement.js';
+import * as mysqlManagement from './src/startup/databases/mysql/mysqlManagement.js';
 
 //.setup
 const app = express();
@@ -22,7 +22,7 @@ async function startServer() {
     console.clear();
 
     //trying to connect
-    const connection = await connectMySQL();
+    const connection = await mysqlManagement.connectMySQL();
 
     //passing all requests to the main router
     app.use('/', mainrouter);

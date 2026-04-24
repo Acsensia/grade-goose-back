@@ -2,10 +2,10 @@
 import mysql from 'mysql2/promise';
 
 //imports->project
-import { logParameterTypeError, logError, logSuccess, logNeutral } from '../../console/consoleLoggers.js';
-import { askTwoOptions } from '../../console/consoleAskers.js';
-import { serverShutdown } from '../../serverManagement.js';
-import { changeDatabaseNameInQueryString, readQuery } from './queries/queryUtilities.js';
+import * as consoleLoggers from '../../console/consoleLoggers.js';
+import * as consoleAskers from '../../console/consoleAskers.js';
+import * as serverManagement from '../../serverManagement.js';
+import * as queryUtilities from './queries/queryUtilities.js';
 
 //function for the initial connection to the database
 async function _connectMySQL(host, user, password, database) {
@@ -22,19 +22,19 @@ async function _connectMySQL(host, user, password, database) {
     }
     else {
         if (typeof host !== 'string'){
-            logParameterTypeError('host', 'string', host, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('host', 'string', host, 'connectMySQL');
             return undefined;
         }
         if (typeof user !== 'string'){
-            logParameterTypeError('user', 'string', user, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('user', 'string', user, 'connectMySQL');
             return undefined;
         }
         if (typeof password !== 'string'){
-            logParameterTypeError('password', 'string', password, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('password', 'string', password, 'connectMySQL');
             return undefined;
         }
         if (typeof database !== 'string'){
-            logParameterTypeError('database', 'string', database, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('database', 'string', database, 'connectMySQL');
             return undefined;
         }
     }
@@ -42,11 +42,11 @@ async function _connectMySQL(host, user, password, database) {
     if (!(await __checkForDatabaseExistence(host, user, password, database, true))) {
         await __suggestCreatingDatabase(host, user, password, database, true);
     } else {
-        if (askTwoOptions("Remove current database?", "Y", "N")) {
+        if (consoleAskers.askTwoOptions("Remove current database?", "Y", "N")) {
             const databaseRemovalResult = await __removeDatabase(host, user, password, database, true);
             if (databaseRemovalResult) {
                 await __suggestCreatingDatabase(host, user, password, database, true);
-            } else serverShutdown();
+            } else serverManagement.shutdown();
         }
     }
 
@@ -58,22 +58,23 @@ async function _connectMySQL(host, user, password, database) {
             password:password,
             database:database
         });
-        logSuccess('Database connection successful');
+        consoleLoggers.logSuccess('Database connection successful');
         return connection;
     } catch (error) {
-        logError('Database connection failed:\n' + error.message);
-        serverShutdown();
+        consoleLoggers.logError('Database connection failed:\n' + error.message);
+        serverManagement.shutdown();
     }
 }
 //incapsulates __createDatabase
 async function __suggestCreatingDatabase(host, user, password, database, areMessagesToBeDisplayed) {
     //intentionally no checks cause the inner function should work fine
-    if (askTwoOptions("Generate the target database?", "Y", "N")) {
-        if (!(await __createDatabase(host, user, password, database, areMessagesToBeDisplayed))) serverShutdown();
-        else {
+    if (consoleAskers.askTwoOptions("Generate the target database?", "Y", "N")) {
+        if (!(await __createDatabase(host, user, password, database, areMessagesToBeDisplayed))) {
+            serverManagement.shutdown();
+        } else {
             //TODO
         }
-    } else serverShutdown();
+    } else serverManagement.shutdown();
 }
 
 async function __createDatabase(host, user, password, database, areMessagesToBeDisplayed) {
@@ -90,34 +91,34 @@ async function __createDatabase(host, user, password, database, areMessagesToBeD
     }
     else{
         if (typeof host !== 'string'){
-            logParameterTypeError('host', 'string', host, '__createDatabase');
+            consoleLoggers.logParameterTypeError('host', 'string', host, '__createDatabase');
             return undefined;
         }
         if (typeof user !== 'string'){
-            logParameterTypeError('user', 'string', user, '__createDatabase');
+            consoleLoggers.logParameterTypeError('user', 'string', user, '__createDatabase');
             return undefined;
         }
         if (typeof password !== 'string'){
-            logParameterTypeError('password', 'string', password, '__createDatabase');
+            consoleLoggers.logParameterTypeError('password', 'string', password, '__createDatabase');
             return undefined;
         }
         if (typeof database !== 'string'){
-            logParameterTypeError('database', 'string', database, '__createDatabase');
+            consoleLoggers.logParameterTypeError('database', 'string', database, '__createDatabase');
             return undefined;
         }
     }
     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
     else {
         if (typeof areMessagesToBeDisplayed !== 'boolean'){
-            logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
             return undefined;
         }
     }
 
-    if (areMessagesToBeDisplayed) logNeutral('(0/__createDatabase)Trying to create the target database...');
+    if (areMessagesToBeDisplayed) consoleLoggers.logNeutral('(0/__createDatabase)Trying to create the target database...');
     try {
         //connecting without specifying the database
-        if (areMessagesToBeDisplayed) logNeutral(`(1/__createDatabase)Trying to create a general MYSQL connection...`);
+        if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(1/__createDatabase)Trying to create a general MYSQL connection...`);
         const connection = await mysql.createConnection({
             host:host,
             user:user,
@@ -125,36 +126,36 @@ async function __createDatabase(host, user, password, database, areMessagesToBeD
             multipleStatements: true
         });
         try {
-            if (areMessagesToBeDisplayed) logSuccess('(1/__createDatabase)MYSQL general connection successful');
+            if (areMessagesToBeDisplayed) consoleLoggers.logSuccess('(1/__createDatabase)MYSQL general connection successful');
 
-            if (areMessagesToBeDisplayed) logNeutral(`(1/__createDatabase)Trying to load the database creation query from an sql file...`);
+            if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(1/__createDatabase)Trying to load the database creation query from an sql file...`);
             //
-            var queryString = await readQuery("management/createDB.sql", true);
+            var queryString = await queryUtilities.readQuery("management/createDB.sql", true);
             if (queryString === undefined) {
-                if (areMessagesToBeDisplayed) logError(`(!/__createDatabase)Failed to load the database creation query from an sql file!`);
+                if (areMessagesToBeDisplayed) consoleLoggers.logError(`(!/__createDatabase)Failed to load the database creation query from an sql file!`);
                 return false;
             } else {
                 if (areMessagesToBeDisplayed) (`(1/__createDatabase)Successfully loaded the database creation query from an sql file.`);
             }
 
-            if (areMessagesToBeDisplayed) logNeutral(`(2/__createDatabase)Trying to change the name of the database inside the loaded query...`);
-            queryString = changeDatabaseNameInQueryString(queryString, database, true);
+            if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(2/__createDatabase)Trying to change the name of the database inside the loaded query...`);
+            queryString = queryUtilities.changeDatabaseNameInQueryString(queryString, database, true);
             if (queryString === undefined) {
-                if (areMessagesToBeDisplayed) logError(`(2/__createDatabase)Failed to change the name of the database inside the loaded query!`);
+                if (areMessagesToBeDisplayed) consoleLoggers.logError(`(2/__createDatabase)Failed to change the name of the database inside the loaded query!`);
                 return false;
             } else {
-                if (areMessagesToBeDisplayed) logSuccess('(2/__createDatabase)Successfully changed the name of the database inside the loaded query.');
+                if (areMessagesToBeDisplayed) consoleLoggers.logSuccess('(2/__createDatabase)Successfully changed the name of the database inside the loaded query.');
             }
             
-            if (areMessagesToBeDisplayed) logNeutral(`(3/__createDatabase)Trying to run the modified query...`);
+            if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(3/__createDatabase)Trying to run the modified query...`);
             await connection.query(queryString);
-            if (areMessagesToBeDisplayed) logSuccess('(3/__createDatabase)Successfully changed ran the query, database created successfully.');
+            if (areMessagesToBeDisplayed) consoleLoggers.logSuccess('(3/__createDatabase)Successfully changed ran the query, database created successfully.');
             return true;
         } finally{
             connection.end();
         }
     } catch (error) {
-        if (areMessagesToBeDisplayed) logError('Database creation failed in general:\n' + error.message);
+        if (areMessagesToBeDisplayed) consoleLoggers.logError('Database creation failed in general:\n' + error.message);
         return false;
     }
 }
@@ -245,31 +246,31 @@ async function __removeDatabase(host, user, password, database, areMessagesToBeD
     }
     else{
         if (typeof host !== 'string'){
-            logParameterTypeError('host', 'string', host, '__createDatabase');
+            consoleLoggers.logParameterTypeError('host', 'string', host, '__createDatabase');
             return undefined;
         }
         if (typeof user !== 'string'){
-            logParameterTypeError('user', 'string', user, '__createDatabase');
+            consoleLoggers.logParameterTypeError('user', 'string', user, '__createDatabase');
             return undefined;
         }
         if (typeof password !== 'string'){
-            logParameterTypeError('password', 'string', password, '__createDatabase');
+            consoleLoggers.logParameterTypeError('password', 'string', password, '__createDatabase');
             return undefined;
         }
         if (typeof database !== 'string'){
-            logParameterTypeError('database', 'string', database, '__createDatabase');
+            consoleLoggers.logParameterTypeError('database', 'string', database, '__createDatabase');
             return undefined;
         }
     }
     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
     else {
         if (typeof areMessagesToBeDisplayed !== 'boolean'){
-            logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
             return undefined;
         }
     }
 
-    if (areMessagesToBeDisplayed) logNeutral('(0/__removeDatabase)Trying to remove the target database...');
+    if (areMessagesToBeDisplayed) consoleLoggers.logNeutral('(0/__removeDatabase)Trying to remove the target database...');
     try {
         //connecting without specifying the database
         const connection = await mysql.createConnection({
@@ -277,16 +278,16 @@ async function __removeDatabase(host, user, password, database, areMessagesToBeD
             user:user,
             password:password
         });
-        if (areMessagesToBeDisplayed) logSuccess('(1/__removeDatabase)MYSQL general connection successful');
+        if (areMessagesToBeDisplayed) consoleLoggers.logSuccess('(1/__removeDatabase)MYSQL general connection successful');
         try {
             await connection.query(`DROP DATABASE IF EXISTS \`${database}\``);
-            logSuccess('(2/2)Target database removal successful');
+            consoleLoggers.logSuccess('(2/2)Target database removal successful');
         } finally {
             connection.end();
         }
         return true;
     } catch (error) {
-        if (areMessagesToBeDisplayed) logError('(!/__removeDatabase)Target database removal failed:\n' + error.message);
+        if (areMessagesToBeDisplayed) consoleLoggers.logError('(!/__removeDatabase)Target database removal failed:\n' + error.message);
         return false;
     }
 }
@@ -305,32 +306,32 @@ async function __checkForDatabaseExistence(host, user, password, database, areMe
     }
     else {
         if (typeof host !== 'string'){
-            logParameterTypeError('host', 'string', host, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('host', 'string', host, '__checkForDatabaseExistence');
             return undefined;
         }
         if (typeof user !== 'string'){
-            logParameterTypeError('user', 'string', user, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('user', 'string', user, '__checkForDatabaseExistence');
             return undefined;
         }
         if (typeof password !== 'string'){
-            logParameterTypeError('password', 'string', password, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('password', 'string', password, '__checkForDatabaseExistence');
             return undefined;
         }
         if (typeof database !== 'string'){
-            logParameterTypeError('database', 'string', database, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('database', 'string', database, '__checkForDatabaseExistence');
             return undefined;
         }
     }
     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
     else {
         if (typeof areMessagesToBeDisplayed !== 'boolean'){
-            logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
             return undefined;
         }
     }
     
     try {
-        if (areMessagesToBeDisplayed) logNeutral('(0/__checkForDatabaseExistence)Trying to check if target database exists...');
+        if (areMessagesToBeDisplayed) consoleLoggers.logNeutral('(0/__checkForDatabaseExistence)Trying to check if target database exists...');
 
         //connecting without specifying the database
         const connection = await mysql.createConnection({
@@ -338,21 +339,21 @@ async function __checkForDatabaseExistence(host, user, password, database, areMe
             user:user,
             password:password
         });
-        if (areMessagesToBeDisplayed) logSuccess('(1/__checkForDatabaseExistence)MYSQL general connection successful');
+        if (areMessagesToBeDisplayed) consoleLoggers.logSuccess('(1/__checkForDatabaseExistence)MYSQL general connection successful');
         try{
             const [resultingRows] = await connection.query(`SHOW DATABASES LIKE '${database}'`);
             if (resultingRows.length > 0) {
-                if (areMessagesToBeDisplayed) logSuccess("(2/__checkForDatabaseExistence)Database existence check successful, query result:\n" + resultingRows);
+                if (areMessagesToBeDisplayed) consoleLoggers.logSuccess("(2/__checkForDatabaseExistence)Database existence check successful, query result:\n" + resultingRows);
                 return true;
             } else {
-                if (areMessagesToBeDisplayed) logError('(2/__checkForDatabaseExistence)Existence check finished: database does not exist:\n' + resultingRows);
+                if (areMessagesToBeDisplayed) consoleLoggers.logError('(2/__checkForDatabaseExistence)Existence check finished: database does not exist:\n' + resultingRows);
                 return false;
             }
         } finally {
             connection.end();
         }
     } catch (error) {
-        if (areMessagesToBeDisplayed) logError('(!/__checkForDatabaseExistence)Database existence check failed:\n' + error.message);
+        if (areMessagesToBeDisplayed) consoleLoggers.logError('(!/__checkForDatabaseExistence)Database existence check failed:\n' + error.message);
         return false;
     }
 }
