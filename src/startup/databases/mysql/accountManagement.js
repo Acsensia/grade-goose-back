@@ -1,6 +1,6 @@
 //imports
 // import mysql from 'mysql2/promise';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 //imports->project
 import * as consoleLoggers from '../../console/consoleLoggers.js';
@@ -20,7 +20,8 @@ async function _getAdministratorCount(databaseConnection, areMessagesToBeDisplay
 
     try {
         if (areMessagesToBeDisplayed) consoleLoggers.logNeutral("(0/_getAdministratorCount)Trying to get the count of currently registered DB administrators...");
-        const administratorCount = await databaseConnection.query('SELECT COUNT(*) FROM `administrators`;')
+        const [rows] = await databaseConnection.execute('SELECT COUNT(*) AS `count` FROM `administrators`;')
+        const administratorCount = Number(rows[0].count);
         if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/_getAdministratorCount)Successfully got the count of currently registered DB administrators: ${administratorCount}!`);
         return administratorCount;
     } catch (error) {
@@ -44,16 +45,19 @@ async function __hashPassword(password, areMessagesToBeDisplayed) {
 
     if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/__hashPassword)Trying to hash a password with bcrypt...`);
     try {
-        const bcryptSaltRounds = process.env.BC_SALTS ?? 12;
-        const hash = await bcrypt.hash(password, bcryptSaltRounds);
+        var saltRounds;
+        if (process.env.BC_SALTS === undefined || process.env.BC_SALTS === null) {
+            saltRounds = 12;
+        } else {
+            saltRounds = Number(process.env.BC_SALTS);
+        }
+        const hash = await bcrypt.hash(password, saltRounds);
         if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(0/__hashPassword)Successfully hashed a password with bcrypt.`);
         return hash;
     } catch (error) {
         if (areMessagesToBeDisplayed) consoleLoggers.logError(`(0/__hashPassword)Failed to hash a password with bcrypt! Error message: ${error}`);
         return undefined;
     }
-    
-
 }
 
 async function _addAdministrator(databaseConnection, areMessagesToBeDisplayed, _email, _password, _firstName, _lastName, _patronymicName) {
@@ -87,9 +91,9 @@ async function _addAdministrator(databaseConnection, areMessagesToBeDisplayed, _
 
     try {
         if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/_addAdministrator)Trying to insert the new administrator account into the table...`);
-        const _passwordHash = __hashPassword(_password, true);
+        const _passwordHash = await __hashPassword(_password, true);
         if (_passwordHash === undefined) return false;
-        const sql = "INSERT INTO `administrators` VALUES (email, password_hash, first_name, last_name, patronymic_name)";
+        const sql = "INSERT INTO `administrators`(email, password_hash, first_name, last_name, patronymic_name) VALUES (?, ?, ?, ?, ?)";
         const params = [_email, _passwordHash, _firstName, _lastName, _patronymicName];
         await databaseConnection.execute(sql, params);
         if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(0/_addAdministrator)Successfully inserted the new administrator account into the table (email: ${_email})!`);

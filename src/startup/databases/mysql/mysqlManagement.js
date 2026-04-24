@@ -5,6 +5,7 @@ import mysql from 'mysql2/promise';
 import * as consoleLoggers from '../../console/consoleLoggers.js';
 import * as consoleAskers from '../../console/consoleAskers.js';
 import * as serverManagement from '../../serverManagement.js';
+import * as accountManagement from '../mysql/accountManagement.js'
 import * as queryUtilities from './queries/queryUtilities.js';
 
 //function for the initial connection to the database
@@ -22,30 +23,34 @@ async function _connect(host, user, password, database) {
     }
     else {
         if (typeof host !== 'string'){
-            consoleLoggers.logParameterTypeError('host', 'string', host, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('host', 'string', host, '_connect');
             return undefined;
         }
         if (typeof user !== 'string'){
-            consoleLoggers.logParameterTypeError('user', 'string', user, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('user', 'string', user, '_connect');
             return undefined;
         }
         if (typeof password !== 'string'){
-            consoleLoggers.logParameterTypeError('password', 'string', password, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('password', 'string', password, '_connect');
             return undefined;
         }
         if (typeof database !== 'string'){
-            consoleLoggers.logParameterTypeError('database', 'string', database, 'connectMySQL');
+            consoleLoggers.logParameterTypeError('database', 'string', database, '_connect');
             return undefined;
         }
     }
 
     if (!(await __checkForDatabaseExistence(host, user, password, database, true))) {
-        await __suggestCreatingDatabase(host, user, password, database, true);
+        if (!(await __suggestCreatingDatabase(host, user, password, database, true))) {
+            serverManagement.shutdown();
+        }
     } else {
         if (consoleAskers.askTwoOptions("Remove current database?", "Y", "N")) {
             const databaseRemovalResult = await __removeDatabase(host, user, password, database, true);
             if (databaseRemovalResult) {
-                await __suggestCreatingDatabase(host, user, password, database, true);
+                if (!(await __suggestCreatingDatabase(host, user, password, database, true))) {
+                    serverManagement.shutdown();
+                }
             } else serverManagement.shutdown();
         }
     }
@@ -59,22 +64,150 @@ async function _connect(host, user, password, database) {
             database:database
         });
         consoleLoggers.logSuccess('Database connection successful');
+        if (!(await __checkAdministratorCount(connection, true))) {
+            serverManagement.shutdown();
+        }
         return connection;
     } catch (error) {
         consoleLoggers.logError('Database connection failed:\n' + error.message);
         serverManagement.shutdown();
     }
 }
+
+async function __checkAdministratorCount(databaseConnection, areMessagesToBeDisplayed) {
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== 'boolean'){
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkAdministratorCount');
+            return undefined;
+        }
+    }
+
+    try {
+        if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(1/__checkAdministratorCount)Trying to count the amount of administrators in the target database...`);
+        const administratorCount = await accountManagement.getAdministratorCount(databaseConnection, areMessagesToBeDisplayed);
+        if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(1/__checkAdministratorCount)Successfully counted the amount of administrators in the target database: ${administratorCount}.`);
+
+        if (administratorCount == 0) {
+            consoleLoggers.logWarning(`(2/__checkAdministratorCount)The amount of administrator accounts in the target database is ${administratorCount}!`);
+            return await __suggestCreatingAnAdministratorAccount(databaseConnection, areMessagesToBeDisplayed);
+        } else {
+            return true;
+        }
+    } catch (error) {
+        if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(1/__checkAdministratorCount)Generally failed to count the amount of administrators in the target database! Error message: ${error}`);
+        return undefined;
+    }
+    
+}
+
 //incapsulates __createDatabase
 async function __suggestCreatingDatabase(host, user, password, database, areMessagesToBeDisplayed) {
-    //intentionally no checks cause the inner function should work fine
+    if (
+        host     === undefined ||
+        user     === undefined ||
+        password === undefined ||
+        database   === undefined
+    ){
+        host = process.env.DB_HOST;
+        user = process.env.DB_USER;
+        password = process.env.DB_PASS;
+        database = process.env.DB_NAME;
+    }
+    else{
+        if (typeof host !== 'string'){
+            consoleLoggers.logParameterTypeError('host', 'string', host, '__suggestCreatingDatabase');
+            return undefined;
+        }
+        if (typeof user !== 'string'){
+            consoleLoggers.logParameterTypeError('user', 'string', user, '__suggestCreatingDatabase');
+            return undefined;
+        }
+        if (typeof password !== 'string'){
+            consoleLoggers.logParameterTypeError('password', 'string', password, '__suggestCreatingDatabase');
+            return undefined;
+        }
+        if (typeof database !== 'string'){
+            consoleLoggers.logParameterTypeError('database', 'string', database, '__suggestCreatingDatabase');
+            return undefined;
+        }
+    }
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== 'boolean'){
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__suggestCreatingDatabase');
+            return undefined;
+        }
+    }
+
     if (consoleAskers.askTwoOptions("Generate the target database?", "Y", "N")) {
         if (!(await __createDatabase(host, user, password, database, areMessagesToBeDisplayed))) {
             serverManagement.shutdown();
         } else {
-            //TODO
+            if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/__suggestCreatingDatabase)Trying to connect to the newly created database...`);
+            try {
+                const connection = await mysql.createConnection({
+                    host:host,
+                    user:user,
+                    password:password,
+                    database:database
+                });
+                if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(0/__suggestCreatingDatabase)Successfully connected to the newly created database.`);
+
+                const checkResult = await __checkAdministratorCount(connection, areMessagesToBeDisplayed)
+                connection.end();
+                return checkResult;
+            } catch (error) {
+                if (areMessagesToBeDisplayed) consoleLoggers.logError(`(0/__suggestCreatingDatabase)General error while trying to connect/interact with the newly created database! Error message: ${error}`);
+            }
         }
-    } else serverManagement.shutdown();
+    } else return false;
+}
+
+async function __suggestCreatingAnAdministratorAccount(databaseConnection, areMessagesToBeDisplayed) {
+    if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+    else {
+        if (typeof areMessagesToBeDisplayed !== 'boolean'){
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__suggestCreatingAnAdministratorAccount');
+            return undefined;
+        }
+    }
+
+    if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(0/__suggestCreatingAnAdministratorAccount)Trying to connect to the target database...`);
+    try {
+        if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(1/__suggestCreatingAnAdministratorAccount)Getting user input...`);
+        if (consoleAskers.askTwoOptions(`Create a new administrator account?`, 'Y', 'N')) {
+            const email = consoleAskers.askEnsureTwice(`Type in the account e-mail address: `, `Type it in again: `);
+            if (email === undefined) {
+                if (areMessagesToBeDisplayed) consoleLoggers.logError(`(1/__suggestCreatingAnAdministratorAccount)Aborting due to the user cancelling the double input...`);
+                return undefined;
+            }
+
+            const pass = consoleAskers.askEnsureTwice(`Type in the account password: `, `Type it in again: `);
+            if (pass === undefined) {
+                if (areMessagesToBeDisplayed) consoleLoggers.logError(`(1/__suggestCreatingAnAdministratorAccount)Aborting due to the user cancelling the double input...`);
+                return undefined;
+            }
+
+            const firstName = consoleAskers.ask(`Type in the account first name: `);
+            const lastName = consoleAskers.ask(`Type in the account last name: `);
+            const patronymicName = consoleAskers.ask(`Type in the account patronymic name: `);
+            if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(1/__suggestCreatingAnAdministratorAccount)Successfully got user input.`);
+
+            if (areMessagesToBeDisplayed) consoleLoggers.logNeutral(`(2/__suggestCreatingAnAdministratorAccount)Trying to insert the new administrator account into the table...`);
+            const insertedSuccessfully = await accountManagement.addAdministrator(databaseConnection, areMessagesToBeDisplayed, email, pass, firstName, lastName, patronymicName);
+            if (insertedSuccessfully === true) {
+                if (areMessagesToBeDisplayed) consoleLoggers.logSuccess(`(2/__suggestCreatingAnAdministratorAccount)Successfully inserted the new administrator account into the table.`);
+                return true;
+            } else {
+                if (areMessagesToBeDisplayed) consoleLoggers.logError(`(2/__suggestCreatingAnAdministratorAccount)Failed to insert the new administrator account into the table!`);
+                return undefined;
+            }
+        }
+    } catch (error) {
+        if (areMessagesToBeDisplayed) consoleLoggers.logError(`(0/__suggestCreatingAnAdministratorAccount)General error while trying to connect/interact with the target database! Error message: ${error}`);
+        return undefined;
+    }
 }
 
 async function __createDatabase(host, user, password, database, areMessagesToBeDisplayed) {
@@ -110,7 +243,7 @@ async function __createDatabase(host, user, password, database, areMessagesToBeD
     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
     else {
         if (typeof areMessagesToBeDisplayed !== 'boolean'){
-            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__createDatabase');
             return undefined;
         }
     }
@@ -246,26 +379,26 @@ async function __removeDatabase(host, user, password, database, areMessagesToBeD
     }
     else{
         if (typeof host !== 'string'){
-            consoleLoggers.logParameterTypeError('host', 'string', host, '__createDatabase');
+            consoleLoggers.logParameterTypeError('host', 'string', host, '__removeDatabase');
             return undefined;
         }
         if (typeof user !== 'string'){
-            consoleLoggers.logParameterTypeError('user', 'string', user, '__createDatabase');
+            consoleLoggers.logParameterTypeError('user', 'string', user, '__removeDatabase');
             return undefined;
         }
         if (typeof password !== 'string'){
-            consoleLoggers.logParameterTypeError('password', 'string', password, '__createDatabase');
+            consoleLoggers.logParameterTypeError('password', 'string', password, '__removeDatabase');
             return undefined;
         }
         if (typeof database !== 'string'){
-            consoleLoggers.logParameterTypeError('database', 'string', database, '__createDatabase');
+            consoleLoggers.logParameterTypeError('database', 'string', database, '__removeDatabase');
             return undefined;
         }
     }
     if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
     else {
         if (typeof areMessagesToBeDisplayed !== 'boolean'){
-            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__checkForDatabaseExistence');
+            consoleLoggers.logParameterTypeError('areMessagesToBeDisplayed', 'boolean', areMessagesToBeDisplayed, '__removeDatabase');
             return undefined;
         }
     }
