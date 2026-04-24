@@ -22,7 +22,7 @@ async function startServer() {
     console.clear();
 
     //trying to connect
-    const connection = await mysqlManagement.connectMySQL();
+    const connection = await mysqlManagement.connect();
 
     //passing all requests to the main router
     app.use('/', mainrouter);

@@ -8,7 +8,7 @@ import * as serverManagement from '../../serverManagement.js';
 import * as queryUtilities from './queries/queryUtilities.js';
 
 //function for the initial connection to the database
-async function _connectMySQL(host, user, password, database) {
+async function _connect(host, user, password, database) {
     if (
         host     === undefined ||
         user     === undefined ||
@@ -359,4 +359,4 @@ async function __checkForDatabaseExistence(host, user, password, database, areMe
 }
 
 //exports
-export const connectMySQL = _connectMySQL;
+export const connect = _connect;
