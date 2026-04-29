@@ -11,7 +11,7 @@ import * as consoleLoggers from "../../console/consoleLoggers.js";
 //INFO functions are supposed to work with mysql2/promise connections
 
 async function _getAdministratorCount(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
@@ -32,7 +32,7 @@ async function _getAdministratorCount(
       consoleLoggers.logNeutral(
         "(0/_getAdministratorCount)Trying to get the count of currently registered DB administrators...",
       );
-    const [rows] = await databaseConnection.execute(
+    const [rows] = await databaseConnectionPool.execute(
       "SELECT COUNT(*) AS `count` FROM `administrators`;",
     );
     const administratorCount = Number(rows[0].count);
@@ -100,7 +100,7 @@ async function __hashPassword(password, areMessagesToBeDisplayed) {
 }
 
 async function __findAccount(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
   _email,
   tableName,
@@ -143,7 +143,7 @@ async function __findAccount(
       );
     const sql = `SELECT * FROM \`${tableName}\` WHERE \`email\` = ?; `;
     const params = [_email];
-    const [results] = await databaseConnection.execute(sql, params);
+    const [results] = await databaseConnectionPool.execute(sql, params);
     if (results !== undefined && results.length !== 0) {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logSuccess(
@@ -171,7 +171,7 @@ async function __findAccount(
 }
 
 async function _findAdministrator(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
   _email,
 ) {
@@ -204,7 +204,7 @@ async function _findAdministrator(
       );
 
     const searchResult = await __findAccount(
-      databaseConnection,
+      databaseConnectionPool,
       areMessagesToBeDisplayed,
       _email,
       "administrators",
@@ -232,7 +232,7 @@ async function _findAdministrator(
 }
 
 async function __addAccount(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
   _email,
   _password,
@@ -323,7 +323,7 @@ async function __addAccount(
       _lastName,
       _patronymicName,
     ];
-    await databaseConnection.execute(sql, params);
+    await databaseConnectionPool.execute(sql, params);
     if (areMessagesToBeDisplayed)
       consoleLoggers.logSuccess(
         `(0/__addAccount)Successfully inserted the new account into the "${tableName}" table (email: ${_email})!`,
@@ -339,7 +339,7 @@ async function __addAccount(
 }
 
 async function _addAdministrator(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
   _email,
   _password,
@@ -411,7 +411,7 @@ async function _addAdministrator(
         `(0/_addAdministrator)Trying to insert the new administrator account into the table...`,
       );
     const insertionResult = __addAccount(
-      databaseConnection,
+      databaseConnectionPool,
       areMessagesToBeDisplayed,
       _email,
       _password,

@@ -8,6 +8,55 @@ import * as serverManagement from "../../serverManagement.js";
 import * as accountManagement from "../mysql/accountManagement.js";
 import * as queryUtilities from "./queries/queryUtilities.js";
 
+let __connectionPool = undefined;
+
+async function _getConnectionPool(areMessagesToBeDisplayed) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__checkAdministratorCount",
+      );
+      return undefined;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/_getConnectionPool)Trying to get the mysql connection pool...`,
+      );
+    if (!__connectionPool) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logWarning(
+          `(0/_getConnectionPool) Connection pool not yet created. Trying to create...`,
+        );
+      if (await _connect()) {
+        if (areMessagesToBeDisplayed)
+          consoleLoggers.logSuccess(
+            `(0/_getConnectionPool) Connection pool successfully accessed.`,
+          );
+        return __connectionPool;
+      }
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(0/_getConnectionPool) Connection pool successfully accessed.`,
+        );
+      return __connectionPool;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/_getConnectionPool)Generally failed to get the mysql connection pool! Error message: "${error}".`,
+      );
+    return undefined;
+  }
+}
+
 //function for the initial connection to the database
 async function _connect(host, user, password, database) {
   if (
@@ -84,17 +133,17 @@ async function _connect(host, user, password, database) {
 
   try {
     //connecting
-    const connection = await mysql.createConnection({
+    __connectionPool = await mysql.createPool({
       host: host,
       user: user,
       password: password,
       database: database,
     });
     consoleLoggers.logSuccess("Database connection successful");
-    if (!(await __checkAdministratorCount(connection, true))) {
+    if (!(await __checkAdministratorCount(__connectionPool, true))) {
       serverManagement.shutdown();
     }
-    return connection;
+    return true;
   } catch (error) {
     consoleLoggers.logError("Database connection failed:\n" + error.message);
     serverManagement.shutdown();
@@ -102,7 +151,7 @@ async function _connect(host, user, password, database) {
 }
 
 async function __checkAdministratorCount(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
@@ -124,7 +173,7 @@ async function __checkAdministratorCount(
         `(1/__checkAdministratorCount)Trying to count the amount of administrators in the target database...`,
       );
     const administratorCount = await accountManagement.getAdministratorCount(
-      databaseConnection,
+      databaseConnectionPool,
       areMessagesToBeDisplayed,
     );
     if (areMessagesToBeDisplayed)
@@ -137,7 +186,7 @@ async function __checkAdministratorCount(
         `(2/__checkAdministratorCount)The amount of administrator accounts in the target database is ${administratorCount}!`,
       );
       return await __suggestCreatingAnAdministratorAccount(
-        databaseConnection,
+        databaseConnectionPool,
         areMessagesToBeDisplayed,
       );
     } else {
@@ -266,7 +315,7 @@ async function __suggestCreatingDatabase(
 }
 
 async function __suggestCreatingAnAdministratorAccount(
-  databaseConnection,
+  databaseConnectionPool,
   areMessagesToBeDisplayed,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
@@ -337,7 +386,7 @@ async function __suggestCreatingAnAdministratorAccount(
           `(2/__suggestCreatingAnAdministratorAccount)Trying to insert the new administrator account into the table...`,
         );
       const insertedSuccessfully = await accountManagement.addAdministrator(
-        databaseConnection,
+        databaseConnectionPool,
         areMessagesToBeDisplayed,
         email,
         pass,
@@ -811,3 +860,4 @@ async function __checkForDatabaseExistence(
 
 //exports
 export const connect = _connect;
+export const getConnectionPool = _getConnectionPool;
