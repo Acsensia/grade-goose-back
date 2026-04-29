@@ -2,7 +2,7 @@
 import express, { json } from "express";
 import dotenv from "dotenv";
 //imports->project
-import mainrouter from "./src/routers/mainRouter.js";
+import mainRouter from "./src/routers/mainRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
 //.setup
@@ -25,7 +25,7 @@ async function startServer() {
   const connection = await mysqlManagement.connect();
 
   //passing all requests to the main router
-  app.use("/", mainrouter);
+  app.use("/", mainRouter);
 
   //starting the server
   app.listen(process.env.PORT, () => {
