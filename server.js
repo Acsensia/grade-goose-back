@@ -1,8 +1,10 @@
 //imports
 import express, { json } from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 //imports->project
 import mainRouter from "./src/routers/mainRouter.js";
+import authRouter from "./src/routers/authRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
 //.setup
@@ -11,6 +13,8 @@ const app = express();
 dotenv.config({ path: "./config/.env" });
 //.setup->middleware
 app.use(json());
+//,setup->cookie-parsing-middleware
+app.use(cookieParser());
 
 //starting the server
 startServer();
@@ -25,7 +29,10 @@ async function startServer() {
   const connectionPool = await mysqlManagement.getConnectionPool();
 
   //passing all requests to the main router
-  app.use("/", mainRouter);
+  //app.use("/", mainRouter); // TODO keep in mind that it is not being used for now
+
+  //applying the auth router
+  app.use("/api/auth", authRouter);
 
   //starting the server
   app.listen(process.env.PORT, () => {
