@@ -247,9 +247,10 @@ async function __suggestCreatingAnAdministratorAccount(
         consoleLoggers.logNeutral(
           `(2/__suggestCreatingAnAdministratorAccount)Trying to insert the new administrator account into the table...`,
         );
-      const insertedSuccessfully = await accountManagement.addAdministrator(
+      const insertedSuccessfully = await accountManagement.addAccount(
         databaseConnectionPool,
         areMessagesToBeDisplayed,
+        "administrators",
         email,
         pass,
         firstName,

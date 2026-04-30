@@ -61,7 +61,49 @@ async function __hashPassword(password, areMessagesToBeDisplayed) {
   }
 }
 
-async function __findAccount(
+// EXPORTED FUNCTIONS //
+
+async function _getAdministratorCount(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_getAdministratorCount",
+      );
+      return undefined;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        "(0/_getAdministratorCount)Trying to get the count of currently registered DB administrators...",
+      );
+    const [rows] = await databaseConnectionPool.execute(
+      "SELECT COUNT(*) AS `count` FROM `administrators`;",
+    );
+    const administratorCount = Number(rows[0].count);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/_getAdministratorCount)Successfully got the count of currently registered DB administrators: ${administratorCount}!`,
+      );
+    return administratorCount;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/_getAdministratorCount)Failed to get the count of currently registered DB administrators! Error message: ${error}`,
+      );
+    return undefined;
+  }
+}
+
+async function _findAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
   tableName,
@@ -132,7 +174,7 @@ async function __findAccount(
   }
 }
 
-async function __addAccount(
+async function _addAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
   tableName,
@@ -239,7 +281,86 @@ async function __addAccount(
   }
 }
 
-async function __addAccountRefreshToken(
+async function _updateAccountRefreshToken(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  updatedToken,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__updateAccountRefreshToken",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(__updateAccountRefreshToken)Trying to update a token...`,
+      );
+
+    let tableName = "";
+    let userIdColumnName = "";
+    let userIdColumnValue = null;
+    if (typeof updatedToken.students_student_id !== "undefined") {
+      tableName = "students";
+      userIdColumnName = "students_student_id";
+      userIdColumnValue = updatedToken.students_student_id;
+    } else if (typeof updatedToken.teachers_teacher_id !== "undefined") {
+      tableName = "teachers";
+      userIdColumnName = "teachers_teacher_id";
+      userIdColumnValue = updatedToken.teachers_teacher_id;
+    } else if (
+      typeof updatedToken.administrators_administrator_id !== "undefined"
+    ) {
+      tableName = "administrators";
+      userIdColumnName = "administrators_administrator_id";
+      userIdColumnValue = updatedToken.administrators_administrator_id;
+    } else {
+      consoleLoggers.logError(
+        `(__updateAccountRefreshToken)Failed to find a matching user_id column in the token object! Look in the code for correct columns.`,
+      );
+      return false;
+    }
+    const sql = `UPDATE \`${tableName}\`
+        SET ${userIdColumnName} = ?, token_hash = ?, jti = ?, expires_at = ?,
+        created_at = ?, revoked_at = ?, replaced_by = ?, ip = ?, user_agent = ?
+        WHERE refresh_token_id = ?`;
+    const params = [
+      userIdColumnValue,
+      updatedToken.token_hash,
+      updatedToken.jti,
+      updatedToken.expires_at,
+      updatedToken.created_at,
+      updatedToken.revoked_at,
+      updatedToken.replaced_by,
+      updatedToken.ip,
+      updatedToken.user_agent,
+      updatedToken.id,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(__updateAccountRefreshToken)Successfully updated a token.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(__updateAccountRefreshToken)Generally failed to update a token! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
+async function _addAccountRefreshToken(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
   tableName,
@@ -361,299 +482,6 @@ async function __addAccountRefreshToken(
   }
 }
 
-// EXPORTED FUNCTIONS //
-
-async function _getAdministratorCount(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "_getAdministratorCount",
-      );
-      return undefined;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        "(0/_getAdministratorCount)Trying to get the count of currently registered DB administrators...",
-      );
-    const [rows] = await databaseConnectionPool.execute(
-      "SELECT COUNT(*) AS `count` FROM `administrators`;",
-    );
-    const administratorCount = Number(rows[0].count);
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_getAdministratorCount)Successfully got the count of currently registered DB administrators: ${administratorCount}!`,
-      );
-    return administratorCount;
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_getAdministratorCount)Failed to get the count of currently registered DB administrators! Error message: ${error}`,
-      );
-    return undefined;
-  }
-}
-
-async function _findAdministrator(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-  _email,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "_findAdministrator",
-      );
-      return false;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_findAdministrator)Trying to find an administrator with the following email: "${_email}"...`,
-      );
-
-    const searchResult = await __findAccount(
-      databaseConnectionPool,
-      areMessagesToBeDisplayed,
-      "administrators",
-      _email,
-    );
-    if (searchResult) {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logSuccess(
-          `(0/_findAdministrator)Successfully found an administrator account with the "${_email}" email!`,
-        );
-      return searchResult;
-    } else {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logError(
-          `(0/_findAdministrator)Failed to find an administrator with the "${_email}" email!`,
-        );
-      return searchResult;
-    }
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_findAdministrator)Generally failed to find an administrator with the "${_email}" email! Error message: "${error}".`,
-      );
-    return false;
-  }
-}
-
-async function _addAdministrator(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-  _email,
-  _password,
-  _firstName,
-  _lastName,
-  _patronymicName,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "_addAdministrator",
-      );
-      return false;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_addAdministrator)Trying to insert the new administrator account into the table...`,
-      );
-    const insertionResult = __addAccount(
-      databaseConnectionPool,
-      areMessagesToBeDisplayed,
-      "administrators",
-      _email,
-      _password,
-      _firstName,
-      _lastName,
-      _patronymicName,
-    );
-    if (insertionResult) {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logSuccess(
-          `(0/_addAdministrator)Successfully inserted the new administrator account into the table (email: ${_email})!`,
-        );
-      return insertionResult;
-    } else {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logError(
-          `(0/_addAdministrator)Failed to insert the new administrator account into the table (email: ${_email})!`,
-        );
-      return insertionResult;
-    }
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_addAdministrator)Failed to insert the new administrator account into the table! Error message: ${error}`,
-      );
-    return false;
-  }
-}
-
-async function _addAdministratorRefreshToken(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-  _userId,
-  _tokenHash,
-  _jti,
-  _expiresAt,
-  _ip,
-  _userAgent,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "_addAdministratorRefreshToken",
-      );
-      return false;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_addAdministratorRefreshToken)Trying to insert the new administrator token into the table...`,
-      );
-    const insertionResult = __addAccountRefreshToken(
-      databaseConnectionPool,
-      areMessagesToBeDisplayed,
-      "administrator_refresh_tokens",
-      _userId,
-      _tokenHash,
-      _jti,
-      _expiresAt,
-      _ip,
-      _userAgent,
-    );
-    if (insertionResult) {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logSuccess(
-          `(0/_addAdministratorRefreshToken)Successfully inserted the new administrator token into the table!`,
-        );
-      return insertionResult;
-    } else {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logError(
-          `(0/_addAdministratorRefreshToken)Failed to insert the new administrator token into the table!`,
-        );
-      return insertionResult;
-    }
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_addAdministratorRefreshToken)Failed to insert the new administrator token into the table! Error message: ${error}`,
-      );
-    return false;
-  }
-}
-
-async function _updateAccountRefreshToken(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-  updatedToken,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "__updateAccountRefreshToken",
-      );
-      return false;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(__updateAccountRefreshToken)Trying to update a token...`,
-      );
-
-    let tableName = "";
-    let userIdColumnName = "";
-    let userIdColumnValue = null;
-    if (typeof updatedToken.students_student_id !== "undefined") {
-      tableName = "students";
-      userIdColumnName = "students_student_id";
-      userIdColumnValue = updatedToken.students_student_id;
-    } else if (typeof updatedToken.teachers_teacher_id !== "undefined") {
-      tableName = "teachers";
-      userIdColumnName = "teachers_teacher_id";
-      userIdColumnValue = updatedToken.teachers_teacher_id;
-    } else if (
-      typeof updatedToken.administrators_administrator_id !== "undefined"
-    ) {
-      tableName = "administrators";
-      userIdColumnName = "administrators_administrator_id";
-      userIdColumnValue = updatedToken.administrators_administrator_id;
-    } else {
-      consoleLoggers.logError(
-        `(__updateAccountRefreshToken)Failed to find a matching user_id column in the token object! Look in the code for correct columns.`,
-      );
-      return false;
-    }
-    const sql = `UPDATE \`${tableName}\`
-        SET ${userIdColumnName} = ?, token_hash = ?, jti = ?, expires_at = ?,
-        created_at = ?, revoked_at = ?, replaced_by = ?, ip = ?, user_agent = ?
-        WHERE refresh_token_id = ?`;
-    const params = [
-      userIdColumnValue,
-      updatedToken.token_hash,
-      updatedToken.jti,
-      updatedToken.expires_at,
-      updatedToken.created_at,
-      updatedToken.revoked_at,
-      updatedToken.replaced_by,
-      updatedToken.ip,
-      updatedToken.user_agent,
-      updatedToken.id,
-    ];
-    await databaseConnectionPool.execute(sql, params);
-
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logSuccess(
-        `(__updateAccountRefreshToken)Successfully updated a token.`,
-      );
-    return true;
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(__updateAccountRefreshToken)Generally failed to update a token! Error message: ${error}`,
-      );
-    return false;
-  }
-}
-
 async function _findAccountRefreshToken(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
@@ -727,8 +555,8 @@ async function _findAccountRefreshToken(
 
 //exports
 export const getAdministratorCount = _getAdministratorCount;
-export const findAdministrator = _findAdministrator;
-export const addAdministrator = _addAdministrator;
-export const addAdministratorRefreshToken = _addAdministratorRefreshToken;
+export const findAccount = _findAccount;
+export const addAccount = _addAccount;
+export const addAccountRefreshToken = _addAccountRefreshToken;
 export const updateAccountRefreshToken = _updateAccountRefreshToken;
 export const findAccountRefreshToken = _findAccountRefreshToken;
