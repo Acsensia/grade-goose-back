@@ -136,9 +136,10 @@ async function _persistRefreshToken(
     } else if (user.type === "teacher") {
       //TODO add teacher handling
     } else if (user.type === "administrator") {
-      insertionResult = accountManagement.addAdministratorRefreshToken(
+      insertionResult = accountManagement.addAccountRefreshToken(
         connectionPool,
         true,
+        "administrators",
         user.id,
         tokenHash,
         jti,
