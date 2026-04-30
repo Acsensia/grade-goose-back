@@ -64,8 +64,8 @@ async function __hashPassword(password, areMessagesToBeDisplayed) {
 async function __findAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
-  _email,
   tableName,
+  _email,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
   else {
@@ -79,20 +79,20 @@ async function __findAccount(
       return false;
     }
   }
-  if (typeof _email !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_email",
-      "string",
-      _email,
-      "_findAccount",
-    );
-    return false;
-  }
   if (typeof tableName !== "string") {
     consoleLoggers.logParameterTypeError(
       "tableName",
       "string",
       tableName,
+      "_findAccount",
+    );
+    return false;
+  }
+  if (typeof _email !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_email",
+      "string",
+      _email,
       "_findAccount",
     );
     return false;
@@ -135,12 +135,12 @@ async function __findAccount(
 async function __addAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
+  tableName,
   _email,
   _password,
   _firstName,
   _lastName,
   _patronymicName,
-  tableName,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
   else {
@@ -153,6 +153,15 @@ async function __addAccount(
       );
       return false;
     }
+  }
+  if (typeof tableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "tableName",
+      "string",
+      tableName,
+      "__addAccount",
+    );
+    return false;
   }
   if (typeof _email !== "string") {
     consoleLoggers.logParameterTypeError(
@@ -195,15 +204,6 @@ async function __addAccount(
       "_patronymicName",
       "string",
       _patronymicName,
-      "__addAccount",
-    );
-    return false;
-  }
-  if (typeof tableName !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "tableName",
-      "string",
-      tableName,
       "__addAccount",
     );
     return false;
@@ -317,8 +317,8 @@ async function _findAdministrator(
     const searchResult = await __findAccount(
       databaseConnectionPool,
       areMessagesToBeDisplayed,
-      _email,
       "administrators",
+      _email,
     );
     if (searchResult) {
       if (areMessagesToBeDisplayed)
@@ -417,12 +417,12 @@ async function _addAdministrator(
     const insertionResult = __addAccount(
       databaseConnectionPool,
       areMessagesToBeDisplayed,
+      "administrators",
       _email,
       _password,
       _firstName,
       _lastName,
       _patronymicName,
-      "administrators",
     );
     if (insertionResult) {
       if (areMessagesToBeDisplayed)
