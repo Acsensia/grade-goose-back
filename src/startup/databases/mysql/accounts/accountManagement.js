@@ -8,47 +8,9 @@ import * as consoleLoggers from "../../../console/consoleLoggers.js";
 // import * as serverManagement from '../../serverManagement.js';
 // import * as queryUtilities from './queries/queryUtilities.js';
 
-//INFO functions are supposed to work with mysql2/promise connections
+//functions are supposed to work with mysql2/promise connections
 
-async function _getAdministratorCount(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "_getAdministratorCount",
-      );
-      return undefined;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        "(0/_getAdministratorCount)Trying to get the count of currently registered DB administrators...",
-      );
-    const [rows] = await databaseConnectionPool.execute(
-      "SELECT COUNT(*) AS `count` FROM `administrators`;",
-    );
-    const administratorCount = Number(rows[0].count);
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_getAdministratorCount)Successfully got the count of currently registered DB administrators: ${administratorCount}!`,
-      );
-    return administratorCount;
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_getAdministratorCount)Failed to get the count of currently registered DB administrators! Error message: ${error}`,
-      );
-    return undefined;
-  }
-}
+// NON EXPORTED (UTILITY) FUNCTIONS //
 
 async function __hashPassword(password, areMessagesToBeDisplayed) {
   if (typeof password !== "string") {
@@ -170,67 +132,6 @@ async function __findAccount(
   }
 }
 
-async function _findAdministrator(
-  databaseConnectionPool,
-  areMessagesToBeDisplayed,
-  _email,
-) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "_findAdministrator",
-      );
-      return false;
-    }
-  }
-  if (typeof _email !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_email",
-      "string",
-      _email,
-      "_findAdministrator",
-    );
-    return false;
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_findAdministrator)Trying to find an administrator with the following email: "${_email}"...`,
-      );
-
-    const searchResult = await __findAccount(
-      databaseConnectionPool,
-      areMessagesToBeDisplayed,
-      _email,
-      "administrators",
-    );
-    if (searchResult) {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logSuccess(
-          `(0/_findAdministrator)Successfully found an administrator account with the "${_email}" email!`,
-        );
-      return searchResult;
-    } else {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logError(
-          `(0/_findAdministrator)Failed to find an administrator with the "${_email}" email!`,
-        );
-      return searchResult;
-    }
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_findAdministrator)Generally failed to find an administrator with the "${_email}" email! Error message: "${error}".`,
-      );
-    return false;
-  }
-}
-
 async function __addAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
@@ -333,6 +234,109 @@ async function __addAccount(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(0/__addAccount)Failed to insert the new account into the "${tableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
+// EXPORTED FUNCTIONS //
+
+async function _getAdministratorCount(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_getAdministratorCount",
+      );
+      return undefined;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        "(0/_getAdministratorCount)Trying to get the count of currently registered DB administrators...",
+      );
+    const [rows] = await databaseConnectionPool.execute(
+      "SELECT COUNT(*) AS `count` FROM `administrators`;",
+    );
+    const administratorCount = Number(rows[0].count);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/_getAdministratorCount)Successfully got the count of currently registered DB administrators: ${administratorCount}!`,
+      );
+    return administratorCount;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/_getAdministratorCount)Failed to get the count of currently registered DB administrators! Error message: ${error}`,
+      );
+    return undefined;
+  }
+}
+
+async function _findAdministrator(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _email,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_findAdministrator",
+      );
+      return false;
+    }
+  }
+  if (typeof _email !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_email",
+      "string",
+      _email,
+      "_findAdministrator",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/_findAdministrator)Trying to find an administrator with the following email: "${_email}"...`,
+      );
+
+    const searchResult = await __findAccount(
+      databaseConnectionPool,
+      areMessagesToBeDisplayed,
+      _email,
+      "administrators",
+    );
+    if (searchResult) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(0/_findAdministrator)Successfully found an administrator account with the "${_email}" email!`,
+        );
+      return searchResult;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(0/_findAdministrator)Failed to find an administrator with the "${_email}" email!`,
+        );
+      return searchResult;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/_findAdministrator)Generally failed to find an administrator with the "${_email}" email! Error message: "${error}".`,
       );
     return false;
   }
