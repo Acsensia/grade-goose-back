@@ -575,8 +575,88 @@ async function _addAdministratorRefreshToken(
   }
 }
 
+async function _updateAccountRefreshToken(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  updatedToken,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__updateAccountRefreshToken",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(__updateAccountRefreshToken)Trying to update a token...`,
+      );
+
+    let tableName = "";
+    let userIdColumnName = "";
+    let userIdColumnValue = null;
+    if (typeof updatedToken.students_student_id !== "undefined") {
+      tableName = "students";
+      userIdColumnName = "students_student_id";
+      userIdColumnValue = updatedToken.students_student_id;
+    } else if (typeof updatedToken.teachers_teacher_id !== "undefined") {
+      tableName = "teachers";
+      userIdColumnName = "teachers_teacher_id";
+      userIdColumnValue = updatedToken.teachers_teacher_id;
+    } else if (
+      typeof updatedToken.administrators_administrator_id !== "undefined"
+    ) {
+      tableName = "administrators";
+      userIdColumnName = "administrators_administrator_id";
+      userIdColumnValue = updatedToken.administrators_administrator_id;
+    } else {
+      consoleLoggers.logError(
+        `(__updateAccountRefreshToken)Failed to find a matching user_id column in the token object! Look in the code for correct columns.`,
+      );
+      return false;
+    }
+    const sql = `UPDATE \`${tableName}\`
+        SET ${userIdColumnName} = ?, token_hash = ?, jti = ?, expires_at = ?,
+        created_at = ?, revoked_at = ?, replaced_by = ?, ip = ?, user_agent = ?
+        WHERE refresh_token_id = ?`;
+    const params = [
+      userIdColumnValue,
+      updatedToken.token_hash,
+      updatedToken.jti,
+      updatedToken.expires_at,
+      updatedToken.created_at,
+      updatedToken.revoked_at,
+      updatedToken.replaced_by,
+      updatedToken.ip,
+      updatedToken.user_agent,
+      updatedToken.id,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(__updateAccountRefreshToken)Successfully updated a token.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(__updateAccountRefreshToken)Generally failed to update a token! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
 export const findAdministrator = _findAdministrator;
 export const addAdministrator = _addAdministrator;
 export const addAdministratorRefreshToken = _addAdministratorRefreshToken;
+export const updateAccountRefreshToken = _updateAccountRefreshToken;
