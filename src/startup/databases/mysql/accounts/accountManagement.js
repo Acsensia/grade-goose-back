@@ -579,3 +579,4 @@ async function _addAdministratorRefreshToken(
 export const getAdministratorCount = _getAdministratorCount;
 export const findAdministrator = _findAdministrator;
 export const addAdministrator = _addAdministrator;
+export const addAdministratorRefreshToken = _addAdministratorRefreshToken;
