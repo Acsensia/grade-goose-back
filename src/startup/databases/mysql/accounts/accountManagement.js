@@ -487,6 +487,7 @@ async function _findAccountRefreshToken(
   areMessagesToBeDisplayed,
   tableName,
   _tokenHash,
+  _jti,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
   else {
@@ -518,14 +519,23 @@ async function _findAccountRefreshToken(
     );
     return false;
   }
+  if (typeof _jti !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_jti",
+      "string",
+      _jti,
+      "__findAccountRefreshToken",
+    );
+    return false;
+  }
 
   try {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logNeutral(
         `(__findAccountRefreshToken)Trying to find an account refresh token in the "${tableName}" table...`,
       );
-    const sql = `SELECT * FROM \`${tableName}\` WHERE \`token_hash\` = ?; `;
-    const params = [_tokenHash];
+    const sql = `SELECT * FROM \`${tableName}\` WHERE \`token_hash\` = ? AND \`jti\` = ?';`;
+    const params = [_tokenHash, _jti];
     const [results] = await databaseConnectionPool.execute(sql, params);
     if (results !== undefined && results.length !== 0) {
       if (areMessagesToBeDisplayed)
