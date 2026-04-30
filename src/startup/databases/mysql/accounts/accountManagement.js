@@ -239,6 +239,128 @@ async function __addAccount(
   }
 }
 
+async function __addAccountRefreshToken(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  tableName,
+  _userId,
+  _tokenHash,
+  _jti,
+  _expiresAt,
+  _ip,
+  _userAgent,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__addAccountRefreshToken",
+      );
+      return false;
+    }
+  }
+  if (typeof tableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "tableName",
+      "string",
+      tableName,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _userId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_userId",
+      "number",
+      _userId,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _tokenHash !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_tokenHash",
+      "string",
+      _tokenHash,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _jti !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_jti",
+      "string",
+      _jti,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _expiresAt.getMonth !== "function") {
+    consoleLoggers.logParameterTypeError(
+      "_expiresAt",
+      "Date",
+      _expiresAt,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _ip !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_ip",
+      "string",
+      _ip,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _userAgent !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_ip",
+      "string",
+      _userAgent,
+      "__addAccountRefreshToken",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/__addAccountRefreshToken)Trying to insert the new token of the ${_userId} user into the "${tableName}" table...`,
+      );
+    let userIdColumnName = "";
+    if (tableName === "student_refresh_tokens") {
+      userIdColumnName = "students_student_id";
+    } else if (tableName === "teacher_refresh_tokens") {
+      userIdColumnName = "teachers_teacher_id";
+    } else if (tableName === "administrator_refresh_tokens") {
+      userIdColumnName = "administrators_administrator_id";
+    } else {
+      consoleLoggers.logError(
+        `(0/__addAccountRefreshToken)Failed to find the user_id column name for the "${tableName}" table! Look in the code to see three possible table names.`,
+      );
+      return false;
+    }
+    const sql = `INSERT INTO \`${tableName}\` (${userIdColumnName}, token_hash, jti, expires_at, it, user_agent) VALUES (?, ?, ?, ?, ?, ?)`;
+    const params = [_userId, _tokenHash, _jti, _expiresAt, _ip, _userAgent];
+    await databaseConnectionPool.execute(sql, params);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(0/__addAccountRefreshToken)Successfully inserted the new token of the ${_userId} user into the "${tableName}" table!`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/__addAccountRefreshToken)Failed to insert the new token of the ${_userId} user into the "${tableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // EXPORTED FUNCTIONS //
 
 async function _getAdministratorCount(
@@ -298,15 +420,6 @@ async function _findAdministrator(
       return false;
     }
   }
-  if (typeof _email !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_email",
-      "string",
-      _email,
-      "_findAdministrator",
-    );
-    return false;
-  }
 
   try {
     if (areMessagesToBeDisplayed)
@@ -363,51 +476,6 @@ async function _addAdministrator(
       return false;
     }
   }
-  if (typeof _email !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_email",
-      "string",
-      _email,
-      "_addAdministrator",
-    );
-    return false;
-  }
-  if (typeof _password !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_password",
-      "string",
-      _password,
-      "_addAdministrator",
-    );
-    return false;
-  }
-  if (typeof _firstName !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_firstName",
-      "string",
-      _firstName,
-      "_addAdministrator",
-    );
-    return false;
-  }
-  if (typeof _lastName !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_lastName",
-      "string",
-      _lastName,
-      "_addAdministrator",
-    );
-    return false;
-  }
-  if (typeof _patronymicName !== "string") {
-    consoleLoggers.logParameterTypeError(
-      "_patronymicName",
-      "string",
-      _patronymicName,
-      "_addAdministrator",
-    );
-    return false;
-  }
 
   try {
     if (areMessagesToBeDisplayed)
@@ -441,6 +509,67 @@ async function _addAdministrator(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(0/_addAdministrator)Failed to insert the new administrator account into the table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
+async function _addAdministratorRefreshToken(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _userId,
+  _tokenHash,
+  _jti,
+  _expiresAt,
+  _ip,
+  _userAgent,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_addAdministratorRefreshToken",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/_addAdministratorRefreshToken)Trying to insert the new administrator token into the table...`,
+      );
+    const insertionResult = _addAdministratorRefreshToken(
+      databaseConnectionPool,
+      areMessagesToBeDisplayed,
+      "administrator_refresh_tokens",
+      _userId,
+      _tokenHash,
+      _jti,
+      _expiresAt,
+      _ip,
+      _userAgent,
+    );
+    if (insertionResult) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(0/_addAdministratorRefreshToken)Successfully inserted the new administrator token into the table!`,
+        );
+      return insertionResult;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(0/_addAdministratorRefreshToken)Failed to insert the new administrator token into the table!`,
+        );
+      return insertionResult;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/_addAdministratorRefreshToken)Failed to insert the new administrator token into the table! Error message: ${error}`,
       );
     return false;
   }
