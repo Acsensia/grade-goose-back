@@ -654,9 +654,81 @@ async function _updateAccountRefreshToken(
   }
 }
 
+async function _findAccountRefreshToken(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  tableName,
+  _tokenHash,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__findAccountRefreshToken",
+      );
+      return false;
+    }
+  }
+  if (typeof tableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "tableName",
+      "string",
+      tableName,
+      "__findAccountRefreshToken",
+    );
+    return false;
+  }
+  if (typeof _tokenHash !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_tokenHash",
+      "string",
+      _tokenHash,
+      "__findAccountRefreshToken",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(__findAccountRefreshToken)Trying to find an account refresh token in the "${tableName}" table...`,
+      );
+    const sql = `SELECT * FROM \`${tableName}\` WHERE \`token_hash\` = ?; `;
+    const params = [_tokenHash];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(__findAccountRefreshToken)Successfully found an account refresh token in the "${tableName}" table!`,
+        );
+      return results[0];
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(__findAccountRefreshToken)Failed to find an account refresh token in the "${tableName}" table!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(__findAccountRefreshToken)Generally failed to find an account refresh token in the "${tableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
 export const findAdministrator = _findAdministrator;
 export const addAdministrator = _addAdministrator;
 export const addAdministratorRefreshToken = _addAdministratorRefreshToken;
 export const updateAccountRefreshToken = _updateAccountRefreshToken;
+export const findAccountRefreshToken = _findAccountRefreshToken;
