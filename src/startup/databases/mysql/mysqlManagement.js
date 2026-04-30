@@ -5,7 +5,7 @@ import mysql from "mysql2/promise";
 import * as consoleLoggers from "../../console/consoleLoggers.js";
 import * as consoleAskers from "../../console/consoleAskers.js";
 import * as serverManagement from "../../serverManagement.js";
-import * as accountManagement from "./accountManagement/accountManagement.js";
+import * as accountManagement from "./accounts/accountManagement.js";
 import * as queryUtilities from "./queries/queryUtilities.js";
 
 let __connectionPool = undefined;
