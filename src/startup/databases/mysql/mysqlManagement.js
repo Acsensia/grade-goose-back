@@ -10,145 +10,7 @@ import * as queryUtilities from "./queries/queryUtilities.js";
 
 let __connectionPool = undefined;
 
-async function _getConnectionPool(areMessagesToBeDisplayed) {
-  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
-  else {
-    if (typeof areMessagesToBeDisplayed !== "boolean") {
-      consoleLoggers.logParameterTypeError(
-        "areMessagesToBeDisplayed",
-        "boolean",
-        areMessagesToBeDisplayed,
-        "__checkAdministratorCount",
-      );
-      return undefined;
-    }
-  }
-
-  try {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logNeutral(
-        `(0/_getConnectionPool)Trying to get the mysql connection pool...`,
-      );
-    if (!__connectionPool) {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logWarning(
-          `(0/_getConnectionPool) Connection pool not yet created. Trying to create...`,
-        );
-      if (await _connect()) {
-        if (areMessagesToBeDisplayed)
-          consoleLoggers.logSuccess(
-            `(0/_getConnectionPool) Connection pool successfully accessed.`,
-          );
-        return __connectionPool;
-      }
-    } else {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logSuccess(
-          `(0/_getConnectionPool) Connection pool successfully accessed.`,
-        );
-      return __connectionPool;
-    }
-  } catch (error) {
-    if (areMessagesToBeDisplayed)
-      consoleLoggers.logError(
-        `(0/_getConnectionPool)Generally failed to get the mysql connection pool! Error message: "${error}".`,
-      );
-    return undefined;
-  }
-}
-
-//function for the initial connection to the database
-async function _connect(host, user, password, database) {
-  if (
-    host === undefined ||
-    user === undefined ||
-    password === undefined ||
-    database === undefined
-  ) {
-    host = process.env.DB_HOST;
-    user = process.env.DB_USER;
-    password = process.env.DB_PASS;
-    database = process.env.DB_NAME;
-  } else {
-    if (typeof host !== "string") {
-      consoleLoggers.logParameterTypeError("host", "string", host, "_connect");
-      return undefined;
-    }
-    if (typeof user !== "string") {
-      consoleLoggers.logParameterTypeError("user", "string", user, "_connect");
-      return undefined;
-    }
-    if (typeof password !== "string") {
-      consoleLoggers.logParameterTypeError(
-        "password",
-        "string",
-        password,
-        "_connect",
-      );
-      return undefined;
-    }
-    if (typeof database !== "string") {
-      consoleLoggers.logParameterTypeError(
-        "database",
-        "string",
-        database,
-        "_connect",
-      );
-      return undefined;
-    }
-  }
-
-  if (
-    !(await __checkForDatabaseExistence(host, user, password, database, true))
-  ) {
-    if (
-      !(await __suggestCreatingDatabase(host, user, password, database, true))
-    ) {
-      serverManagement.shutdown();
-    }
-  } else {
-    if (consoleAskers.askTwoOptions("Remove current database?", "Y", "N")) {
-      const databaseRemovalResult = await __removeDatabase(
-        host,
-        user,
-        password,
-        database,
-        true,
-      );
-      if (databaseRemovalResult) {
-        if (
-          !(await __suggestCreatingDatabase(
-            host,
-            user,
-            password,
-            database,
-            true,
-          ))
-        ) {
-          serverManagement.shutdown();
-        }
-      } else serverManagement.shutdown();
-    }
-  }
-
-  try {
-    //connecting
-    __connectionPool = await mysql.createPool({
-      host: host,
-      user: user,
-      password: password,
-      database: database,
-    });
-    consoleLoggers.logSuccess("Database connection successful");
-    if (!(await __checkAdministratorCount(__connectionPool, true))) {
-      serverManagement.shutdown();
-    }
-    return true;
-  } catch (error) {
-    consoleLoggers.logError("Database connection failed:\n" + error.message);
-    serverManagement.shutdown();
-  }
-}
+// NON EXPORTED (UTILITY) FUNCTIONS //
 
 async function __checkAdministratorCount(
   databaseConnectionPool,
@@ -858,6 +720,148 @@ async function __checkForDatabaseExistence(
   }
 }
 
+// EXPORTED FUNCTIONS //
+
+async function _getConnectionPool(areMessagesToBeDisplayed) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__checkAdministratorCount",
+      );
+      return undefined;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(0/_getConnectionPool)Trying to get the mysql connection pool...`,
+      );
+    if (!__connectionPool) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logWarning(
+          `(0/_getConnectionPool) Connection pool not yet created. Trying to create...`,
+        );
+      if (await _connect()) {
+        if (areMessagesToBeDisplayed)
+          consoleLoggers.logSuccess(
+            `(0/_getConnectionPool) Connection pool successfully accessed.`,
+          );
+        return __connectionPool;
+      }
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(0/_getConnectionPool) Connection pool successfully accessed.`,
+        );
+      return __connectionPool;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(0/_getConnectionPool)Generally failed to get the mysql connection pool! Error message: "${error}".`,
+      );
+    return undefined;
+  }
+}
+
+//function for the initial connection to the database
+async function _connect(host, user, password, database) {
+  if (
+    host === undefined ||
+    user === undefined ||
+    password === undefined ||
+    database === undefined
+  ) {
+    host = process.env.DB_HOST;
+    user = process.env.DB_USER;
+    password = process.env.DB_PASS;
+    database = process.env.DB_NAME;
+  } else {
+    if (typeof host !== "string") {
+      consoleLoggers.logParameterTypeError("host", "string", host, "_connect");
+      return undefined;
+    }
+    if (typeof user !== "string") {
+      consoleLoggers.logParameterTypeError("user", "string", user, "_connect");
+      return undefined;
+    }
+    if (typeof password !== "string") {
+      consoleLoggers.logParameterTypeError(
+        "password",
+        "string",
+        password,
+        "_connect",
+      );
+      return undefined;
+    }
+    if (typeof database !== "string") {
+      consoleLoggers.logParameterTypeError(
+        "database",
+        "string",
+        database,
+        "_connect",
+      );
+      return undefined;
+    }
+  }
+
+  if (
+    !(await __checkForDatabaseExistence(host, user, password, database, true))
+  ) {
+    if (
+      !(await __suggestCreatingDatabase(host, user, password, database, true))
+    ) {
+      serverManagement.shutdown();
+    }
+  } else {
+    if (consoleAskers.askTwoOptions("Remove current database?", "Y", "N")) {
+      const databaseRemovalResult = await __removeDatabase(
+        host,
+        user,
+        password,
+        database,
+        true,
+      );
+      if (databaseRemovalResult) {
+        if (
+          !(await __suggestCreatingDatabase(
+            host,
+            user,
+            password,
+            database,
+            true,
+          ))
+        ) {
+          serverManagement.shutdown();
+        }
+      } else serverManagement.shutdown();
+    }
+  }
+
+  try {
+    //connecting
+    __connectionPool = await mysql.createPool({
+      host: host,
+      user: user,
+      password: password,
+      database: database,
+    });
+    consoleLoggers.logSuccess("Database connection successful");
+    if (!(await __checkAdministratorCount(__connectionPool, true))) {
+      serverManagement.shutdown();
+    }
+    return true;
+  } catch (error) {
+    consoleLoggers.logError("Database connection failed:\n" + error.message);
+    serverManagement.shutdown();
+  }
+}
+
 //exports
-export const connect = _connect;
 export const getConnectionPool = _getConnectionPool;
+export const connect = _connect;
