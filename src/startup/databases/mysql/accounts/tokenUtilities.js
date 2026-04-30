@@ -56,7 +56,6 @@ function _createJti(areMessagesToBeDisplayed) {
   }
 }
 
-//TODO finish user.type handling, check for mistakes
 function _signAccessToken(user, areMessagesToBeDisplayed) {
   if (areMessagesToBeDisplayed)
     consoleLoggers.logNeutral(
@@ -64,10 +63,22 @@ function _signAccessToken(user, areMessagesToBeDisplayed) {
     );
 
   try {
+    let userType = "";
+    if (typeof user.student_id !== "undefined") {
+      userType = "student";
+    } else if (typeof user.teacher_id !== "undefined") {
+      userType = "teacher";
+    } else if (typeof user.administrator_id !== "undefined") {
+      userType = "administrator";
+    } else
+      throw new Error(
+        "Provided user object does not have a matching id column name! Look closer in the code...",
+      );
+
     const payload = {
       id: user.id.toString(),
       email: user.email,
-      type: user.type,
+      type: userType,
     };
     let signedToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: ACCESS_TTL,
@@ -128,14 +139,20 @@ async function _persistRefreshToken(
 
   try {
     const tokenHash = _hashToken(refreshToken);
+    if (!tokenHash) throw new Error("Failed to hash a token!");
+
     const expiresAt = new Date(Date.now() + REFRESH_TTL_SEC * 1000);
+
     const connectionPool = await mysqlManagement.getConnectionPool();
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
     let insertionResult = undefined;
-    if (user.type === "student") {
+    if (typeof user.student_id !== "undefined") {
       //TODO add student handling
-    } else if (user.type === "teacher") {
+    } else if (typeof user.teacher_id !== "undefined") {
       //TODO add teacher handling
-    } else if (user.type === "administrator") {
+    } else if (typeof user.administrator_id !== "undefined") {
       insertionResult = accountManagement.addAccountRefreshToken(
         connectionPool,
         true,
@@ -149,7 +166,7 @@ async function _persistRefreshToken(
       );
     } else
       throw new Error(
-        `Failed to find the insertion function responsible for the user type specified ("${user.type}")!`,
+        "Provided user object does not have a matching id column name! Look closer in the code...",
       );
 
     if (insertionResult) {
