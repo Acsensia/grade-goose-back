@@ -3,7 +3,7 @@
 import * as bcrypt from "bcrypt";
 
 //imports->project
-import * as consoleLoggers from "../../console/consoleLoggers.js";
+import * as consoleLoggers from "../../../console/consoleLoggers.js";
 // import * as consoleAskers from '../../console/consoleAskers.js';
 // import * as serverManagement from '../../serverManagement.js';
 // import * as queryUtilities from './queries/queryUtilities.js';

@@ -5,7 +5,7 @@ import * as bcrypt from "bcrypt";
 
 //imports->project
 import * as mysqlManagement from "../startup/databases/mysql/mysqlManagement.js";
-import * as accountManagement from "../startup/databases/mysql/accountManagement.js";
+import * as accountManagement from "../startup/databases/mysql/accountManagement/accountManagement.js";
 import * as consoleLoggers from "../startup/console/consoleLoggers.js";
 
 //.setup
