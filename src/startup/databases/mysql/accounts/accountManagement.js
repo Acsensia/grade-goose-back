@@ -174,6 +174,72 @@ async function _findAccount(
   }
 }
 
+async function _getAccount(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  tableName,
+  _id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_getAccount",
+      );
+      return false;
+    }
+  }
+  if (typeof tableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "tableName",
+      "string",
+      tableName,
+      "_getAccount",
+    );
+    return false;
+  }
+  if (typeof _id !== "number") {
+    consoleLoggers.logParameterTypeError("_id", "number", _id, "_getAccount");
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_getAccount)Trying to find an account with the "${_id}" id in the "${tableName}" table...`,
+      );
+    const sql = `SELECT * FROM \`${tableName}\` WHERE \`id\` = ?; `;
+    const params = [_id];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(_getAccount)Successfully found an account with the "${_id}" id in the "${tableName}" table!`,
+        );
+      return results[0];
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(_getAccount)Failed to find an account with the "${_id}" id in the "${tableName}" table!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_getAccount)Generally failed to find an account with the "${_id}" id in the "${tableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 async function _addAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
@@ -565,6 +631,7 @@ async function _findAccountRefreshToken(
 
 //exports
 export const getAdministratorCount = _getAdministratorCount;
+export const getAccount = _getAccount;
 export const findAccount = _findAccount;
 export const addAccount = _addAccount;
 export const addAccountRefreshToken = _addAccountRefreshToken;
