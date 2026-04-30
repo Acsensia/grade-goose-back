@@ -542,7 +542,7 @@ async function _addAdministratorRefreshToken(
       consoleLoggers.logNeutral(
         `(0/_addAdministratorRefreshToken)Trying to insert the new administrator token into the table...`,
       );
-    const insertionResult = _addAdministratorRefreshToken(
+    const insertionResult = __addAccountRefreshToken(
       databaseConnectionPool,
       areMessagesToBeDisplayed,
       "administrator_refresh_tokens",
