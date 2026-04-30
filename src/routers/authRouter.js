@@ -1,12 +1,12 @@
 //imports
 import { Router } from "express";
-import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
 
 //imports->project
 import * as mysqlManagement from "../startup/databases/mysql/mysqlManagement.js";
 import * as accountManagement from "../startup/databases/mysql/accounts/accountManagement.js";
 import * as consoleLoggers from "../startup/console/consoleLoggers.js";
+import * as tokenUtilities from "../startup/databases/mysql/accounts/tokenUtilities.js";
 
 //.setup
 const authRouter = Router();
@@ -30,12 +30,34 @@ authRouter.post("/login/admin", async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const payload = { id: user.id, email: user.email, type: "admin" };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "15m",
-    });
+    const accessToken = tokenUtilities.signAccessToken(user);
+    if (!accessToken) throw new Error("Failed to sign a new access token!");
 
-    res.json({ token });
+    const jti = tokenUtilities.createJti();
+    if (!jti) throw new Error("Failed to create a new jti!");
+
+    const refreshToken = tokenUtilities.signRefreshToken(user, jti);
+    if (!refreshToken) throw new Error("Failed to sign a new refresh token!");
+
+    const insertionResult = await tokenUtilities.persistRefreshToken({
+      user,
+      refreshToken,
+      jti,
+      ip: req.ip,
+      userAgent: req.headers["user-agent"] || "",
+    });
+    if (!insertionResult)
+      throw new Error(
+        "Failed to insert the new refresh token into the database!",
+      );
+
+    const cookieSettingResult = tokenUtilities.setRefreshCookie(
+      res,
+      refreshToken,
+    );
+    if (!cookieSettingResult) throw new Error("Failed to set a new cookie!");
+
+    res.json({ accessToken });
   } catch (error) {
     consoleLoggers.logError(
       `(authRouter:/login/admin)General error while processing admin login request, error message: "${error}".`,
