@@ -127,12 +127,12 @@ async function _persistRefreshToken(
   { userId, tokenTableName, refreshToken, jti, ip, userAgent },
   areMessagesToBeDisplayed,
 ) {
-  if (areMessagesToBeDisplayed)
-    consoleLoggers.logNeutral(
-      `(_persistRefreshToken)Attempting to insert a refresh token...`,
-    );
-
   try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_persistRefreshToken)Attempting to insert a refresh token...`,
+      );
+
     const tokenHash = _hashToken(refreshToken);
     if (!tokenHash) throw new Error("Failed to hash a token!");
 
