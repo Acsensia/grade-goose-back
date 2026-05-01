@@ -142,7 +142,7 @@ async function __suggestCreatingDatabase(
         areMessagesToBeDisplayed,
       ))
     ) {
-      serverManagement.shutdown();
+      await serverManagement.shutdown();
     } else {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logNeutral(
@@ -817,7 +817,7 @@ async function _connect(host, user, password, database) {
     if (
       !(await __suggestCreatingDatabase(host, user, password, database, true))
     ) {
-      serverManagement.shutdown();
+      await serverManagement.shutdown();
     }
   } else {
     if (consoleAskers.askTwoOptions("Remove current database?", "Y", "N")) {
@@ -838,9 +838,9 @@ async function _connect(host, user, password, database) {
             true,
           ))
         ) {
-          serverManagement.shutdown();
+          await serverManagement.shutdown();
         }
-      } else serverManagement.shutdown();
+      } else await serverManagement.shutdown();
     }
   }
 
@@ -854,12 +854,12 @@ async function _connect(host, user, password, database) {
     });
     consoleLoggers.logSuccess("Database connection successful");
     if (!(await __checkAdministratorCount(__connectionPool, true))) {
-      serverManagement.shutdown();
+      await serverManagement.shutdown();
     }
     return true;
   } catch (error) {
     consoleLoggers.logError("Database connection failed:\n" + error.message);
-    serverManagement.shutdown();
+    await serverManagement.shutdown();
   }
 }
 
