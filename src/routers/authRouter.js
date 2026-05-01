@@ -44,7 +44,6 @@ async function __loginAccount(
   accountTableName,
   tokenTableName,
   userType,
-  userId,
 ) {
   try {
     consoleLoggers.logNeutral(
@@ -63,6 +62,18 @@ async function __loginAccount(
       email,
     );
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
+
+    let userId = null;
+    if (typeof user.student_id !== "undefined") {
+      userId = user.student_id;
+    } else if (typeof user.teacher_id !== "undefined") {
+      userId = user.teacher_id;
+    } else if (typeof user.administrator_id !== "undefined") {
+      userId = user.administrator_id;
+    } else
+      throw new Error(
+        "Couldn't find an id column name that matches the specified user!",
+      );
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch)
@@ -88,15 +99,17 @@ async function __loginAccount(
     );
     if (!refreshToken) throw new Error("Failed to sign a new refresh token!");
 
-    const insertionResult = await tokenUtilities.persistRefreshToken({
-      user,
-      tokenTableName,
-      refreshToken,
-      jti,
-      ip: req.ip,
-      userAgent: req.headers["user-agent"] || "",
-      areMessagesToBeDisplayed: true,
-    });
+    const insertionResult = await tokenUtilities.persistRefreshToken(
+      {
+        userId,
+        tokenTableName,
+        refreshToken,
+        jti,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"] || "",
+      },
+      true,
+    );
     if (!insertionResult)
       throw new Error(
         "Failed to insert the new refresh token into the database!",

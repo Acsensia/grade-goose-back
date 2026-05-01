@@ -142,7 +142,7 @@ async function _persistRefreshToken(
     if (!connectionPool)
       throw new Error("Failed to access the connection pool!");
 
-    const insertionResult = accountManagement.addAccountRefreshToken(
+    const insertionResult = await accountManagement.addAccountRefreshToken(
       connectionPool,
       true,
       tokenTableName,

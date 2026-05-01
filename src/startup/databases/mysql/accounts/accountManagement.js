@@ -505,7 +505,7 @@ async function _addAccountRefreshToken(
   }
   if (typeof _userAgent !== "string") {
     consoleLoggers.logParameterTypeError(
-      "_ip",
+      "_userAgent",
       "string",
       _userAgent,
       "__addAccountRefreshToken",
@@ -531,7 +531,7 @@ async function _addAccountRefreshToken(
       );
       return false;
     }
-    const sql = `INSERT INTO \`${tokenTableName}\` (${userIdColumnName}, token_hash, jti, expires_at, it, user_agent) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO \`${tokenTableName}\` (${userIdColumnName}, token_hash, jti, expires_at, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?)`;
     const params = [_userId, _tokenHash, _jti, _expiresAt, _ip, _userAgent];
     await databaseConnectionPool.execute(sql, params);
     if (areMessagesToBeDisplayed)
