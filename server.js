@@ -2,8 +2,8 @@
 import express, { json } from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 //imports->project
-//import mainRouter from "./src/routers/mainRouter.js";
 import { authRouter } from "./src/routers/authRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
@@ -15,6 +15,15 @@ dotenv.config({ path: "./config/.env" });
 app.use(json());
 //,setup->cookie-parsing-middleware
 app.use(cookieParser());
+//,setup->cors for development
+if (process.env.NODE_ENV === "development")
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_DEV_URL,
+      credentials: true, // sets Access-Control-Allow-Credentials: true
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
+  );
 
 //starting the server
 startServer();
