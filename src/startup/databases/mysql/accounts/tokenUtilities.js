@@ -95,7 +95,8 @@ function _signRefreshToken(user, userType, jti, areMessagesToBeDisplayed) {
     );
 
   try {
-    const payload = { id: user.id.toString(), type: userType, jti };
+    //TODO check if "jti: jti" generates an error, it used to be just 'jti'
+    const payload = { id: user.id.toString(), type: userType, jti: jti };
     const signedToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TTL_SEC,
     });
