@@ -10,14 +10,38 @@ import * as consoleLoggers from "../startup/console/consoleLoggers.js";
 import * as tokenUtilities from "../startup/databases/mysql/accounts/tokenUtilities.js";
 
 //.setup
-const authRouter = Router();
+const _authRouter = Router();
+
+//path variables for easy path changing
+
+//basically what comes before the auth paths, like `"/api/auth"`
+//needed for clean cookie path selection
+const _expectedFullPathToRouter = "/api/auth";
+
+const _studentAuthPaths = {
+  login: "/login/student",
+  refresh: "/refresh/student",
+  logout: "/logout/student",
+};
+
+const _teacherAuthPaths = {
+  login: "/login/teacher",
+  refresh: "/refresh/teacher",
+  logout: "/logout/teacher",
+};
+
+const _adminAuthPaths = {
+  login: "/login/admin",
+  refresh: "/refresh/admin",
+  logout: "/logout/admin",
+};
 
 //utility functions
 
 async function __loginAccount(req, res, tableName, userType) {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:__loginAccount)Got a login request, processing...`,
+      `(_authRouter:__loginAccount)Got a login request, processing...`,
     );
     const { email, password } = req.body;
 
@@ -53,7 +77,7 @@ async function __loginAccount(req, res, tableName, userType) {
 
     const insertionResult = await tokenUtilities.persistRefreshToken({
       user,
-      userType,
+      tableName,
       refreshToken,
       jti,
       ip: req.ip,
@@ -76,7 +100,7 @@ async function __loginAccount(req, res, tableName, userType) {
     res.json({ accessToken });
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:__loginAccount)General error while processing a login request, error message: "${error}".`,
+      `(_authRouter:__loginAccount)General error while processing a login request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -85,7 +109,7 @@ async function __loginAccount(req, res, tableName, userType) {
 async function __refreshAccountAccessToken(req, res, tableName, userType) {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:__refreshAccountAccessToken)Got an access token refresh request, processing...`,
+      `(_authRouter:__refreshAccountAccessToken)Got an access token refresh request, processing...`,
     );
     const token = req.cookies?.refresh_token;
     if (!token) return res.status(401).json({ message: "No refresh token" });
@@ -95,7 +119,7 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
       decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     } catch (error) {
       consoleLoggers.logError(
-        `(authRouter:__refreshAccountAccessToken)General error while processing an access token refresh request, error message: "${error}".`,
+        `(_authRouter:__refreshAccountAccessToken)General error while processing an access token refresh request, error message: "${error}".`,
       );
       return res
         .status(401)
@@ -104,7 +128,7 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
 
     if (decoded.type !== userType) {
       consoleLoggers.logError(
-        `(authRouter:__refreshAccountAccessToken)Token type error: the token type ("${decoded.type}") is not "${userType}"!`,
+        `(_authRouter:__refreshAccountAccessToken)Token type error: the token type ("${decoded.type}") is not "${userType}"!`,
       );
       return res.status(401).json({
         message: "Invalid token type, try accessing other refresh endpoints.",
@@ -164,6 +188,7 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
       foundAccessToken,
       foundAccount,
       userType,
+      tableName,
       req,
       res,
     );
@@ -171,16 +196,16 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
     return res.json({ accessToken: rotationResult.accessToken });
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:__refreshAccountAccessToken)General error while processing an access token refresh request, error message: "${error}".`,
+      `(_authRouter:__refreshAccountAccessToken)General error while processing an access token refresh request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
 }
 
-async function __logoutAccount(req, res, tableName, refreshPath) {
+async function __logoutAccount(req, res, tableName, fullAcountRefreshPath) {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:__logoutAccount)Got a logout request, processing...`,
+      `(_authRouter:__logoutAccount)Got a logout request, processing...`,
     );
 
     const token = req.cookies?.refresh_token;
@@ -214,11 +239,11 @@ async function __logoutAccount(req, res, tableName, refreshPath) {
           throw new Error("Failed to update the stored refresh token!");
       }
     }
-    res.clearCookie("refresh_token", { path: refreshPath });
+    res.clearCookie("refresh_token", { path: fullAcountRefreshPath });
     res.json({ message: "Logged out" });
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:__logoutAccount)General error while processing a logout request, error message: "${error}".`,
+      `(_authRouter:__logoutAccount)General error while processing a logout request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -227,24 +252,24 @@ async function __logoutAccount(req, res, tableName, refreshPath) {
 //routes
 //TODO add student routes
 //TODO add teacher routes
-authRouter.post("/login/admin", async (req, res) => {
+_authRouter.post(_adminAuthPaths.login, async (req, res) => {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:/login/admin)Got an admin login request, processing...`,
+      `(_authRouter:/login/admin)Got an admin login request, processing...`,
     );
     return await __loginAccount(req, res, "administrators", "administrator");
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:/login/admin)General error while processing admin login request, error message: "${error}".`,
+      `(_authRouter:/login/admin)General error while processing admin login request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
 });
 
-authRouter.post("refresh/admin", async (req, res) => {
+_authRouter.post(_adminAuthPaths.refresh, async (req, res) => {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:/refresh/admin)Got an admin access token refresh request, processing...`,
+      `(_authRouter:/refresh/admin)Got an admin access token refresh request, processing...`,
     );
     return await __refreshAccountAccessToken(
       req,
@@ -254,25 +279,34 @@ authRouter.post("refresh/admin", async (req, res) => {
     );
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:/refresh/admin)General error while processing admin access token refresh request, error message: "${error}".`,
+      `(_authRouter:/refresh/admin)General error while processing admin access token refresh request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
 });
 
-authRouter.post("/logout/admin", async (req, res) => {
+_authRouter.post(_adminAuthPaths.logout, async (req, res) => {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:/logout/admin)Got an admin logout request, processing...`,
+      `(_authRouter:/logout/admin)Got an admin logout request, processing...`,
     );
-    return __logoutAccount(req, res, "administrators", "/auth/refresh/admin");
+    return __logoutAccount(
+      req,
+      res,
+      "administrators",
+      _expectedFullPathToRouter + _adminAuthPaths.refresh,
+    );
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:/logout/admin)General error while processing an admin logout request, error message: "${error}".`,
+      `(_authRouter:/logout/admin)General error while processing an admin logout request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
 });
 
 //exports
-export default authRouter;
+export const authRouter = _authRouter;
+export const expectedFullPathToRouter = _expectedFullPathToRouter;
+export const studentAuthPaths = _studentAuthPaths;
+export const teacherAuthPaths = _teacherAuthPaths;
+export const adminAuthPaths = _adminAuthPaths;

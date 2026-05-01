@@ -118,7 +118,7 @@ function _signRefreshToken(user, userType, jti, areMessagesToBeDisplayed) {
 }
 
 async function _persistRefreshToken(
-  { user, userType, refreshToken, jti, ip, userAgent },
+  { user, tableName, refreshToken, jti, ip, userAgent },
   areMessagesToBeDisplayed,
 ) {
   if (areMessagesToBeDisplayed)
@@ -136,28 +136,17 @@ async function _persistRefreshToken(
     if (!connectionPool)
       throw new Error("Failed to access the connection pool!");
 
-    let insertionResult = undefined;
-    if (userType === "student") {
-      //TODO add student handling
-    } else if (userType === "teacher") {
-      //TODO add teacher handling
-    } else if (userType === "administrator") {
-      insertionResult = accountManagement.addAccountRefreshToken(
-        connectionPool,
-        true,
-        "administrators",
-        user.id,
-        tokenHash,
-        jti,
-        expiresAt,
-        ip,
-        userAgent,
-      );
-    } else
-      throw new Error(
-        "Provided userType parameter does not have a handler! Look closer in the code...",
-      );
-
+    const insertionResult = accountManagement.addAccountRefreshToken(
+      connectionPool,
+      true,
+      tableName,
+      user.id,
+      tokenHash,
+      jti,
+      expiresAt,
+      ip,
+      userAgent,
+    );
     if (insertionResult) {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logSuccess(
@@ -216,6 +205,7 @@ async function _rotateRefreshToken(
   oldRefreshToken,
   user,
   userType,
+  tableName,
   req,
   res,
   areMessagesToBeDisplayed,
@@ -265,7 +255,7 @@ async function _rotateRefreshToken(
     const persistResult = await _persistRefreshToken(
       {
         user,
-        userType,
+        tableName,
         refreshToken: newRefreshToken,
         jti: newJti,
         ip: req.ip,
