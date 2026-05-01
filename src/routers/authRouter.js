@@ -38,7 +38,13 @@ const _adminAuthPaths = {
 
 //utility functions
 
-async function __loginAccount(req, res, tableName, userType) {
+async function __loginAccount(
+  req,
+  res,
+  accountTableName,
+  tokenTableName,
+  userType,
+) {
   try {
     consoleLoggers.logNeutral(
       `(_authRouter:__loginAccount)Got a login request, processing...`,
@@ -52,7 +58,7 @@ async function __loginAccount(req, res, tableName, userType) {
     const user = await accountManagement.findAccount(
       connectionPool,
       true,
-      tableName,
+      accountTableName,
       email,
     );
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
@@ -77,7 +83,7 @@ async function __loginAccount(req, res, tableName, userType) {
 
     const insertionResult = await tokenUtilities.persistRefreshToken({
       user,
-      tableName,
+      tokenTableName,
       refreshToken,
       jti,
       ip: req.ip,
@@ -106,7 +112,13 @@ async function __loginAccount(req, res, tableName, userType) {
   }
 }
 
-async function __refreshAccountAccessToken(req, res, tableName, userType) {
+async function __refreshAccountAccessToken(
+  req,
+  res,
+  accountTableName,
+  tokenTableName,
+  userType,
+) {
   try {
     consoleLoggers.logNeutral(
       `(_authRouter:__refreshAccountAccessToken)Got an access token refresh request, processing...`,
@@ -144,7 +156,7 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
     const foundAccessToken = await accountManagement.findAccountRefreshToken(
       connectionPool,
       true,
-      tableName,
+      tokenTableName,
       tokenHash,
       decoded.jti,
     );
@@ -176,7 +188,7 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
     const foundAccount = await accountManagement.getAccount(
       connectionPool,
       true,
-      tableName,
+      accountTableName,
       accountId,
     );
     if (!foundAccount)
@@ -188,7 +200,7 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
       foundAccessToken,
       foundAccount,
       userType,
-      tableName,
+      tokenTableName,
       req,
       res,
     );
@@ -202,7 +214,12 @@ async function __refreshAccountAccessToken(req, res, tableName, userType) {
   }
 }
 
-async function __logoutAccount(req, res, tableName, fullAcountRefreshPath) {
+async function __logoutAccount(
+  req,
+  res,
+  tokenTableName,
+  fullAcountRefreshPath,
+) {
   try {
     consoleLoggers.logNeutral(
       `(_authRouter:__logoutAccount)Got a logout request, processing...`,
@@ -220,7 +237,7 @@ async function __logoutAccount(req, res, tableName, fullAcountRefreshPath) {
       const foundRefreshToken = await accountManagement.findAccountRefreshToken(
         connectionPool,
         true,
-        tableName,
+        tokenTableName,
         tokenHash,
         token.jti,
       );
@@ -256,7 +273,13 @@ _authRouter.post(_studentAuthPaths.login, async (req, res) => {
     consoleLoggers.logNeutral(
       `(_authRouter:${_studentAuthPaths.login})Got a student login request, processing...`,
     );
-    return await __loginAccount(req, res, "students", "student");
+    return await __loginAccount(
+      req,
+      res,
+      "students",
+      "student_refresh_tokens",
+      "student",
+    );
   } catch (error) {
     consoleLoggers.logError(
       `(_authRouter:${_studentAuthPaths.login})General error while processing a student login request, error message: "${error}".`,
@@ -270,7 +293,13 @@ _authRouter.post(_teacherAuthPaths.login, async (req, res) => {
     consoleLoggers.logNeutral(
       `(_authRouter:${_teacherAuthPaths.login})Got a teacher login request, processing...`,
     );
-    return await __loginAccount(req, res, "teachers", "teacher");
+    return await __loginAccount(
+      req,
+      res,
+      "teachers",
+      "teacher_refresh_tokens",
+      "teacher",
+    );
   } catch (error) {
     consoleLoggers.logError(
       `(_authRouter:${_teacherAuthPaths.login})General error while processing a teacher login request, error message: "${error}".`,
@@ -284,7 +313,13 @@ _authRouter.post(_adminAuthPaths.login, async (req, res) => {
     consoleLoggers.logNeutral(
       `(_authRouter:${_adminAuthPaths.login})Got an admin login request, processing...`,
     );
-    return await __loginAccount(req, res, "administrators", "administrator");
+    return await __loginAccount(
+      req,
+      res,
+      "administrators",
+      "administrator_refresh_tokens",
+      "administrator",
+    );
   } catch (error) {
     consoleLoggers.logError(
       `(_authRouter:${_adminAuthPaths.login})General error while processing an admin login request, error message: "${error}".`,
@@ -300,7 +335,13 @@ _authRouter.post(_studentAuthPaths.refresh, async (req, res) => {
     consoleLoggers.logNeutral(
       `(_authRouter:${_studentAuthPaths.refresh})Got a student access token refresh request, processing...`,
     );
-    return await __refreshAccountAccessToken(req, res, "students", "student");
+    return await __refreshAccountAccessToken(
+      req,
+      res,
+      "students",
+      "student_refresh_tokens",
+      "student",
+    );
   } catch (error) {
     consoleLoggers.logError(
       `(_authRouter:${_studentAuthPaths.refresh})General error while processing a student access token refresh request, error message: "${error}".`,
@@ -314,7 +355,13 @@ _authRouter.post(_teacherAuthPaths.refresh, async (req, res) => {
     consoleLoggers.logNeutral(
       `(_authRouter:${_teacherAuthPaths.refresh})Got a teacher access token refresh request, processing...`,
     );
-    return await __refreshAccountAccessToken(req, res, "teachers", "teacher");
+    return await __refreshAccountAccessToken(
+      req,
+      res,
+      "teachers",
+      "teacher_refresh_tokens",
+      "teacher",
+    );
   } catch (error) {
     consoleLoggers.logError(
       `(_authRouter:${_teacherAuthPaths.refresh})General error while processing a teacher access token refresh request, error message: "${error}".`,
@@ -332,6 +379,7 @@ _authRouter.post(_adminAuthPaths.refresh, async (req, res) => {
       req,
       res,
       "administrators",
+      "administrator_refresh_tokens",
       "administrator",
     );
   } catch (error) {
@@ -352,7 +400,7 @@ _authRouter.post(_studentAuthPaths.logout, async (req, res) => {
     return __logoutAccount(
       req,
       res,
-      "teachers",
+      "student_refresh_tokens",
       _expectedFullPathToRouter + _studentAuthPaths.refresh,
     );
   } catch (error) {
@@ -371,7 +419,7 @@ _authRouter.post(_teacherAuthPaths.logout, async (req, res) => {
     return __logoutAccount(
       req,
       res,
-      "teachers",
+      "teacher_refresh_tokens",
       _expectedFullPathToRouter + _teacherAuthPaths.refresh,
     );
   } catch (error) {
@@ -390,7 +438,7 @@ _authRouter.post(_adminAuthPaths.logout, async (req, res) => {
     return __logoutAccount(
       req,
       res,
-      "administrators",
+      "administrator_refresh_tokens",
       _expectedFullPathToRouter + _adminAuthPaths.refresh,
     );
   } catch (error) {
