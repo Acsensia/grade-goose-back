@@ -63,8 +63,19 @@ function _signAccessToken(user, userType, areMessagesToBeDisplayed) {
     );
 
   try {
+    let userId = null;
+    if (typeof user.student_id !== "undefined") {
+      userId = user.student_id;
+    } else if (typeof user.teacher_id !== "undefined") {
+      userId = user.teacher_id;
+    } else if (typeof user.administrator_id !== "undefined") {
+      userId = user.administrator_id;
+    } else
+      throw new Error(
+        "Couldn't find an id column name that matches the specified user type!",
+      );
     const payload = {
-      id: user.id.toString(),
+      id: userId.toString(),
       email: user.email,
       type: userType,
     };
