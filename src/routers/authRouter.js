@@ -12,13 +12,12 @@ import * as tokenUtilities from "../startup/databases/mysql/accounts/tokenUtilit
 //.setup
 const authRouter = Router();
 
-//routes
-//TODO add student routes
-//TODO add teacher routes
-authRouter.post("/login/admin", async (req, res) => {
+//utility functions
+
+async function __loginAccount(req, res, tableName, userType) {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:/login/admin)Got an admin login request, processing...`,
+      `(authRouter:__loginAccount)Got a login request, processing...`,
     );
     const { email, password } = req.body;
 
@@ -29,7 +28,7 @@ authRouter.post("/login/admin", async (req, res) => {
     const user = await accountManagement.findAccount(
       connectionPool,
       true,
-      "administrators",
+      tableName,
       email,
     );
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
@@ -38,11 +37,7 @@ authRouter.post("/login/admin", async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const accessToken = tokenUtilities.signAccessToken(
-      user,
-      "administrator",
-      true,
-    );
+    const accessToken = tokenUtilities.signAccessToken(user, userType, true);
     if (!accessToken) throw new Error("Failed to sign a new access token!");
 
     const jti = tokenUtilities.createJti(true);
@@ -50,7 +45,7 @@ authRouter.post("/login/admin", async (req, res) => {
 
     const refreshToken = tokenUtilities.signRefreshToken(
       user,
-      "administrator",
+      userType,
       jti,
       true,
     );
@@ -58,7 +53,7 @@ authRouter.post("/login/admin", async (req, res) => {
 
     const insertionResult = await tokenUtilities.persistRefreshToken({
       user,
-      userType: "administrator",
+      userType,
       refreshToken,
       jti,
       ip: req.ip,
@@ -81,16 +76,16 @@ authRouter.post("/login/admin", async (req, res) => {
     res.json({ accessToken });
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:/login/admin)General error while processing admin login request, error message: "${error}".`,
+      `(authRouter:__loginAccount)General error while processing a login request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
-});
+}
 
-authRouter.post("refresh/admin", async (req, res) => {
+async function __refreshAccountAccessToken(req, res, tableName, userType) {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:/refresh/admin)Got an admin access token refresh request, processing...`,
+      `(authRouter:__refreshAccountAccessToken)Got an access token refresh request, processing...`,
     );
     const token = req.cookies?.refresh_token;
     if (!token) return res.status(401).json({ message: "No refresh token" });
@@ -100,16 +95,16 @@ authRouter.post("refresh/admin", async (req, res) => {
       decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     } catch (error) {
       consoleLoggers.logError(
-        `(authRouter:/refresh/admin)General error while processing admin access token refresh request, error message: "${error}".`,
+        `(authRouter:__refreshAccountAccessToken)General error while processing an access token refresh request, error message: "${error}".`,
       );
       return res
         .status(401)
         .json({ message: "Invalid or expired refresh token" });
     }
 
-    if (decoded.type !== "administrator") {
+    if (decoded.type !== userType) {
       consoleLoggers.logError(
-        `(authRouter:/refresh/admin)Token type error: the token type is not "administrator"!`,
+        `(authRouter:__refreshAccountAccessToken)Token type error: the token type ("${decoded.type}") is not "${userType}"!`,
       );
       return res.status(401).json({
         message: "Invalid token type, try accessing other refresh endpoints.",
@@ -125,7 +120,7 @@ authRouter.post("refresh/admin", async (req, res) => {
     const foundAccessToken = await accountManagement.findAccountRefreshToken(
       connectionPool,
       true,
-      "administrators",
+      tableName,
       tokenHash,
       decoded.jti,
     );
@@ -141,7 +136,11 @@ authRouter.post("refresh/admin", async (req, res) => {
     }
 
     let accountId = null;
-    if (
+    if (typeof foundAccessToken.students_student_id !== "undefined") {
+      accountId = foundAccessToken.students_student_id;
+    } else if (typeof foundAccessToken.teachers_teacher_id !== "undefined") {
+      accountId = foundAccessToken.teachers_teacher_id;
+    } else if (
       typeof foundAccessToken.administrators_administrator_id !== "undefined"
     ) {
       accountId = foundAccessToken.administrators_administrator_id;
@@ -153,7 +152,7 @@ authRouter.post("refresh/admin", async (req, res) => {
     const foundAccount = await accountManagement.getAccount(
       connectionPool,
       true,
-      "administrators",
+      tableName,
       accountId,
     );
     if (!foundAccount)
@@ -164,7 +163,7 @@ authRouter.post("refresh/admin", async (req, res) => {
     const rotationResult = await tokenUtilities.rotateRefreshToken(
       foundAccessToken,
       foundAccount,
-      "administrator",
+      userType,
       req,
       res,
     );
@@ -172,16 +171,16 @@ authRouter.post("refresh/admin", async (req, res) => {
     return res.json({ accessToken: rotationResult.accessToken });
   } catch (error) {
     consoleLoggers.logError(
-      `(authRouter:/refresh/admin)General error while processing admin access token refresh request, error message: "${error}".`,
+      `(authRouter:__refreshAccountAccessToken)General error while processing an access token refresh request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
-});
+}
 
-authRouter.post("/logout/admin", async (req, res) => {
+async function __logoutAccount(req, res, tableName, refreshPath) {
   try {
     consoleLoggers.logNeutral(
-      `(authRouter:/logout)Got an admin logout request, processing...`,
+      `(authRouter:__logoutAccount)Got a logout request, processing...`,
     );
 
     const token = req.cookies?.refresh_token;
@@ -196,7 +195,7 @@ authRouter.post("/logout/admin", async (req, res) => {
       const foundRefreshToken = await accountManagement.findAccountRefreshToken(
         connectionPool,
         true,
-        "administrators",
+        tableName,
         tokenHash,
         token.jti,
       );
@@ -215,8 +214,58 @@ authRouter.post("/logout/admin", async (req, res) => {
           throw new Error("Failed to update the stored refresh token!");
       }
     }
-    res.clearCookie("refresh_token", { path: "/api/auth/refresh/admin" });
+    res.clearCookie("refresh_token", { path: refreshPath });
     res.json({ message: "Logged out" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(authRouter:__logoutAccount)General error while processing a logout request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+//routes
+//TODO add student routes
+//TODO add teacher routes
+authRouter.post("/login/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(authRouter:/login/admin)Got an admin login request, processing...`,
+    );
+    return await __loginAccount(req, res, "administrators", "administrator");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(authRouter:/login/admin)General error while processing admin login request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+authRouter.post("refresh/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(authRouter:/refresh/admin)Got an admin access token refresh request, processing...`,
+    );
+    return await __refreshAccountAccessToken(
+      req,
+      res,
+      "administrators",
+      "administrator",
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(authRouter:/refresh/admin)General error while processing admin access token refresh request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+authRouter.post("/logout/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(authRouter:/logout/admin)Got an admin logout request, processing...`,
+    );
+    return __logoutAccount(req, res, "administrators", "/auth/refresh/admin");
   } catch (error) {
     consoleLoggers.logError(
       `(authRouter:/logout/admin)General error while processing an admin logout request, error message: "${error}".`,
