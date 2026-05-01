@@ -56,25 +56,13 @@ function _createJti(areMessagesToBeDisplayed) {
   }
 }
 
-function _signAccessToken(user, areMessagesToBeDisplayed) {
+function _signAccessToken(user, userType, areMessagesToBeDisplayed) {
   if (areMessagesToBeDisplayed)
     consoleLoggers.logNeutral(
       `(_signAccessToken)Attempting to sign an access token...`,
     );
 
   try {
-    let userType = "";
-    if (typeof user.student_id !== "undefined") {
-      userType = "student";
-    } else if (typeof user.teacher_id !== "undefined") {
-      userType = "teacher";
-    } else if (typeof user.administrator_id !== "undefined") {
-      userType = "administrator";
-    } else
-      throw new Error(
-        "Provided user object does not have a matching id column name! Look closer in the code...",
-      );
-
     const payload = {
       id: user.id.toString(),
       email: user.email,
@@ -100,14 +88,14 @@ function _signAccessToken(user, areMessagesToBeDisplayed) {
   }
 }
 
-function _signRefreshToken(user, jti, areMessagesToBeDisplayed) {
+function _signRefreshToken(user, userType, jti, areMessagesToBeDisplayed) {
   if (areMessagesToBeDisplayed)
     consoleLoggers.logNeutral(
       `(_signRefreshToken)Attempting to sign a refresh token...`,
     );
 
   try {
-    const payload = { id: user.id.toString(), jti };
+    const payload = { id: user.id.toString(), type: userType, jti };
     const signedToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TTL_SEC,
     });
@@ -129,7 +117,7 @@ function _signRefreshToken(user, jti, areMessagesToBeDisplayed) {
 }
 
 async function _persistRefreshToken(
-  { user, refreshToken, jti, ip, userAgent },
+  { user, userType, refreshToken, jti, ip, userAgent },
   areMessagesToBeDisplayed,
 ) {
   if (areMessagesToBeDisplayed)
@@ -148,11 +136,11 @@ async function _persistRefreshToken(
       throw new Error("Failed to access the connection pool!");
 
     let insertionResult = undefined;
-    if (typeof user.student_id !== "undefined") {
+    if (userType === "student") {
       //TODO add student handling
-    } else if (typeof user.teacher_id !== "undefined") {
+    } else if (userType === "teacher") {
       //TODO add teacher handling
-    } else if (typeof user.administrator_id !== "undefined") {
+    } else if (userType === "administrator") {
       insertionResult = accountManagement.addAccountRefreshToken(
         connectionPool,
         true,
@@ -166,7 +154,7 @@ async function _persistRefreshToken(
       );
     } else
       throw new Error(
-        "Provided user object does not have a matching id column name! Look closer in the code...",
+        "Provided userType parameter does not have a handler! Look closer in the code...",
       );
 
     if (insertionResult) {
@@ -186,7 +174,12 @@ async function _persistRefreshToken(
   }
 }
 
-function _setRefreshCookie(res, refreshToken, areMessagesToBeDisplayed) {
+function _setRefreshCookie(
+  res,
+  refreshToken,
+  requestPath,
+  areMessagesToBeDisplayed,
+) {
   if (areMessagesToBeDisplayed)
     consoleLoggers.logNeutral(
       `(_setRefreshCookie)Attempting to set a refresh cookie...`,
@@ -198,7 +191,7 @@ function _setRefreshCookie(res, refreshToken, areMessagesToBeDisplayed) {
       httpOnly: true,
       secure: isProd, //TODO ensure HTTPS communication at some point, this thing enables it
       sameSite: "strict",
-      path: "/api/auth/refresh",
+      path: requestPath,
       maxAge: REFRESH_TTL_SEC * 1000,
     });
 
@@ -221,6 +214,7 @@ function _setRefreshCookie(res, refreshToken, areMessagesToBeDisplayed) {
 async function _rotateRefreshToken(
   oldRefreshToken,
   user,
+  userType,
   req,
   res,
   areMessagesToBeDisplayed,
@@ -251,11 +245,16 @@ async function _rotateRefreshToken(
 
     //issuing a new token
 
-    const newAccessToken = _signAccessToken(user, areMessagesToBeDisplayed);
+    const newAccessToken = _signAccessToken(
+      user,
+      userType,
+      areMessagesToBeDisplayed,
+    );
     if (!newAccessToken) throw new Error("Failed to sign a new access token!");
 
     const newRefreshToken = _signRefreshToken(
       user,
+      userType,
       newJti,
       areMessagesToBeDisplayed,
     );
@@ -265,6 +264,7 @@ async function _rotateRefreshToken(
     const persistResult = await _persistRefreshToken(
       {
         user,
+        userType,
         refreshToken: newRefreshToken,
         jti: newJti,
         ip: req.ip,
@@ -278,6 +278,7 @@ async function _rotateRefreshToken(
     const cookieSettingResult = _setRefreshCookie(
       res,
       newRefreshToken,
+      req.path,
       areMessagesToBeDisplayed,
     );
     if (!cookieSettingResult) throw new Error("Failed to set a new cookie!");

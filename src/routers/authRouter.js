@@ -38,21 +38,32 @@ authRouter.post("/login/admin", async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const accessToken = tokenUtilities.signAccessToken(user);
+    const accessToken = tokenUtilities.signAccessToken(
+      user,
+      "administrator",
+      true,
+    );
     if (!accessToken) throw new Error("Failed to sign a new access token!");
 
-    const jti = tokenUtilities.createJti();
+    const jti = tokenUtilities.createJti(true);
     if (!jti) throw new Error("Failed to create a new jti!");
 
-    const refreshToken = tokenUtilities.signRefreshToken(user, jti);
+    const refreshToken = tokenUtilities.signRefreshToken(
+      user,
+      "administrator",
+      jti,
+      true,
+    );
     if (!refreshToken) throw new Error("Failed to sign a new refresh token!");
 
     const insertionResult = await tokenUtilities.persistRefreshToken({
       user,
+      userType: "administrator",
       refreshToken,
       jti,
       ip: req.ip,
       userAgent: req.headers["user-agent"] || "",
+      areMessagesToBeDisplayed: true,
     });
     if (!insertionResult)
       throw new Error(
@@ -62,6 +73,8 @@ authRouter.post("/login/admin", async (req, res) => {
     const cookieSettingResult = tokenUtilities.setRefreshCookie(
       res,
       refreshToken,
+      req.path,
+      true,
     );
     if (!cookieSettingResult) throw new Error("Failed to set a new cookie!");
 
@@ -94,7 +107,16 @@ authRouter.post("login/admin/refresh", async (req, res) => {
         .json({ message: "Invalid or expired refresh token" });
     }
 
-    const tokenHash = tokenUtilities.hashToken(token);
+    if (decoded.type !== "administrator") {
+      consoleLoggers.logError(
+        `(authRouter:/login/admin/refresh)Token type error: the token type is not "administrator"!`,
+      );
+      return res.status(401).json({
+        message: "Invalid token type, try accessing other refresh endpoints.",
+      });
+    }
+
+    const tokenHash = tokenUtilities.hashToken(token, true);
     if (!tokenHash) throw new Error("Failed to hash a new token!");
 
     const connectionPool = await mysqlManagement.getConnectionPool(true);
@@ -142,6 +164,7 @@ authRouter.post("login/admin/refresh", async (req, res) => {
     const rotationResult = await tokenUtilities.rotateRefreshToken(
       foundAccessToken,
       foundAccount,
+      "administrator",
       req,
       res,
     );
@@ -154,6 +177,29 @@ authRouter.post("login/admin/refresh", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+// //TODO check if it works for all three types of accounts
+// authRouter.post("/logout", async (req, res) => {
+//   try {
+//     const token = req.cookies?.refresh_token;
+//     if (token) {
+//       const tokenHash = tokenUtilities.hashToken(token);
+//       if (!tokenHash) throw new Error("Failed to hash a token!");
+
+//       const doc = await RefreshToken.findOne({ tokenHash });
+//       if (doc && !doc.revokedAt) {
+//         doc.revokedAt = new Date();
+//         await doc.save();
+//       }
+//     }
+//     res.clearCookie("refresh_token", { path: "/api/auth/refresh" });
+//     res.json({ message: "Logged out" });
+//   } catch (error) {
+//     consoleLoggers.logError(
+//       `(authRouter:/login/admin/refresh)General error while processing a logout request, error message: "${error}".`,
+//     );
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 
 //exports
 export default authRouter;
