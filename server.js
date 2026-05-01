@@ -3,8 +3,8 @@ import express, { json } from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 //imports->project
-import mainRouter from "./src/routers/mainRouter.js";
-import authRouter from "./src/routers/authRouter.js";
+//import mainRouter from "./src/routers/mainRouter.js";
+import { authRouter } from "./src/routers/authRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
 //.setup

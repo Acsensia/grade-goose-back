@@ -1,7 +1,7 @@
 //imports
 import { Router } from "express";
 import * as bcrypt from "bcrypt";
-import * as jwt from "jwt";
+import * as jwt from "jsonwebtoken";
 
 //imports->project
 import * as mysqlManagement from "../startup/databases/mysql/mysqlManagement.js";
