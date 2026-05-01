@@ -104,17 +104,17 @@ function _logParameterTypeError(
     console.log(styleText("magenta", "-- -- -- \n"));
     return;
   }
-  if (parameter === undefined) {
-    console.log(styleText("magenta", "\n-- -- --"));
-    console.log(
-      styleText(
-        "magenta",
-        "PARAMETER EXISTENCE ERROR: 'logParameterTypeError' was called without 'parameter' parameter.",
-      ),
-    );
-    console.log(styleText("magenta", "-- -- -- \n"));
-    return;
-  }
+  // if (parameter === undefined) {
+  //   console.log(styleText("magenta", "\n-- -- --"));
+  //   console.log(
+  //     styleText(
+  //       "magenta",
+  //       "PARAMETER EXISTENCE ERROR: 'logParameterTypeError' was called without 'parameter' parameter.",
+  //     ),
+  //   );
+  //   console.log(styleText("magenta", "-- -- -- \n"));
+  //   return;
+  // }
   if (functionName === undefined) {
     console.log(styleText("magenta", "\n-- -- --"));
     console.log(
