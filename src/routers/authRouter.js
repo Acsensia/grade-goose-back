@@ -12,11 +12,11 @@ import * as tokenUtilities from "../startup/databases/mysql/accounts/tokenUtilit
 //.setup
 const _authRouter = Router();
 
-//path variables for easy path changing
-
 //basically what comes before the auth paths, like `"/api/auth"`
 //needed for clean cookie path selection
 const _expectedFullPathToRouter = "/api/auth";
+
+//path variables for easy path changing
 
 const _studentAuthPaths = {
   login: "/login/student",
