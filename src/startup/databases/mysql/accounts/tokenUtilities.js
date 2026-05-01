@@ -68,7 +68,7 @@ function _signAccessToken(user, userType, areMessagesToBeDisplayed) {
       email: user.email,
       type: userType,
     };
-    let signedToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    let signedToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: ACCESS_TTL,
     });
 
