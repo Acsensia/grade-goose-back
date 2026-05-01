@@ -44,6 +44,7 @@ async function __loginAccount(
   accountTableName,
   tokenTableName,
   userType,
+  userId,
 ) {
   try {
     consoleLoggers.logNeutral(
@@ -67,7 +68,12 @@ async function __loginAccount(
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    const accessToken = tokenUtilities.signAccessToken(user, userType, true);
+    const accessToken = tokenUtilities.signAccessToken(
+      user,
+      userType,
+      userId,
+      true,
+    );
     if (!accessToken) throw new Error("Failed to sign a new access token!");
 
     const jti = tokenUtilities.createJti(true);
@@ -76,6 +82,7 @@ async function __loginAccount(
     const refreshToken = tokenUtilities.signRefreshToken(
       user,
       userType,
+      userId,
       jti,
       true,
     );

@@ -429,7 +429,7 @@ async function _updateAccountRefreshToken(
 async function _addAccountRefreshToken(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
-  tableName,
+  tokenTableName,
   _userId,
   _tokenHash,
   _jti,
@@ -449,11 +449,11 @@ async function _addAccountRefreshToken(
       return false;
     }
   }
-  if (typeof tableName !== "string") {
+  if (typeof tokenTableName !== "string") {
     consoleLoggers.logParameterTypeError(
-      "tableName",
+      "tokenTableName",
       "string",
-      tableName,
+      tokenTableName,
       "__addAccountRefreshToken",
     );
     return false;
@@ -516,33 +516,33 @@ async function _addAccountRefreshToken(
   try {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logNeutral(
-        `(0/__addAccountRefreshToken)Trying to insert the new token of the ${_userId} user into the "${tableName}" table...`,
+        `(0/__addAccountRefreshToken)Trying to insert the new token of the ${_userId} user into the "${tokenTableName}" table...`,
       );
     let userIdColumnName = "";
-    if (tableName === "student_refresh_tokens") {
+    if (tokenTableName === "student_refresh_tokens") {
       userIdColumnName = "students_student_id";
-    } else if (tableName === "teacher_refresh_tokens") {
+    } else if (tokenTableName === "teacher_refresh_tokens") {
       userIdColumnName = "teachers_teacher_id";
-    } else if (tableName === "administrator_refresh_tokens") {
+    } else if (tokenTableName === "administrator_refresh_tokens") {
       userIdColumnName = "administrators_administrator_id";
     } else {
       consoleLoggers.logError(
-        `(0/__addAccountRefreshToken)Failed to find the user_id column name for the "${tableName}" table! Look in the code to see three possible table names.`,
+        `(0/__addAccountRefreshToken)Failed to find the user_id column name for the "${tokenTableName}" table! Look in the code to see three possible table names.`,
       );
       return false;
     }
-    const sql = `INSERT INTO \`${tableName}\` (${userIdColumnName}, token_hash, jti, expires_at, it, user_agent) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO \`${tokenTableName}\` (${userIdColumnName}, token_hash, jti, expires_at, it, user_agent) VALUES (?, ?, ?, ?, ?, ?)`;
     const params = [_userId, _tokenHash, _jti, _expiresAt, _ip, _userAgent];
     await databaseConnectionPool.execute(sql, params);
     if (areMessagesToBeDisplayed)
       consoleLoggers.logSuccess(
-        `(0/__addAccountRefreshToken)Successfully inserted the new token of the ${_userId} user into the "${tableName}" table!`,
+        `(0/__addAccountRefreshToken)Successfully inserted the new token of the ${_userId} user into the "${tokenTableName}" table!`,
       );
     return true;
   } catch (error) {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
-        `(0/__addAccountRefreshToken)Failed to insert the new token of the ${_userId} user into the "${tableName}" table! Error message: ${error}`,
+        `(0/__addAccountRefreshToken)Failed to insert the new token of the ${_userId} user into the "${tokenTableName}" table! Error message: ${error}`,
       );
     return false;
   }

@@ -56,26 +56,15 @@ function _createJti(areMessagesToBeDisplayed) {
   }
 }
 
-function _signAccessToken(user, userType, areMessagesToBeDisplayed) {
+function _signAccessToken(user, userType, userId, areMessagesToBeDisplayed) {
   if (areMessagesToBeDisplayed)
     consoleLoggers.logNeutral(
       `(_signAccessToken)Attempting to sign an access token...`,
     );
 
   try {
-    let userId = null;
-    if (typeof user.student_id !== "undefined") {
-      userId = user.student_id;
-    } else if (typeof user.teacher_id !== "undefined") {
-      userId = user.teacher_id;
-    } else if (typeof user.administrator_id !== "undefined") {
-      userId = user.administrator_id;
-    } else
-      throw new Error(
-        "Couldn't find an id column name that matches the specified user type!",
-      );
     const payload = {
-      id: userId.toString(),
+      id: userId,
       email: user.email,
       type: userType,
     };
@@ -99,7 +88,13 @@ function _signAccessToken(user, userType, areMessagesToBeDisplayed) {
   }
 }
 
-function _signRefreshToken(user, userType, jti, areMessagesToBeDisplayed) {
+function _signRefreshToken(
+  user,
+  userType,
+  userId,
+  jti,
+  areMessagesToBeDisplayed,
+) {
   if (areMessagesToBeDisplayed)
     consoleLoggers.logNeutral(
       `(_signRefreshToken)Attempting to sign a refresh token...`,
@@ -107,7 +102,7 @@ function _signRefreshToken(user, userType, jti, areMessagesToBeDisplayed) {
 
   try {
     //TODO check if "jti: jti" generates an error, it used to be just 'jti'
-    const payload = { id: user.id.toString(), type: userType, jti: jti };
+    const payload = { id: userId, type: userType, jti: jti };
     const signedToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: REFRESH_TTL_SEC,
     });
@@ -129,7 +124,7 @@ function _signRefreshToken(user, userType, jti, areMessagesToBeDisplayed) {
 }
 
 async function _persistRefreshToken(
-  { user, tableName, refreshToken, jti, ip, userAgent },
+  { userId, tokenTableName, refreshToken, jti, ip, userAgent },
   areMessagesToBeDisplayed,
 ) {
   if (areMessagesToBeDisplayed)
@@ -150,8 +145,8 @@ async function _persistRefreshToken(
     const insertionResult = accountManagement.addAccountRefreshToken(
       connectionPool,
       true,
-      tableName,
-      user.id,
+      tokenTableName,
+      userId,
       tokenHash,
       jti,
       expiresAt,
@@ -205,7 +200,7 @@ function _setRefreshCookie(
   } catch (error) {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
-        `(_signRefreshToken)Generally failed to set a refresh cookie! Error message: "${error}".`,
+        `(_setRefreshCookie)Generally failed to set a refresh cookie! Error message: "${error}".`,
       );
 
     return false;
@@ -216,7 +211,7 @@ async function _rotateRefreshToken(
   oldRefreshToken,
   user,
   userType,
-  tableName,
+  tokenTableName,
   req,
   res,
   areMessagesToBeDisplayed,
@@ -247,9 +242,22 @@ async function _rotateRefreshToken(
 
     //issuing a new token
 
+    let userId = null;
+    if (typeof user.student_id !== "undefined") {
+      userId = user.student_id;
+    } else if (typeof user.teacher_id !== "undefined") {
+      userId = user.teacher_id;
+    } else if (typeof user.administrator_id !== "undefined") {
+      userId = user.administrator_id;
+    } else
+      throw new Error(
+        "Couldn't find an id column name that matches the specified user type!",
+      );
+
     const newAccessToken = _signAccessToken(
       user,
       userType,
+      userId,
       areMessagesToBeDisplayed,
     );
     if (!newAccessToken) throw new Error("Failed to sign a new access token!");
@@ -257,6 +265,7 @@ async function _rotateRefreshToken(
     const newRefreshToken = _signRefreshToken(
       user,
       userType,
+      userId,
       newJti,
       areMessagesToBeDisplayed,
     );
@@ -265,8 +274,8 @@ async function _rotateRefreshToken(
 
     const persistResult = await _persistRefreshToken(
       {
-        user,
-        tableName,
+        userId,
+        tokenTableName,
         refreshToken: newRefreshToken,
         jti: newJti,
         ip: req.ip,
