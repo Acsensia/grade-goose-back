@@ -1,4 +1,4 @@
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 function _auth(req, res, next) {
   const header = req.headers.authorization || "";
@@ -15,6 +15,7 @@ function _auth(req, res, next) {
     req.user = { id: decoded.id, email: decoded.email, type: decoded.type };
     next();
   } catch (err) {
+    console.log(err);
     const msg =
       err.name === "TokenExpiredError"
         ? "Access token expired"

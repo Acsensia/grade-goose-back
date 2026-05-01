@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 //imports->project
+import { auth } from "./src/middleware/auth.js";
+import { mainRouter } from "./src/routers/mainRouter.js";
 import { authRouter } from "./src/routers/authRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
@@ -38,7 +40,7 @@ async function startServer() {
   const connectionPool = await mysqlManagement.getConnectionPool();
 
   //passing all requests to the main router
-  //app.use("/", mainRouter); // TODO keep in mind that it is not being used for now
+  app.use("/test", auth, mainRouter);
 
   //applying the auth router
   app.use("/api/auth", authRouter);

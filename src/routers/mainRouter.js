@@ -2,15 +2,12 @@
 import { Router } from "express";
 
 //.setup
-const mainRouter = Router();
+const _mainRouter = Router();
 
 //routes
-mainRouter.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
-mainRouter.get("/api/data", (req, res) => {
+_mainRouter.post("/test1", (req, res) => {
   res.json({ message: "This is some data" });
 });
 
 //exports
-export default mainRouter;
+export const mainRouter = _mainRouter;
