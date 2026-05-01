@@ -186,7 +186,7 @@ function _setRefreshCookie(
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: isProd, //TODO ensure HTTPS communication at some point, this thing enables it
-      sameSite: "strict",
+      sameSite: isProd ? "strict" : "lax",
       path: requestPath,
       maxAge: REFRESH_TTL_SEC * 1000,
     });

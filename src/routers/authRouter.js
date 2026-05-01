@@ -144,6 +144,7 @@ async function __refreshAccountAccessToken(
       `(_authRouter:__refreshAccountAccessToken)Got an access token refresh request, processing...`,
     );
     const token = req.cookies?.refresh_token;
+    console.log(req.cookies); //TODO remove
     if (!token) return res.status(401).json({ message: "No refresh token" });
 
     let decoded;
