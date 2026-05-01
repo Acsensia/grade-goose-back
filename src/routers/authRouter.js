@@ -249,18 +249,75 @@ async function __logoutAccount(req, res, tableName, fullAcountRefreshPath) {
   }
 }
 
-//routes
-//TODO add student routes
-//TODO add teacher routes
+//login routes
+
+_authRouter.post(_studentAuthPaths.login, async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_authRouter:${_studentAuthPaths.login})Got a student login request, processing...`,
+    );
+    return await __loginAccount(req, res, "students", "student");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_authRouter:${_studentAuthPaths.login})General error while processing a student login request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_authRouter.post(_teacherAuthPaths.login, async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_authRouter:${_teacherAuthPaths.login})Got a teacher login request, processing...`,
+    );
+    return await __loginAccount(req, res, "teachers", "teacher");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_authRouter:${_teacherAuthPaths.login})General error while processing a teacher login request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 _authRouter.post(_adminAuthPaths.login, async (req, res) => {
   try {
     consoleLoggers.logNeutral(
-      `(_authRouter:/login/admin)Got an admin login request, processing...`,
+      `(_authRouter:${_adminAuthPaths.login})Got an admin login request, processing...`,
     );
     return await __loginAccount(req, res, "administrators", "administrator");
   } catch (error) {
     consoleLoggers.logError(
-      `(_authRouter:/login/admin)General error while processing admin login request, error message: "${error}".`,
+      `(_authRouter:${_adminAuthPaths.login})General error while processing an admin login request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//refresh routes
+
+_authRouter.post(_studentAuthPaths.refresh, async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_authRouter:${_studentAuthPaths.refresh})Got a student access token refresh request, processing...`,
+    );
+    return await __refreshAccountAccessToken(req, res, "students", "student");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_authRouter:${_studentAuthPaths.refresh})General error while processing a student access token refresh request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_authRouter.post(_teacherAuthPaths.refresh, async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_authRouter:${_teacherAuthPaths.refresh})Got a teacher access token refresh request, processing...`,
+    );
+    return await __refreshAccountAccessToken(req, res, "teachers", "teacher");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_authRouter:${_teacherAuthPaths.refresh})General error while processing a teacher access token refresh request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -269,7 +326,7 @@ _authRouter.post(_adminAuthPaths.login, async (req, res) => {
 _authRouter.post(_adminAuthPaths.refresh, async (req, res) => {
   try {
     consoleLoggers.logNeutral(
-      `(_authRouter:/refresh/admin)Got an admin access token refresh request, processing...`,
+      `(_authRouter:${_adminAuthPaths.refresh})Got an admin access token refresh request, processing...`,
     );
     return await __refreshAccountAccessToken(
       req,
@@ -279,7 +336,47 @@ _authRouter.post(_adminAuthPaths.refresh, async (req, res) => {
     );
   } catch (error) {
     consoleLoggers.logError(
-      `(_authRouter:/refresh/admin)General error while processing admin access token refresh request, error message: "${error}".`,
+      `(_authRouter:${_adminAuthPaths.refresh})General error while processing an admin access token refresh request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//logout routes
+
+_authRouter.post(_studentAuthPaths.logout, async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_authRouter:${_studentAuthPaths.logout})Got a student logout request, processing...`,
+    );
+    return __logoutAccount(
+      req,
+      res,
+      "teachers",
+      _expectedFullPathToRouter + _studentAuthPaths.refresh,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_authRouter:${_studentAuthPaths.logout})General error while processing a student logout request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_authRouter.post(_teacherAuthPaths.logout, async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_authRouter:${_teacherAuthPaths.logout})Got a teacher logout request, processing...`,
+    );
+    return __logoutAccount(
+      req,
+      res,
+      "teachers",
+      _expectedFullPathToRouter + _teacherAuthPaths.refresh,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_authRouter:${_teacherAuthPaths.logout})General error while processing a teacher logout request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -288,7 +385,7 @@ _authRouter.post(_adminAuthPaths.refresh, async (req, res) => {
 _authRouter.post(_adminAuthPaths.logout, async (req, res) => {
   try {
     consoleLoggers.logNeutral(
-      `(_authRouter:/logout/admin)Got an admin logout request, processing...`,
+      `(_authRouter:${_adminAuthPaths.logout})Got an admin logout request, processing...`,
     );
     return __logoutAccount(
       req,
@@ -298,7 +395,7 @@ _authRouter.post(_adminAuthPaths.logout, async (req, res) => {
     );
   } catch (error) {
     consoleLoggers.logError(
-      `(_authRouter:/logout/admin)General error while processing an admin logout request, error message: "${error}".`,
+      `(_authRouter:${_adminAuthPaths.logout})General error while processing an admin logout request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
