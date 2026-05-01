@@ -1,6 +1,6 @@
 import * as jwt from "jsonwebtoken";
 
-function auth(req, res, next) {
+function _auth(req, res, next) {
   const header = req.headers.authorization || "";
   const [scheme, tokenFromHeader] = header.split(" ");
   const tokenFromCookie = req.cookies?.access_token;
