@@ -1,5 +1,5 @@
 //imports
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import * as crypto from "crypto";
 
 //imports->project
