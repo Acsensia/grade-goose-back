@@ -178,6 +178,7 @@ async function _getAccount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
   tableName,
+  idColumnName,
   _id,
 ) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
@@ -211,7 +212,7 @@ async function _getAccount(
       consoleLoggers.logNeutral(
         `(_getAccount)Trying to find an account with the "${_id}" id in the "${tableName}" table...`,
       );
-    const sql = `SELECT * FROM \`${tableName}\` WHERE \`id\` = ?; `;
+    const sql = `SELECT * FROM \`${tableName}\` WHERE \`${idColumnName}\` = ?; `;
     const params = [_id];
     const [results] = await databaseConnectionPool.execute(sql, params);
     if (results !== undefined && results.length !== 0) {

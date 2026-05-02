@@ -5,8 +5,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 //imports->project
 import { auth } from "./src/middleware/auth.js";
-import { mainRouter } from "./src/routers/mainRouter.js";
 import { authRouter } from "./src/routers/authRouter.js";
+import { accountRouter } from "./src/routers/accountRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
 //.setup
@@ -37,13 +37,14 @@ async function startServer() {
   console.clear();
 
   //trying to connect
-  const connectionPool = await mysqlManagement.getConnectionPool();
-
-  //passing all requests to the main router
-  app.use("/test", auth, mainRouter);
+  //const connectionPool = await mysqlManagement.getConnectionPool();
+  await mysqlManagement.getConnectionPool();
 
   //applying the auth router
   app.use("/api/auth", authRouter);
+
+  //applying the account router
+  app.use("/api/account", auth, accountRouter);
 
   //starting the server
   app.listen(process.env.PORT, () => {
