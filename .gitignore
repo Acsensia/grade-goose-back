@@ -1,6 +1,9 @@
 # MacOS-specific
 .DS_Store
 
+# Windows-specific
+desktop.ini
+
 # Logs
 logs
 *.log
