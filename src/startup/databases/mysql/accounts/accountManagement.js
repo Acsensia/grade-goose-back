@@ -63,6 +63,7 @@ async function __hashPassword(password, areMessagesToBeDisplayed) {
 
 // EXPORTED FUNCTIONS //
 
+//needed for the backend specifically
 async function _getAdministratorCount(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
@@ -102,6 +103,8 @@ async function _getAdministratorCount(
     return undefined;
   }
 }
+
+// account functions //
 
 async function _findAccount(
   databaseConnectionPool,
@@ -348,8 +351,64 @@ async function _addAccount(
   }
 }
 
+async function _updateAccount(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  tableName,
+  _idColumnName,
+  _idColumnValue,
+  _updatedAccount,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_updateAccount",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_updateAccount)Trying to update an account...`,
+      );
+
+    const sql = `UPDATE \`${tableName}\`
+        SET email = ?, password_hash = ?,
+        first_name = ?, last_name = ?, patronymic_name = ?
+        WHERE ${_idColumnName} = ?`;
+    const params = [
+      _updatedAccount.email,
+      _updatedAccount.password_hash,
+      _updatedAccount.first_name,
+      _updatedAccount.last_name,
+      _updatedAccount.patronymic_name,
+      _idColumnValue,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(_updateAccount)Successfully updated an account.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_updateAccount)Generally failed to update an account! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
 export const getAccount = _getAccount;
 export const findAccount = _findAccount;
 export const addAccount = _addAccount;
+export const updateAccount = _updateAccount;

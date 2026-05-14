@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import * as consoleLoggers from "../../../console/consoleLoggers.js";
 
 //default access token duration
+//TODO increase duration
 const ACCESS_TTL = "15m";
 
 function _signAccessToken(user, userType, userId, areMessagesToBeDisplayed) {
