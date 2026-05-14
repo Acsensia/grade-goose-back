@@ -1,5 +1,6 @@
 //imports
 import { Router } from "express";
+import * as bcrypt from "bcrypt";
 
 //imports->project
 import * as mysqlManagement from "../startup/databases/mysql/mysqlManagement.js";
@@ -56,6 +57,73 @@ async function _getAccountInfo(
   }
 }
 
+async function _changeAccountPassword(
+  req,
+  res,
+  accountTableName,
+  idColumnName,
+  userType,
+  _newPassword,
+  _oldPassword,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_changeAccountPassword)Got an account password change request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if (userType !== req.user.type)
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: wrong account type" });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const user = await accountManagement.getAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+    );
+    if (!user) throw new Error("Could not find user with specified ID!");
+
+    const isMatch = await bcrypt.compare(_oldPassword, user.password_hash);
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
+
+    user.password_hash = await accountManagement.hashPassword(
+      _newPassword,
+      true,
+    );
+    if (!user.password_hash) throw new Error("Failed to hash the password!");
+
+    const updateResult = await accountManagement.updateAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+      user,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the account with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed password" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_changeAccountPassword)General error while processing an account password change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 async function _changeAccountEmail(
   req,
   res,
@@ -74,7 +142,9 @@ async function _changeAccountEmail(
       throw new Error("No user object in request! Check auth middleware code.");
 
     if (userType !== req.user.type)
-      res.status(401).json({ message: "Unauthorized: wrong account type" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: wrong account type" });
 
     const connectionPool = await mysqlManagement.getConnectionPool(true);
     if (!connectionPool)
@@ -89,10 +159,8 @@ async function _changeAccountEmail(
     );
     if (!user) throw new Error("Could not find user with specified ID!");
 
-    if (user.email !== _oldEmail) {
-      res.status(400).json({ message: "Wrong old email!" });
-      return false;
-    }
+    if (user.email !== _oldEmail)
+      return res.status(400).json({ message: "Wrong old email!" });
 
     user.email = _newEmail;
     const updateResult = await accountManagement.updateAccount(
@@ -117,7 +185,180 @@ async function _changeAccountEmail(
   }
 }
 
+async function _changeAccountFName(
+  req,
+  res,
+  accountTableName,
+  idColumnName,
+  userType,
+  _newFName,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_changeAccountFName)Got an account first name change request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if (userType !== req.user.type)
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: wrong account type" });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const user = await accountManagement.getAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+    );
+    if (!user) throw new Error("Could not find user with specified ID!");
+
+    user.first_name = _newFName;
+    const updateResult = await accountManagement.updateAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+      user,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the account with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed first name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_changeAccountFName)General error while processing an account first name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _changeAccountLName(
+  req,
+  res,
+  accountTableName,
+  idColumnName,
+  userType,
+  _newLName,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_changeAccountLName)Got an account last name change request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if (userType !== req.user.type)
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: wrong account type" });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const user = await accountManagement.getAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+    );
+    if (!user) throw new Error("Could not find user with specified ID!");
+
+    user.last_name = _newLName;
+    const updateResult = await accountManagement.updateAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+      user,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the account with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed last name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_changeAccountLName)General error while processing an account last name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _changeAccountPName(
+  req,
+  res,
+  accountTableName,
+  idColumnName,
+  userType,
+  _newPName,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_changeAccountPName)Got an account patronymic name change request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if (userType !== req.user.type)
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: wrong account type" });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const user = await accountManagement.getAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+    );
+    if (!user) throw new Error("Could not find user with specified ID!");
+
+    user.patronymic_name = _newPName;
+    const updateResult = await accountManagement.updateAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      req.user.id,
+      user,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the account with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed patronymic name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_changeAccountPName)General error while processing an account patronymic name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
+
+//1.info routes
 
 _accountRouter.post("/info/student", async (req, res) => {
   try {
@@ -166,6 +407,102 @@ _accountRouter.post("/info/admin", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+//2.change routes
+
+//2.1pass change routes
+
+_accountRouter.post("/change/pass/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/pass/student)Got a student password change request, processing...`,
+    );
+
+    const { newPassword, oldPassword } = req.body;
+
+    if (!newPassword)
+      throw new Error("No newPassword parameter in the received JSON.");
+    if (!oldPassword)
+      throw new Error("No oldPassword parameter in the received JSON.");
+
+    return await _changeAccountPassword(
+      req,
+      res,
+      "students",
+      "student_id",
+      "student",
+      newPassword,
+      oldPassword,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/pass/student)General error while processing a student password change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/pass/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/pass/teacher)Got a teacher password change request, processing...`,
+    );
+
+    const { newPassword, oldPassword } = req.body;
+
+    if (!newPassword)
+      throw new Error("No newPassword parameter in the received JSON.");
+    if (!oldPassword)
+      throw new Error("No oldPassword parameter in the received JSON.");
+
+    return await _changeAccountPassword(
+      req,
+      res,
+      "teachers",
+      "teacher_id",
+      "teacher",
+      newPassword,
+      oldPassword,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/pass/teacher)General error while processing a teacher password change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/pass/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/pass/admin)Got an admin password change request, processing...`,
+    );
+
+    const { newPassword, oldPassword } = req.body;
+
+    if (!newPassword)
+      throw new Error("No newPassword parameter in the received JSON.");
+    if (!oldPassword)
+      throw new Error("No oldPassword parameter in the received JSON.");
+
+    return await _changeAccountPassword(
+      req,
+      res,
+      "administrators",
+      "administrator_id",
+      "administrator",
+      newPassword,
+      oldPassword,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/pass/admin)General error while processing an admin password change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//2.2email change routes
 
 _accountRouter.post("/change/email/student", async (req, res) => {
   try {
@@ -252,6 +589,255 @@ _accountRouter.post("/change/email/admin", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/change/email/admin)General error while processing an admin email change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//2.3first name change routes
+
+_accountRouter.post("/change/firstname/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/firstname/student)Got a student first name change request, processing...`,
+    );
+
+    const { newFirstName } = req.body;
+
+    if (!newFirstName)
+      throw new Error("No newFirstName parameter in the received JSON.");
+
+    return await _changeAccountFName(
+      req,
+      res,
+      "students",
+      "student_id",
+      "student",
+      newFirstName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/firstname/student)General error while processing a student first name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/firstname/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/firstname/teacher)Got a teacher first name change request, processing...`,
+    );
+
+    const { newFirstName } = req.body;
+
+    if (!newFirstName)
+      throw new Error("No newFirstName parameter in the received JSON.");
+
+    return await _changeAccountFName(
+      req,
+      res,
+      "teachers",
+      "teacher_id",
+      "teacher",
+      newFirstName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/firstname/teacher)General error while processing a teacher first name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/firstname/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/firstname/admin)Got an admin first name change request, processing...`,
+    );
+
+    const { newFirstName } = req.body;
+
+    if (!newFirstName)
+      throw new Error("No newFirstName parameter in the received JSON.");
+
+    return await _changeAccountFName(
+      req,
+      res,
+      "administrators",
+      "administrator_id",
+      "administrator",
+      newFirstName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/firstname/admin)General error while processing an admin first name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//2.4last name change routes
+
+_accountRouter.post("/change/lastname/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/lastname/student)Got a student last name change request, processing...`,
+    );
+
+    const { newLastName } = req.body;
+
+    if (!newLastName)
+      throw new Error("No newLastName parameter in the received JSON.");
+
+    return await _changeAccountLName(
+      req,
+      res,
+      "students",
+      "student_id",
+      "student",
+      newLastName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/lastname/student)General error while processing a student last name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/lastname/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/lastname/teacher)Got a teacher last name change request, processing...`,
+    );
+
+    const { newLastName } = req.body;
+
+    if (!newLastName)
+      throw new Error("No newLastName parameter in the received JSON.");
+
+    return await _changeAccountLName(
+      req,
+      res,
+      "teachers",
+      "teacher_id",
+      "teacher",
+      newLastName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/lastname/teacher)General error while processing a teacher last name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/lastname/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/lastname/admin)Got an admin last name change request, processing...`,
+    );
+
+    const { newLastName } = req.body;
+
+    if (!newLastName)
+      throw new Error("No newLastName parameter in the received JSON.");
+
+    return await _changeAccountLName(
+      req,
+      res,
+      "administrators",
+      "administrator_id",
+      "administrator",
+      newLastName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/lastname/admin)General error while processing an admin last name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//2.5patronymic name change routes
+
+_accountRouter.post("/change/patronymicname/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/patronymicname/student)Got a student patronymic name change request, processing...`,
+    );
+
+    const { newPatronymicName } = req.body;
+
+    if (!newPatronymicName)
+      throw new Error("No newPatronymicName parameter in the received JSON.");
+
+    return await _changeAccountPName(
+      req,
+      res,
+      "students",
+      "student_id",
+      "student",
+      newPatronymicName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/patronymicname/student)General error while processing a student patronymic name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/patronymicname/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/patronymicname/teacher)Got a teacher patronymic name change request, processing...`,
+    );
+
+    const { newPatronymicName } = req.body;
+
+    if (!newPatronymicName)
+      throw new Error("No newPatronymicName parameter in the received JSON.");
+
+    return await _changeAccountPName(
+      req,
+      res,
+      "teachers",
+      "teacher_id",
+      "teacher",
+      newPatronymicName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/patronymicname/teacher)General error while processing a teacher patronymic name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/change/patronymicname/admin", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/change/patronymicname/admin)Got an admin patronymic name change request, processing...`,
+    );
+
+    const { newPatronymicName } = req.body;
+
+    if (!newPatronymicName)
+      throw new Error("No newPatronymicName parameter in the received JSON.");
+
+    return await _changeAccountPName(
+      req,
+      res,
+      "administrators",
+      "administrator_id",
+      "administrator",
+      newPatronymicName,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/change/patronymicname/admin)General error while processing an admin patronymic name change request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

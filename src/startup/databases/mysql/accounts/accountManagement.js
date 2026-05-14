@@ -12,7 +12,10 @@ import * as consoleLoggers from "../../../console/consoleLoggers.js";
 
 // NON EXPORTED (UTILITY) FUNCTIONS //
 
-async function __hashPassword(password, areMessagesToBeDisplayed) {
+// EXPORTED FUNCTIONS //
+
+//password hashing
+async function _hashPassword(password, areMessagesToBeDisplayed) {
   if (typeof password !== "string") {
     consoleLoggers.logParameterTypeError(
       "password",
@@ -60,8 +63,6 @@ async function __hashPassword(password, areMessagesToBeDisplayed) {
     return undefined;
   }
 }
-
-// EXPORTED FUNCTIONS //
 
 //needed for the backend specifically
 async function _getAdministratorCount(
@@ -326,7 +327,7 @@ async function _addAccount(
       consoleLoggers.logNeutral(
         `(0/__addAccount)Trying to insert the new account into the "${tableName}" table...`,
       );
-    const _passwordHash = await __hashPassword(_password, true);
+    const _passwordHash = await _hashPassword(_password, true);
     if (_passwordHash === undefined) return false;
     const sql = `INSERT INTO \`${tableName}\` (email, password_hash, first_name, last_name, patronymic_name) VALUES (?, ?, ?, ?, ?)`;
     const params = [
@@ -412,3 +413,4 @@ export const getAccount = _getAccount;
 export const findAccount = _findAccount;
 export const addAccount = _addAccount;
 export const updateAccount = _updateAccount;
+export const hashPassword = _hashPassword;
