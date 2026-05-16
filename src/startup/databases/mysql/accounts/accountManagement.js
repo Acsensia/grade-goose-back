@@ -407,6 +407,69 @@ async function _updateAccount(
   }
 }
 
+// select all function //
+
+async function _getAllAccounts(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  tableName,
+  idColumnName,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_getAllAccounts",
+      );
+      return false;
+    }
+  }
+  if (typeof tableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "tableName",
+      "string",
+      tableName,
+      "_getAllAccounts",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_getAllAccounts)Trying to get all the accounts from the "${tableName}" table while applying certain filters...`,
+      );
+
+    let sql = `SELECT ${idColumnName} AS id, email, first_name, last_name, patronymic_name FROM \`${tableName}\``;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(_getAllAccounts)Successfully got all the accounts from the "${tableName}" table while applying certain filters!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(_getAllAccounts)Failed to get all accounts from the "${tableName}" table while applying certain filters!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_getAllAccounts)Generally failed to get all accounts from the "${tableName}" table while applying certain filters!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
 export const getAccount = _getAccount;
@@ -414,3 +477,4 @@ export const findAccount = _findAccount;
 export const addAccount = _addAccount;
 export const updateAccount = _updateAccount;
 export const hashPassword = _hashPassword;
+export const getAllAccounts = _getAllAccounts;

@@ -356,6 +356,99 @@ async function _changeAccountPName(
   }
 }
 
+async function _getAllUserAccountInfo(
+  req,
+  res,
+  accountTableName,
+  accountIdColumnName,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllUserAccountInfo)Got an all account info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllAccounts(
+      connectionPool,
+      true,
+      accountTableName,
+      accountIdColumnName,
+    );
+    if (!result) throw new Error("Failed to get all all accounts!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllUserAccountInfo)General error while processing an all account info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _addNewUserAccount(
+  req,
+  res,
+  accountTableName,
+  _email,
+  _password,
+  _firstName,
+  _lastName,
+  _patronymicName,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewUserAccount)Got an account addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await accountManagement.addAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      _email,
+      _password,
+      _firstName,
+      _lastName,
+      _patronymicName,
+    );
+    if (!additionResult)
+      throw new Error("Failed to add the almost-new account!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewUserAccount)General error while processing an account addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
 
 //1.info routes
@@ -838,6 +931,116 @@ _accountRouter.post("/change/patronymicname/admin", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/change/patronymicname/admin)General error while processing an admin patronymic name change request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//otherAccount routes
+
+//1getall routes for admin
+
+_accountRouter.post("/admin/getall/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getall/student)Got a student get all request, processing...`,
+    );
+
+    return await _getAllUserAccountInfo(req, res, "students", "student_id");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getall/student)General error while processing a student get all request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/getall/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getall/teacher)Got a teacher get all request, processing...`,
+    );
+
+    return await _getAllUserAccountInfo(req, res, "teachers", "teacher_id");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getall/teacher)General error while processing a teacher get all request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//2addition routes for admin
+
+_accountRouter.post("/admin/add/account/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/add/account/student)Got a student addition request, processing...`,
+    );
+
+    const { email, password, first_name, last_name, patronymic_name } =
+      req.body;
+
+    if (!email) throw new Error("No email parameter in the received JSON.");
+    if (!password)
+      throw new Error("No password parameter in the received JSON.");
+    if (!first_name)
+      throw new Error("No first_name parameter in the received JSON.");
+    if (!last_name)
+      throw new Error("No last_name parameter in the received JSON.");
+    if (!patronymic_name)
+      throw new Error("No patronymic_name parameter in the received JSON.");
+
+    return await _addNewUserAccount(
+      req,
+      res,
+      "students",
+      email,
+      password,
+      first_name,
+      last_name,
+      patronymic_name,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/add/account/student)General error while processing a student addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/add/account/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/add/account/teacher)Got a teacher addition request, processing...`,
+    );
+
+    const { email, password, first_name, last_name, patronymic_name } =
+      req.body;
+
+    if (!email) throw new Error("No email parameter in the received JSON.");
+    if (!password)
+      throw new Error("No password parameter in the received JSON.");
+    if (!first_name)
+      throw new Error("No first_name parameter in the received JSON.");
+    if (!last_name)
+      throw new Error("No last_name parameter in the received JSON.");
+    if (!patronymic_name)
+      throw new Error("No patronymic_name parameter in the received JSON.");
+
+    return await _addNewUserAccount(
+      req,
+      res,
+      "teachers",
+      email,
+      password,
+      first_name,
+      last_name,
+      patronymic_name,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/add/account/teacher)General error while processing a teacher addition request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
