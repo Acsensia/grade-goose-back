@@ -862,7 +862,7 @@ async function _getUserAccountAssignedEntities(
 ) {
   try {
     consoleLoggers.logNeutral(
-      `(_getUserAccountAssignedEntities)Got an account assigned entities request, processing...`,
+      `(_getUserAccountAssignedEntities)Got a user account assigned entities request, processing...`,
     );
 
     if (!req.user)
@@ -888,14 +888,64 @@ async function _getUserAccountAssignedEntities(
       _accountId,
     );
     if (!result)
-      throw new Error("Failed to get all entities assigned to an account!");
+      throw new Error("Failed to get all entities assigned to a user account!");
 
     res.json({
       result: result,
     });
   } catch (error) {
     consoleLoggers.logError(
-      `(_getUserAccountAssignedEntities)General error while processing an account assigned entities request, error message: "${error}".`,
+      `(_getUserAccountAssignedEntities)General error while processing a user account assigned entities request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _unassignUserAccountAssignedEntities(
+  req,
+  res,
+  assignedEntityTableName,
+  assignedEntityTable_entityIdColumnName,
+  assignedEntityTable_accountIdColumnName,
+  _entityIdSelection,
+  _accountId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_unassignUserAccountAssignedEntities)Got a user account assigned entities selection unassignment request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const unassignmentResult =
+      await accountManagement.unassignAccountAssignedEntities(
+        connectionPool,
+        true,
+        assignedEntityTableName,
+        assignedEntityTable_accountIdColumnName,
+        assignedEntityTable_accountIdColumnName,
+        _entityIdSelection,
+        _accountId,
+      );
+    if (!unassignmentResult)
+      throw new Error(
+        "Failed to unassign the specified account assigned entities!",
+      );
+
+    res.json({ result: unassignmentResult });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_unassignUserAccountAssignedEntities)General error while processing a user account assigned entities selection unassignment request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -1962,6 +2012,80 @@ _accountRouter.post(
     } catch (error) {
       consoleLoggers.logError(
         `(_accountRouter:admin/getinfo/account/assigned/studentgroups/teacher)General error while processing a teacher admin_getinfo assigned student groups request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//7unassignment routes for admin
+
+//7.1student group unassignment routes for admin
+
+_accountRouter.post(
+  "/admin/unassign/studentgroups/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/unassign/studentgroups/student)Got a student admin_unassign student groups request, processing...`,
+      );
+
+      const { student_group_id_selection, account_id } = req.body;
+
+      if (!student_group_id_selection)
+        throw new Error(
+          "No student_group_id_selection parameter in the received JSON.",
+        );
+      if (!account_id)
+        throw new Error("No account_id parameter in the received JSON.");
+
+      return await _unassignUserAccountAssignedEntities(
+        req,
+        res,
+        "students_assigned_to_a_student_group",
+        "student_groups_student_group_id",
+        "students_student_id",
+        student_group_id_selection,
+        Number(account_id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/unassign/studentgroups/student)General error while processing a student admin_unassign student groups request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_accountRouter.post(
+  "/admin/unassign/studentgroups/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/unassign/studentgroups/teacher)Got a teacher admin_unassign student groups request, processing...`,
+      );
+
+      const { student_group_id_selection, account_id } = req.body;
+
+      if (!student_group_id_selection)
+        throw new Error(
+          "No student_group_id_selection parameter in the received JSON.",
+        );
+      if (!account_id)
+        throw new Error("No account_id parameter in the received JSON.");
+
+      return await _unassignUserAccountAssignedEntities(
+        req,
+        res,
+        "student_groups_assigned_to_a_teacher_for_supervision",
+        "student_groups_student_group_id",
+        "teachers_teacher_id",
+        student_group_id_selection,
+        Number(account_id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/unassign/studentgroups/teacher)General error while processing a teacher admin_unassign student groups request, error message: "${error}".`,
       );
       res.status(500).json({ message: "Server error" });
     }

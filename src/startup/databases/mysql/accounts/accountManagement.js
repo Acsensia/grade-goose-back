@@ -665,6 +665,107 @@ async function _getAccountAssignedEntities(
   }
 }
 
+async function _unassignAccountAssignedEntities(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignedEntityTableName,
+  assignedEntityTable_entityIdColumnName,
+  assignedEntityTable_accountIdColumnName,
+  _entityIdSelection,
+  _accountId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_unassignAccountAssignedEntities",
+      );
+      return false;
+    }
+  }
+  if (typeof assignedEntityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTableName",
+      "string",
+      assignedEntityTableName,
+      "_unassignAccountAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTable_entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTable_entityIdColumnName",
+      "string",
+      assignedEntityTable_entityIdColumnName,
+      "_unassignAccountAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTable_accountIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTable_accountIdColumnName",
+      "string",
+      assignedEntityTable_accountIdColumnName,
+      "_unassignAccountAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof _accountId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_accountId",
+      "number",
+      _accountId,
+      "_unassignAccountAssignedEntities",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_unassignAccountAssignedEntities)Trying to unassign a selection of entities in the "${assignedEntityTableName}" table...`,
+      );
+
+    if (_entityIdSelection.length === 0)
+      throw new Error("Entity id selection array was empty!");
+
+    const placeholders = _entityIdSelection.map(() => "?").join(",");
+    const sql = `
+    DELETE FROM \`${assignedEntityTableName}\`
+    WHERE \`${assignedEntityTable_entityIdColumnName}\` IN (${placeholders})
+    AND \`${assignedEntityTable_accountIdColumnName}\` = ?
+    `;
+    const params = [..._entityIdSelection, _accountId];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(_unassignAccountAssignedEntities)Successfully unassigned a selection of entities in the "${assignedEntityTableName}" table!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(_unassignAccountAssignedEntities)Failed to unassign a selection of entities in the "${assignedEntityTableName}" table!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_unassignAccountAssignedEntities)Generally failed to unassign a selection of entities in the "${assignedEntityTableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
 export const getAccount = _getAccount;
@@ -675,3 +776,4 @@ export const hashPassword = _hashPassword;
 export const deleteAccountSelection = _deleteAccountSelection;
 export const getAllAccounts = _getAllAccounts;
 export const getAccountAssignedEntities = _getAccountAssignedEntities;
+export const unassignAccountAssignedEntities = _unassignAccountAssignedEntities;
