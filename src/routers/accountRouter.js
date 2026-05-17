@@ -28,7 +28,9 @@ async function _getAccountInfo(
       throw new Error("No user object in request! Check auth middleware code.");
 
     if (userType !== req.user.type)
-      res.status(401).json({ message: "Unauthorized: wrong account type" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: wrong account type" });
 
     const connectionPool = await mysqlManagement.getConnectionPool(true);
     if (!connectionPool)
@@ -356,6 +358,8 @@ async function _changeAccountPName(
   }
 }
 
+//utility: admin-only functions
+
 async function _getAllUserAccountInfo(
   req,
   res,
@@ -444,6 +448,55 @@ async function _addNewUserAccount(
   } catch (error) {
     consoleLoggers.logError(
       `(_addNewUserAccount)General error while processing an account addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getUserAccountInfo(
+  req,
+  res,
+  accountTableName,
+  idColumnName,
+  _idColumnValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getUserAccountInfo)Got a user account info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const user = await accountManagement.getAccount(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      _idColumnValue,
+    );
+    if (!user)
+      throw new Error("Could not find user account with specified ID!");
+
+    res.json({
+      id: user[`${idColumnName}`],
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      patronymic_name: user.patronymic_name,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getUserAccountInfo)General error while processing a user account info request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -1041,6 +1094,52 @@ _accountRouter.post("/admin/add/account/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/add/account/teacher)General error while processing a teacher addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//3getinfo routes for admin
+
+_accountRouter.post("/admin/getinfo/account/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getinfo/account/student)Got a student admin_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getUserAccountInfo(req, res, "students", "student_id", id);
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getinfo/account/student)General error while processing a student admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/getinfo/account/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getinfo/account/teacher)Got a teacher admin_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getUserAccountInfo(
+      req,
+      res,
+      "teachers",
+      "teacher_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getinfo/account/teacher)General error while processing a teacher admin_getinfo request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
