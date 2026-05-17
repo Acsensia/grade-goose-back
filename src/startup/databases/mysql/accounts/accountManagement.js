@@ -407,6 +407,85 @@ async function _updateAccount(
   }
 }
 
+// account selection functions //
+
+async function _deleteAccountSelection(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  tableName,
+  idColumnName,
+  _idSelection,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_deleteAccountSelection",
+      );
+      return false;
+    }
+  }
+  if (typeof tableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "tableName",
+      "string",
+      tableName,
+      "_deleteAccountSelection",
+    );
+    return false;
+  }
+  if (typeof idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "idColumnName",
+      "string",
+      idColumnName,
+      "_deleteAccountSelection",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_deleteAccountSelection)Trying to delete a selection of accounts in the "${tableName}" table...`,
+      );
+
+    if (_idSelection.length === 0)
+      throw new Error("Id selection array was empty!");
+
+    const placeholders = _idSelection.map(() => "?").join(",");
+    const sql = `DELETE FROM \`${tableName}\` WHERE \`${idColumnName}\` IN (${placeholders})`;
+    //_idSelection here is used directly as the parameter array
+    const [results] = await databaseConnectionPool.execute(sql, _idSelection);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(_deleteAccountSelection)Successfully a selection of accounts in the "${tableName}" table!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(_deleteAccountSelection)Failed to delete a selection of accounts in the "${tableName}" table!
+          Query: "${sql}"
+          Parameters: "${_idSelection}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_deleteAccountSelection)Generally failed to delete a selection of accounts in the "${tableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 // select all function //
 
 async function _getAllAccounts(
@@ -445,7 +524,7 @@ async function _getAllAccounts(
 
     let sql = `SELECT ${idColumnName} AS id, email, first_name, last_name, patronymic_name FROM \`${tableName}\``;
     const [results] = await databaseConnectionPool.execute(sql);
-    if (results !== undefined && results.length !== 0) {
+    if (results !== undefined) {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logSuccess(
           `(_getAllAccounts)Successfully got all the accounts from the "${tableName}" table while applying certain filters!`,
@@ -477,4 +556,5 @@ export const findAccount = _findAccount;
 export const addAccount = _addAccount;
 export const updateAccount = _updateAccount;
 export const hashPassword = _hashPassword;
+export const deleteAccountSelection = _deleteAccountSelection;
 export const getAllAccounts = _getAllAccounts;

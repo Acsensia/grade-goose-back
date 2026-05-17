@@ -502,6 +502,49 @@ async function _getUserAccountInfo(
   }
 }
 
+async function _deleteUserAccountSelection(
+  req,
+  res,
+  accountTableName,
+  idColumnName,
+  _idSelection,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_deleteUserAccountSelection)Got a user account selection deletion request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const deletionResult = await accountManagement.deleteAccountSelection(
+      connectionPool,
+      true,
+      accountTableName,
+      idColumnName,
+      _idSelection,
+    );
+    if (!deletionResult)
+      throw new Error("Failed to delete the specified account selection!");
+
+    res.json({ result: deletionResult });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_deleteUserAccountSelection)General error while processing a user account selection deletion request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
 
 //1.info routes
@@ -1111,7 +1154,13 @@ _accountRouter.post("/admin/getinfo/account/student", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    return await _getUserAccountInfo(req, res, "students", "student_id", id);
+    return await _getUserAccountInfo(
+      req,
+      res,
+      "students",
+      "student_id",
+      Number(id),
+    );
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/getinfo/account/student)General error while processing a student admin_getinfo request, error message: "${error}".`,
@@ -1140,6 +1189,60 @@ _accountRouter.post("/admin/getinfo/account/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/getinfo/account/teacher)General error while processing a teacher admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//4delete routes for admin
+
+_accountRouter.post("/admin/delete/accounts/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/delete/accounts/student)Got a student admin_delete request, processing...`,
+    );
+
+    const { id_selection } = req.body;
+
+    if (!id_selection)
+      throw new Error("No id_selection parameter in the received JSON.");
+
+    return await _deleteUserAccountSelection(
+      req,
+      res,
+      "students",
+      "student_id",
+      id_selection,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/delete/accounts/student)General error while processing a student admin_delete request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/delete/accounts/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/delete/accounts/teacher)Got a teacher admin_delete request, processing...`,
+    );
+
+    const { id_selection } = req.body;
+
+    if (!id_selection)
+      throw new Error("No id_selection parameter in the received JSON.");
+
+    return await _deleteUserAccountSelection(
+      req,
+      res,
+      "teachers",
+      "teacher_id",
+      id_selection,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/delete/accounts/teacher)General error while processing a teacher admin_delete request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
