@@ -850,6 +850,57 @@ async function _updateUserAccountPName(
   }
 }
 
+async function _getUserAccountAssignedEntities(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  assignedEntityTableName,
+  assignedEntityTable_entityIdColumnName,
+  assignedEntityTable_accountIdColumnName,
+  _accountId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getUserAccountAssignedEntities)Got an account assigned entities request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAccountAssignedEntities(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      assignedEntityTableName,
+      assignedEntityTable_entityIdColumnName,
+      assignedEntityTable_accountIdColumnName,
+      _accountId,
+    );
+    if (!result)
+      throw new Error("Failed to get all entities assigned to an account!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getUserAccountAssignedEntities)General error while processing an account assigned entities request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
 
 //1.info routes
@@ -1845,6 +1896,72 @@ _accountRouter.post(
     } catch (error) {
       consoleLoggers.logError(
         `(_accountRouter:/admin/update/patronymicname/teacher)General error while processing a teacher admin_update patronymic name request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//6assigned routes for admin
+
+//6.1assigned student groups routes for admin
+
+_accountRouter.post(
+  "/admin/getinfo/account/assigned/studentgroups/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/getinfo/account/assigned/studentgroups/student)Got a student admin_getinfo assigned student groups request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getUserAccountAssignedEntities(
+        req,
+        res,
+        "student_groups",
+        "student_group_id",
+        "students_assigned_to_a_student_group",
+        "student_groups_student_group_id",
+        "students_student_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/getinfo/account/assigned/studentgroups/student)General error while processing a student admin_getinfo assigned student groups request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_accountRouter.post(
+  "/admin/getinfo/account/assigned/studentgroups/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/getinfo/account/assigned/studentgroups/teacher)Got a teacher admin_getinfo assigned student groups request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getUserAccountAssignedEntities(
+        req,
+        res,
+        "student_groups",
+        "student_group_id",
+        "student_groups_assigned_to_a_teacher_for_supervision",
+        "student_groups_student_group_id",
+        "teachers_teacher_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/getinfo/account/assigned/studentgroups/teacher)General error while processing a teacher admin_getinfo assigned student groups request, error message: "${error}".`,
       );
       res.status(500).json({ message: "Server error" });
     }
