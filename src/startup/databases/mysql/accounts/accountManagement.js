@@ -522,7 +522,7 @@ async function _getAllAccounts(
         `(_getAllAccounts)Trying to get all the accounts from the "${tableName}" table while applying certain filters...`,
       );
 
-    let sql = `SELECT ${idColumnName} AS id, email, first_name, last_name, patronymic_name FROM \`${tableName}\``;
+    let sql = `SELECT ${idColumnName} AS id, ${idColumnName}, email, first_name, last_name, patronymic_name FROM \`${tableName}\``;
     const [results] = await databaseConnectionPool.execute(sql);
     if (results !== undefined) {
       if (areMessagesToBeDisplayed)
@@ -634,7 +634,7 @@ async function _getAccountAssignedEntities(
         `(_getAccountAssignedEntities)Trying to find all entities assigned to a certain account...`,
       );
     const sql = `
-    SELECT e.*
+    SELECT e.*, e.${entityIdColumnName} AS id
     FROM ${entityTableName} e
     JOIN ${assignedEntityTableName} a ON a.${assignedEntityTable_entityIdColumnName} = e.${entityIdColumnName}
     WHERE a.${assignedEntityTable_accountIdColumnName} = ${_accountId};
