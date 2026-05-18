@@ -2157,6 +2157,25 @@ _accountRouter.post("/admin/getinfo/subject", async (req, res) => {
   }
 });
 
+_accountRouter.post("/admin/getinfo/task", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getinfo/task)Got a task admin_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getEntityInfo(req, res, "tasks", "task_id", Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getinfo/task)General error while processing a task admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //4delete routes for admin
 
 _accountRouter.post("/admin/delete/accounts/student", async (req, res) => {
