@@ -1343,7 +1343,7 @@ async function _assignEntitiesToUserAccount(
       connectionPool,
       true,
       assignedEntityTableName,
-      assignedEntityTable_accountIdColumnName,
+      assignedEntityTable_entityIdColumnName,
       assignedEntityTable_accountIdColumnName,
       _entityIdSelection,
       _accountId,

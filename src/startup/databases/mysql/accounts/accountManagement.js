@@ -951,10 +951,9 @@ async function _assignEntitiesToAccount(
 
     const placeholders = _entityIdSelection.map(() => "(?,?)").join(",");
     const sql = `
-    INSERT INTO \`${assignedEntityTableName}\`
+    INSERT IGNORE INTO \`${assignedEntityTableName}\`
     (${assignedEntityTable_entityIdColumnName}, ${assignedEntityTable_accountIdColumnName})
     VALUES ${placeholders}
-    ON DUPLICATE KEY UPDATE ${assignedEntityTable_accountIdColumnName} = ${assignedEntityTable_accountIdColumnName}
     `;
     const params = [];
     for (const entityId of _entityIdSelection) {
@@ -980,7 +979,7 @@ async function _assignEntitiesToAccount(
   } catch (error) {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
-        `(_assignEntitiesToAccount)Generally assign to unassign a selection of entities in the "${assignedEntityTableName}" table!
+        `(_assignEntitiesToAccount)Generally failed to assign a selection of entities in the "${assignedEntityTableName}" table!
         Error message: "${error}".`,
       );
     return false;
