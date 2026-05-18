@@ -1787,6 +1787,21 @@ _accountRouter.post("/admin/getall/subjects", async (req, res) => {
   }
 });
 
+_accountRouter.post("/admin/getall/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getall/tasks)Got a task get all request, processing...`,
+    );
+
+    return await _getAllEntityInfo(req, res, "tasks", "task_id");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getall/tasks)General error while processing a task get all request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //2add routes for admin
 
 _accountRouter.post("/admin/add/account/student", async (req, res) => {
@@ -2156,6 +2171,32 @@ _accountRouter.post("/admin/delete/subjects", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/delete/subjects)General error while processing a subjects admin_delete request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/delete/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/delete/tasks)Got a tasks admin_delete request, processing...`,
+    );
+
+    const { id_selection } = req.body;
+
+    if (!id_selection)
+      throw new Error("No id_selection parameter in the received JSON.");
+
+    return await _deleteEntitySelection(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      id_selection,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/delete/tasks)General error while processing a tasks admin_delete request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
