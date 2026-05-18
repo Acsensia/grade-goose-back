@@ -2698,6 +2698,70 @@ _accountRouter.post(
   },
 );
 
+//6.2assigned specialties routes for admin
+
+_accountRouter.post(
+  "/admin/getinfo/account/assigned/specialties/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/getinfo/account/assigned/specialties/student)Got a student admin_getinfo assigned specialties request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getUserAccountAssignedEntities(
+        req,
+        res,
+        "specialties",
+        "specialty_id",
+        "specialties_assigned_to_a_student_individually",
+        "specialties_specialty_id",
+        "students_student_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/getinfo/account/assigned/specialties/student)General error while processing a student admin_getinfo assigned specialties request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_accountRouter.post(
+  "/admin/getinfo/account/assigned/specialties/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/getinfo/account/assigned/specialties/teacher)Got a teacher admin_getinfo assigned specialties request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getUserAccountAssignedEntities(
+        req,
+        res,
+        "specialties",
+        "specialty_id",
+        "specialties_assigned_to_a_teacher_for_supervision",
+        "specialties_specialty_id",
+        "teachers_teacher_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/getinfo/account/assigned/specialties/teacher)General error while processing a teacher admin_getinfo assigned specialties request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
 //7unassignment routes for admin
 
 //7.1student group unassignment routes for admin
@@ -2771,6 +2835,72 @@ _accountRouter.post(
     }
   },
 );
+
+//7.1specialty unassignment routes for admin
+
+_accountRouter.post("/admin/unassign/specialties/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:admin/unassign/specialties/student)Got a student admin_unassign specialties request, processing...`,
+    );
+
+    const { specialty_id_selection, account_id } = req.body;
+
+    if (!specialty_id_selection)
+      throw new Error(
+        "No specialty_id_selection parameter in the received JSON.",
+      );
+    if (!account_id)
+      throw new Error("No account_id parameter in the received JSON.");
+
+    return await _unassignUserAccountAssignedEntities(
+      req,
+      res,
+      "specialties_assigned_to_a_student_individually",
+      "specialties_specialty_id",
+      "students_student_id",
+      specialty_id_selection,
+      Number(account_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:admin/unassign/specialties/student)General error while processing a student admin_unassign specialties request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/unassign/specialties/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:admin/unassign/specialties/teacher)Got a teacher admin_unassign specialties request, processing...`,
+    );
+
+    const { specialty_id_selection, account_id } = req.body;
+
+    if (!specialty_id_selection)
+      throw new Error(
+        "No specialty_id_selection parameter in the received JSON.",
+      );
+    if (!account_id)
+      throw new Error("No account_id parameter in the received JSON.");
+
+    return await _unassignUserAccountAssignedEntities(
+      req,
+      res,
+      "specialties_assigned_to_a_teacher_for_supervision",
+      "specialties_specialty_id",
+      "teachers_teacher_id",
+      specialty_id_selection,
+      Number(account_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:admin/unassign/specialties/teacher)General error while processing a teacher admin_unassign specialties request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 //exports
 export const accountRouter = _accountRouter;
