@@ -1216,6 +1216,50 @@ async function _addNewTask(
   }
 }
 
+async function _getEntityInfo(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityInfo)Got an entity info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityId,
+    );
+    if (!entity) throw new Error("Could not find an entity with specified ID!");
+
+    res.json({
+      entity: entity,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityInfo)General error while processing an entity info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
 
 //1.info routes
@@ -2039,6 +2083,56 @@ _accountRouter.post("/admin/getinfo/account/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/getinfo/account/teacher)General error while processing a teacher admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/getinfo/studentgroup", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getinfo/studentgroup)Got a student group admin_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getEntityInfo(
+      req,
+      res,
+      "student_groups",
+      "student_group_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getinfo/studentgroup)General error while processing a student group admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/getinfo/specialty", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getinfo/specialty)Got a specialty admin_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getEntityInfo(
+      req,
+      res,
+      "specialties",
+      "specialty_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getinfo/specialty)General error while processing a specialty admin_getinfo request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

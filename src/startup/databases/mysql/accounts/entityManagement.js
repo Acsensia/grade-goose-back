@@ -83,6 +83,92 @@ export async function getAllEntities(
   }
 }
 
+// select one function
+export async function getEntity(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityIdColumnName,
+  _entityId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getEntity",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "getEntity",
+    );
+    return false;
+  }
+  if (typeof entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityIdColumnName",
+      "string",
+      entityIdColumnName,
+      "getEntity",
+    );
+    return false;
+  }
+  if (typeof _entityId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityId",
+      "string",
+      _entityId,
+      "getEntity",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getEntity)Trying to get an entity with the id "${_entityId}" from the "${entityTableName}"...`,
+      );
+
+    let sql = `
+    SELECT t.*, t.${entityIdColumnName} AS id
+    FROM \`${entityTableName}\` t
+    WHERE t.${entityIdColumnName} = ?
+    `;
+    const params = [_entityId];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getEntity)Successfully got an entity with the id "${_entityId}" from the "${entityTableName}"!`,
+        );
+      return results[0];
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getEntity)Failed to get an entity with the id "${_entityId}" from the "${entityTableName}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getEntity)Generally failed to get an entity with the id "${_entityId}" from the "${entityTableName}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 // entity addition functions //
 
 export async function addStudentGroup(
