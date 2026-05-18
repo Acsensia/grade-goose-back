@@ -1082,6 +1082,140 @@ async function _addNewStudentGroup(
   }
 }
 
+async function _addNewSpecialty(
+  req,
+  res,
+  entityTableName,
+  _name,
+  _abbreviation,
+  _description,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewSpecialty)Got a specialty addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await entityManagement.addSpecialty(
+      connectionPool,
+      true,
+      entityTableName,
+      _name,
+      _abbreviation,
+      _description,
+    );
+    if (!additionResult)
+      throw new Error("Failed to add the almost-new specialty!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewSpecialty)General error while processing a specialty addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _addNewSubject(req, res, entityTableName, _name, _description) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewSubject)Got a subject addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await entityManagement.addSubject(
+      connectionPool,
+      true,
+      entityTableName,
+      _name,
+      _description,
+    );
+    if (!additionResult)
+      throw new Error("Failed to add the almost-new subject!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewSubject)General error while processing a subject addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _addNewTask(
+  req,
+  res,
+  entityTableName,
+  _name,
+  _instructions,
+  _timeDue,
+  _canBeHandedInPastDue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewTask)Got a task addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await entityManagement.addTask(
+      connectionPool,
+      true,
+      entityTableName,
+      _name,
+      _instructions,
+      _timeDue,
+      _canBeHandedInPastDue,
+    );
+    if (!additionResult) throw new Error("Failed to add the almost-new task!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewTask)General error while processing a task addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
 
 //1.info routes
@@ -1721,6 +1855,93 @@ _accountRouter.post("/admin/add/studentgroup", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/add/studentgroup)General error while processing a student group addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/add/specialty", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/add/specialty)Got a specialty addition request, processing...`,
+    );
+
+    const { name, abbreviation, description } = req.body;
+
+    if (!name) throw new Error("No name parameter in the received JSON.");
+    if (!abbreviation)
+      throw new Error("No abbreviation parameter in the received JSON.");
+    if (!description)
+      throw new Error("No description parameter in the received JSON.");
+
+    return await _addNewSpecialty(
+      req,
+      res,
+      "specialties",
+      name,
+      abbreviation,
+      description,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/add/specialty)General error while processing a specialty addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/add/subject", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/add/subject)Got a subject addition request, processing...`,
+    );
+
+    const { name, description } = req.body;
+
+    if (!name) throw new Error("No name parameter in the received JSON.");
+    if (!description)
+      throw new Error("No description parameter in the received JSON.");
+
+    return await _addNewSubject(req, res, "subjects", name, description);
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/add/subject)General error while processing a subject addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/add/task", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/add/task)Got a task addition request, processing...`,
+    );
+
+    const { name, instructions, time_due, can_be_handed_in_past_due } =
+      req.body;
+
+    if (!name) throw new Error("No name parameter in the received JSON.");
+    if (!instructions)
+      throw new Error("No instructions parameter in the received JSON.");
+    if (!time_due)
+      throw new Error("No time_due parameter in the received JSON.");
+    if (!can_be_handed_in_past_due)
+      throw new Error(
+        "No can_be_handed_in_past_due parameter in the received JSON.",
+      );
+
+    return await _addNewTask(
+      req,
+      res,
+      "tasks",
+      name,
+      instructions,
+      time_due,
+      can_be_handed_in_past_due,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/add/task)General error while processing a task addition request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

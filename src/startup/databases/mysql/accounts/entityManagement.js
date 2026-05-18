@@ -154,6 +154,233 @@ export async function addStudentGroup(
   }
 }
 
+export async function addSpecialty(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _name,
+  _abbreviation,
+  _description,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "addSpecialty",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "addSpecialty",
+    );
+    return false;
+  }
+  if (typeof _name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_name",
+      "string",
+      _name,
+      "addSpecialty",
+    );
+    return false;
+  }
+  if (typeof _abbreviation !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_abbreviation",
+      "string",
+      _abbreviation,
+      "addSpecialty",
+    );
+    return false;
+  }
+  if (typeof _description !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_description",
+      "string",
+      _description,
+      "addSpecialty",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(addSpecialty)Trying to insert the new specialty into the "${entityTableName}" table...`,
+      );
+    const sql = `INSERT INTO \`${entityTableName}\` (name, abbreviation, description) VALUES (?, ?, ?)`;
+    const params = [_name, _abbreviation, _description];
+    await databaseConnectionPool.execute(sql, params);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(addSpecialty)Successfully inserted the new specialty into the "${entityTableName}" table (name: ${_name})!`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(addSpecialty)Failed to insert the new specialty into the "${entityTableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
+export async function addSubject(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _name,
+  _description,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "addSubject",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "addSubject",
+    );
+    return false;
+  }
+  if (typeof _name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_name",
+      "string",
+      _name,
+      "addSubject",
+    );
+    return false;
+  }
+  if (typeof _description !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_description",
+      "string",
+      _description,
+      "addSubject",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(addSubject)Trying to insert the new subject into the "${entityTableName}" table...`,
+      );
+    const sql = `INSERT INTO \`${entityTableName}\` (name, description) VALUES (?, ?)`;
+    const params = [_name, _description];
+    await databaseConnectionPool.execute(sql, params);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(addSubject)Successfully inserted the new subject into the "${entityTableName}" table (name: ${_name})!`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(addSubject)Failed to insert the new subject into the "${entityTableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
+export async function addTask(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _name,
+  _instructions,
+  _timeDue,
+  _canBeHandedInPastDue,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "addTask",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "addTask",
+    );
+    return false;
+  }
+  if (typeof _name !== "string") {
+    consoleLoggers.logParameterTypeError("_name", "string", _name, "addTask");
+    return false;
+  }
+  if (typeof _instructions !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_description",
+      "string",
+      _instructions,
+      "addTask",
+    );
+    return false;
+  }
+  if (typeof _canBeHandedInPastDue !== "boolean") {
+    consoleLoggers.logParameterTypeError(
+      "_canBeHandedInPastDue",
+      "boolean",
+      _canBeHandedInPastDue,
+      "addTask",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(addTask)Trying to insert the new task into the "${entityTableName}" table...`,
+      );
+    const sql = `
+    INSERT INTO \`${entityTableName}\`
+    (name, instructions, time_due, can_be_handed_in_past_due)
+    VALUES (?, ?, ?, ?)
+    `;
+    const params = [_name, _instructions, _timeDue, _canBeHandedInPastDue];
+    await databaseConnectionPool.execute(sql, params);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(addTask)Successfully inserted the new task into the "${entityTableName}" table (name: ${_name})!`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(addTask)Failed to insert the new task into the "${entityTableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // entity selection functions //
 
 export async function deleteEntitySelection(
