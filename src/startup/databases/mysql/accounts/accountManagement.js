@@ -519,7 +519,7 @@ async function _getAllAccounts(
   try {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logNeutral(
-        `(_getAllAccounts)Trying to get all the accounts from the "${tableName}" table while applying certain filters...`,
+        `(_getAllAccounts)Trying to get all the accounts from the "${tableName}"...`,
       );
 
     let sql = `SELECT ${idColumnName} AS id, ${idColumnName}, email, first_name, last_name, patronymic_name FROM \`${tableName}\``;
@@ -527,13 +527,13 @@ async function _getAllAccounts(
     if (results !== undefined) {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logSuccess(
-          `(_getAllAccounts)Successfully got all the accounts from the "${tableName}" table while applying certain filters!`,
+          `(_getAllAccounts)Successfully got all the accounts from the "${tableName}"!`,
         );
       return results;
     } else {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logError(
-          `(_getAllAccounts)Failed to get all accounts from the "${tableName}" table while applying certain filters!
+          `(_getAllAccounts)Failed to get all accounts from the "${tableName}"!
           Query: "${sql}"
           Search results: "${results}"`,
         );
@@ -542,7 +542,7 @@ async function _getAllAccounts(
   } catch (error) {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
-        `(_getAllAccounts)Generally failed to get all accounts from the "${tableName}" table while applying certain filters!
+        `(_getAllAccounts)Generally failed to get all accounts from the "${tableName}"!
         Error message: "${error}".`,
       );
     return false;

@@ -5,6 +5,7 @@ import * as bcrypt from "bcrypt";
 //imports->project
 import * as mysqlManagement from "../startup/databases/mysql/mysqlManagement.js";
 import * as accountManagement from "../startup/databases/mysql/accounts/accountManagement.js";
+import * as entityManagement from "../startup/databases/mysql/accounts/entityManagement.js";
 import * as consoleLoggers from "../startup/console/consoleLoggers.js";
 
 //.setup
@@ -951,6 +952,136 @@ async function _unassignUserAccountAssignedEntities(
   }
 }
 
+async function _getAllEntityInfo(
+  req,
+  res,
+  entitytTableName,
+  entityIdColumnName,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllEntityInfo)Got an all entity info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllEntities(
+      connectionPool,
+      true,
+      entitytTableName,
+      entityIdColumnName,
+    );
+    if (!result) throw new Error("Failed to get all entities!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllEntityInfo)General error while processing an all entity info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _deleteEntitySelection(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdSelection,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_deleteEntitySelection)Got an entity selection deletion request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const deletionResult = await entityManagement.deleteEntitySelection(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdSelection,
+    );
+    if (!deletionResult)
+      throw new Error("Failed to delete the specified entity selection!");
+
+    res.json({ result: deletionResult });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_deleteEntitySelection)General error while processing an entity selection deletion request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _addNewStudentGroup(
+  req,
+  res,
+  entityTableName,
+  _name,
+  _description,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewStudentGroup)Got a student group addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await entityManagement.addStudentGroup(
+      connectionPool,
+      true,
+      entityTableName,
+      _name,
+      _description,
+    );
+    if (!additionResult)
+      throw new Error("Failed to add the almost-new student group!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewStudentGroup)General error while processing a student group addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //account routes
 
 //1.info routes
@@ -1472,7 +1603,27 @@ _accountRouter.post("/admin/getall/teacher", async (req, res) => {
   }
 });
 
-//2addition routes for admin
+_accountRouter.post("/admin/getall/studentgroups", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getall/studentgroups)Got a student group get all request, processing...`,
+    );
+
+    return await _getAllEntityInfo(
+      req,
+      res,
+      "student_groups",
+      "student_group_id",
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getall/studentgroups)General error while processing a student group get all request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//2add routes for admin
 
 _accountRouter.post("/admin/add/account/student", async (req, res) => {
   try {
@@ -1543,6 +1694,33 @@ _accountRouter.post("/admin/add/account/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/add/account/teacher)General error while processing a teacher addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/add/studentgroup", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/add/studentgroup)Got a student group addition request, processing...`,
+    );
+
+    const { name, description } = req.body;
+
+    if (!name) throw new Error("No name parameter in the received JSON.");
+    if (!description)
+      throw new Error("No description parameter in the received JSON.");
+
+    return await _addNewStudentGroup(
+      req,
+      res,
+      "student_groups",
+      name,
+      description,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/add/studentgroup)General error while processing a student group addition request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -1649,6 +1827,32 @@ _accountRouter.post("/admin/delete/accounts/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/delete/accounts/teacher)General error while processing a teacher admin_delete request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/delete/studentgroups", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/delete/studentgroups)Got a student group admin_delete request, processing...`,
+    );
+
+    const { id_selection } = req.body;
+
+    if (!id_selection)
+      throw new Error("No id_selection parameter in the received JSON.");
+
+    return await _deleteEntitySelection(
+      req,
+      res,
+      "student_groups",
+      "student_group_id",
+      id_selection,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/delete/studentgroups)General error while processing a student group admin_delete request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

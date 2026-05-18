@@ -1,0 +1,237 @@
+//imports
+
+//imports->project
+import * as consoleLoggers from "../../../console/consoleLoggers.js";
+
+//functions are supposed to work with mysql2/promise connections
+
+// NON EXPORTED (UTILITY) FUNCTIONS //
+
+// EXPORTED FUNCTIONS //
+
+// select all function
+export async function getAllEntities(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityIdColumnName,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllEntities",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "getAllEntities",
+    );
+    return false;
+  }
+  if (typeof entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityIdColumnName",
+      "string",
+      entityIdColumnName,
+      "getAllEntities",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentGroups)Trying to get all the entities from the "${entityTableName}"...`,
+      );
+
+    let sql = `
+    SELECT t.*, t.${entityIdColumnName} AS id
+    FROM \`${entityTableName}\` t
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentGroups)Successfully got all the entities from the "${entityTableName}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentGroups)Failed to get all the entities from the "${entityTableName}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentGroups)Generally failed to get all the entities from the "${entityTableName}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// entity addition functions //
+
+export async function addStudentGroup(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _name,
+  _description,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "addStudentGroup",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "addStudentGroup",
+    );
+    return false;
+  }
+  if (typeof _name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_name",
+      "string",
+      _name,
+      "addStudentGroup",
+    );
+    return false;
+  }
+  if (typeof _description !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_description",
+      "string",
+      _description,
+      "addStudentGroup",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(addStudentGroup)Trying to insert the new student group into the "${entityTableName}" table...`,
+      );
+    const sql = `INSERT INTO \`${entityTableName}\` (name, description) VALUES (?, ?)`;
+    const params = [_name, _description];
+    await databaseConnectionPool.execute(sql, params);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(addStudentGroup)Successfully inserted the new student group into the "${entityTableName}" table (name: ${_name})!`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(addStudentGroup)Failed to insert the new student group into the "${entityTableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
+// entity selection functions //
+
+export async function deleteEntitySelection(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdSelection,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "deleteEntitySelection",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "deleteEntitySelection",
+    );
+    return false;
+  }
+  if (typeof entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityIdColumnName",
+      "string",
+      entityIdColumnName,
+      "deleteEntitySelection",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(deleteEntitySelection)Trying to delete a selection of entities in the "${entityTableName}" table...`,
+      );
+
+    if (_entityIdSelection.length === 0)
+      throw new Error("Entity id selection array was empty!");
+
+    const placeholders = _entityIdSelection.map(() => "?").join(",");
+    const sql = `DELETE FROM \`${entityTableName}\` WHERE \`${entityIdColumnName}\` IN (${placeholders})`;
+    //_entityIdSelection here is used directly as the parameter array
+    const [results] = await databaseConnectionPool.execute(
+      sql,
+      _entityIdSelection,
+    );
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(deleteEntitySelection)Successfully a selection of entities in the "${entityTableName}" table!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(deleteEntitySelection)Failed to delete a selection of entities in the "${entityTableName}" table!
+          Query: "${sql}"
+          Parameters: "${_entityIdSelection}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(deleteEntitySelection)Generally failed to delete a selection of entities in the "${entityTableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
