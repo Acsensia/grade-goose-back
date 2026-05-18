@@ -2762,6 +2762,70 @@ _accountRouter.post(
   },
 );
 
+//6.3assigned subjects routes for admin
+
+_accountRouter.post(
+  "/admin/getinfo/account/assigned/subjects/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/getinfo/account/assigned/subjects/student)Got a student admin_getinfo assigned subjects request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getUserAccountAssignedEntities(
+        req,
+        res,
+        "subjects",
+        "subject_id",
+        "subjects_assigned_to_a_student_individually",
+        "subjects_subject_id",
+        "students_student_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/getinfo/account/assigned/subjects/student)General error while processing a student admin_getinfo assigned subjects request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_accountRouter.post(
+  "/admin/getinfo/account/assigned/subjects/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_accountRouter:admin/getinfo/account/assigned/subjects/teacher)Got a teacher admin_getinfo assigned subjects request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getUserAccountAssignedEntities(
+        req,
+        res,
+        "subjects",
+        "subject_id",
+        "subjects_assigned_to_a_teacher_for_supervision",
+        "subjects_subject_id",
+        "teachers_teacher_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_accountRouter:admin/getinfo/account/assigned/subjects/teacher)General error while processing a teacher admin_getinfo assigned subjects request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
 //7unassignment routes for admin
 
 //7.1student group unassignment routes for admin
@@ -2836,7 +2900,7 @@ _accountRouter.post(
   },
 );
 
-//7.1specialty unassignment routes for admin
+//7.2specialty unassignment routes for admin
 
 _accountRouter.post("/admin/unassign/specialties/student", async (req, res) => {
   try {
@@ -2897,6 +2961,72 @@ _accountRouter.post("/admin/unassign/specialties/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:admin/unassign/specialties/teacher)General error while processing a teacher admin_unassign specialties request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//7.2subject unassignment routes for admin
+
+_accountRouter.post("/admin/unassign/subjects/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:admin/unassign/subjects/student)Got a student admin_unassign subjects request, processing...`,
+    );
+
+    const { subject_id_selection, account_id } = req.body;
+
+    if (!subject_id_selection)
+      throw new Error(
+        "No subject_id_selection parameter in the received JSON.",
+      );
+    if (!account_id)
+      throw new Error("No account_id parameter in the received JSON.");
+
+    return await _unassignUserAccountAssignedEntities(
+      req,
+      res,
+      "subjects_assigned_to_a_student_individually",
+      "subjects_subject_id",
+      "students_student_id",
+      subject_id_selection,
+      Number(account_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:admin/unassign/subjects/student)General error while processing a student admin_unassign subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/unassign/subjects/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:admin/unassign/subjects/teacher)Got a teacher admin_unassign subjects request, processing...`,
+    );
+
+    const { subject_id_selection, account_id } = req.body;
+
+    if (!subject_id_selection)
+      throw new Error(
+        "No subject_id_selection parameter in the received JSON.",
+      );
+    if (!account_id)
+      throw new Error("No account_id parameter in the received JSON.");
+
+    return await _unassignUserAccountAssignedEntities(
+      req,
+      res,
+      "subjects_assigned_to_a_teacher_for_supervision",
+      "subjects_subject_id",
+      "teachers_teacher_id",
+      subject_id_selection,
+      Number(account_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:admin/unassign/subjects/teacher)General error while processing a teacher admin_unassign subjects request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
