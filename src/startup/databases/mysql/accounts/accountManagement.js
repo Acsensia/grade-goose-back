@@ -851,8 +851,10 @@ async function _getAccountUnassignedEntities(
     const sql = `
     SELECT e.*, e.${entityIdColumnName} AS id
     FROM ${entityTableName} e
-    JOIN ${assignedEntityTableName} a ON a.${assignedEntityTable_entityIdColumnName} = e.${entityIdColumnName}
-    WHERE NOT a.${assignedEntityTable_accountIdColumnName} = ${_accountId};
+    LEFT JOIN ${assignedEntityTableName} et
+      ON et.${assignedEntityTable_entityIdColumnName} = e.${entityIdColumnName}
+      AND et.${assignedEntityTable_accountIdColumnName} = ${_accountId}
+    WHERE et.${assignedEntityTable_accountIdColumnName} IS NULL;
     `;
     const [results] = await databaseConnectionPool.execute(sql);
     if (results !== undefined) {
