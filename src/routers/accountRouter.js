@@ -2138,6 +2138,25 @@ _accountRouter.post("/admin/getinfo/specialty", async (req, res) => {
   }
 });
 
+_accountRouter.post("/admin/getinfo/subject", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getinfo/subject)Got a subject admin_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getEntityInfo(req, res, "subjects", "subject_id", Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getinfo/subject)General error while processing a subject admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //4delete routes for admin
 
 _accountRouter.post("/admin/delete/accounts/student", async (req, res) => {
