@@ -766,6 +766,225 @@ async function _unassignAccountAssignedEntities(
   }
 }
 
+async function _getAccountUnassignedEntities(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityIdColumnName,
+  assignedEntityTableName,
+  assignedEntityTable_entityIdColumnName,
+  assignedEntityTable_accountIdColumnName,
+  _accountId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_getAccountUnassignedEntities",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "_getAccountUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityIdColumnName",
+      "string",
+      entityIdColumnName,
+      "_getAccountUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTableName",
+      "string",
+      assignedEntityTableName,
+      "_getAccountUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTable_entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTable_entityIdColumnName",
+      "string",
+      assignedEntityTable_entityIdColumnName,
+      "_getAccountUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTable_accountIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTable_accountIdColumnName",
+      "string",
+      assignedEntityTable_accountIdColumnName,
+      "_getAccountUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof _accountId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_accountId",
+      "number",
+      _accountId,
+      "_getAccountUnassignedEntities",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_getAccountUnassignedEntities)Trying to find all entities not assigned to a certain account...`,
+      );
+    const sql = `
+    SELECT e.*, e.${entityIdColumnName} AS id
+    FROM ${entityTableName} e
+    JOIN ${assignedEntityTableName} a ON a.${assignedEntityTable_entityIdColumnName} = e.${entityIdColumnName}
+    WHERE NOT a.${assignedEntityTable_accountIdColumnName} = ${_accountId};
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(_getAccountUnassignedEntities)Successfully found entities not assigned to a certain account!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(_getAccountUnassignedEntities)Failed to find entities not assigned to a certain account!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_getAccountUnassignedEntities)Generally failed to find entities not assigned to a certain account!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+async function _assignEntitiesToAccount(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignedEntityTableName,
+  assignedEntityTable_entityIdColumnName,
+  assignedEntityTable_accountIdColumnName,
+  _entityIdSelection,
+  _accountId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "_assignEntitiesToAccount",
+      );
+      return false;
+    }
+  }
+  if (typeof assignedEntityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTableName",
+      "string",
+      assignedEntityTableName,
+      "_assignEntitiesToAccount",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTable_entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTable_entityIdColumnName",
+      "string",
+      assignedEntityTable_entityIdColumnName,
+      "_assignEntitiesToAccount",
+    );
+    return false;
+  }
+  if (typeof assignedEntityTable_accountIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignedEntityTable_accountIdColumnName",
+      "string",
+      assignedEntityTable_accountIdColumnName,
+      "_assignEntitiesToAccount",
+    );
+    return false;
+  }
+  if (typeof _accountId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_accountId",
+      "number",
+      _accountId,
+      "_assignEntitiesToAccount",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(_assignEntitiesToAccount)Trying to assign a selection of entities in the "${assignedEntityTableName}" table...`,
+      );
+
+    if (_entityIdSelection.length === 0)
+      throw new Error("Entity id selection array was empty!");
+
+    const placeholders = _entityIdSelection.map(() => "(?,?)").join(",");
+    const sql = `
+    INSERT INTO \`${assignedEntityTableName}\`
+    (${assignedEntityTable_entityIdColumnName}, ${assignedEntityTable_accountIdColumnName})
+    VALUES ${placeholders}
+    ON DUPLICATE KEY UPDATE ${assignedEntityTable_accountIdColumnName} = ${assignedEntityTable_accountIdColumnName}
+    `;
+    const params = [];
+    for (const entityId of _entityIdSelection) {
+      params.push(entityId, _accountId);
+    }
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(_assignEntitiesToAccount)Successfully assigned a selection of entities in the "${assignedEntityTableName}" table!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(_assignEntitiesToAccount)Failed to assign a selection of entities in the "${assignedEntityTableName}" table!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(_assignEntitiesToAccount)Generally assign to unassign a selection of entities in the "${assignedEntityTableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 //exports
 export const getAdministratorCount = _getAdministratorCount;
 export const getAccount = _getAccount;
@@ -777,3 +996,5 @@ export const deleteAccountSelection = _deleteAccountSelection;
 export const getAllAccounts = _getAllAccounts;
 export const getAccountAssignedEntities = _getAccountAssignedEntities;
 export const unassignAccountAssignedEntities = _unassignAccountAssignedEntities;
+export const getAccountUnassignedEntities = _getAccountUnassignedEntities;
+export const assignEntitiesToAccount = _assignEntitiesToAccount;
