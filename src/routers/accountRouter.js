@@ -1757,6 +1757,21 @@ _accountRouter.post("/admin/getall/studentgroups", async (req, res) => {
   }
 });
 
+_accountRouter.post("/admin/getall/specialties", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/getall/specialties)Got a specialty get all request, processing...`,
+    );
+
+    return await _getAllEntityInfo(req, res, "specialties", "specialty_id");
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/getall/specialties)General error while processing a specialty get all request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //2add routes for admin
 
 _accountRouter.post("/admin/add/account/student", async (req, res) => {
@@ -2074,6 +2089,32 @@ _accountRouter.post("/admin/delete/studentgroups", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_accountRouter:/admin/delete/studentgroups)General error while processing a student group admin_delete request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_accountRouter.post("/admin/delete/specialties", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_accountRouter:/admin/delete/specialties)Got a specialty admin_delete request, processing...`,
+    );
+
+    const { id_selection } = req.body;
+
+    if (!id_selection)
+      throw new Error("No id_selection parameter in the received JSON.");
+
+    return await _deleteEntitySelection(
+      req,
+      res,
+      "specialties",
+      "specialty_id",
+      id_selection,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_accountRouter:/admin/delete/specialties)General error while processing a specialty admin_delete request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
