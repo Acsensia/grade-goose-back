@@ -2863,7 +2863,7 @@ _adminRouter.post("/update/task/enforcedue", async (req, res) => {
 
 //6assigned routes for admin
 
-//6.1assigned student groups routes for admin
+//6.1student groups assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/assigned/studentgroups/student",
@@ -2927,7 +2927,7 @@ _adminRouter.post(
   },
 );
 
-//6.2assigned specialties routes for admin
+//6.specialties assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/assigned/specialties/student",
@@ -2991,7 +2991,7 @@ _adminRouter.post(
   },
 );
 
-//6.3assigned subjects routes for admin
+//6.3subjects assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/assigned/subjects/student",
@@ -3055,7 +3055,7 @@ _adminRouter.post(
   },
 );
 
-//6.4assigned tasks routes for admin
+//6.4tasks assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/assigned/tasks/student",
@@ -3121,7 +3121,7 @@ _adminRouter.post(
 
 //7unassignment routes for admin
 
-//7.1student group unassignment routes for admin
+//7.1student group unassignment from an account routes for admin
 
 _adminRouter.post("/unassign/studentgroups/student", async (req, res) => {
   try {
@@ -3187,7 +3187,7 @@ _adminRouter.post("/unassign/studentgroups/teacher", async (req, res) => {
   }
 });
 
-//7.2specialty unassignment routes for admin
+//7.2specialty unassignment from an account routes for admin
 
 _adminRouter.post("/unassign/specialties/student", async (req, res) => {
   try {
@@ -3253,7 +3253,7 @@ _adminRouter.post("/unassign/specialties/teacher", async (req, res) => {
   }
 });
 
-//7.3subject unassignment routes for admin
+//7.3subject unassignment from an account routes for admin
 
 _adminRouter.post("/unassign/subjects/student", async (req, res) => {
   try {
@@ -3319,7 +3319,7 @@ _adminRouter.post("/unassign/subjects/teacher", async (req, res) => {
   }
 });
 
-//7.4task unassignment routes for admin
+//7.4task unassignment from an account routes for admin
 
 _adminRouter.post("/unassign/tasks/student", async (req, res) => {
   try {
@@ -3383,7 +3383,7 @@ _adminRouter.post("/unassign/tasks/teacher", async (req, res) => {
 
 //8unassigned routes for admin
 
-//8.1unassigned student groups routes for admin
+//8.1student groups not assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/unassigned/studentgroups/student",
@@ -3447,7 +3447,7 @@ _adminRouter.post(
   },
 );
 
-//8.2unassigned specialties routes for admin
+//8.2specialties not assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/unassigned/specialties/student",
@@ -3511,7 +3511,7 @@ _adminRouter.post(
   },
 );
 
-//8.3unassigned subjects routes for admin
+//8.3subjects not assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/unassigned/subjects/student",
@@ -3575,7 +3575,7 @@ _adminRouter.post(
   },
 );
 
-//8.4unassigned tasks routes for admin
+//8.4tasks not assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/unassigned/tasks/student",
@@ -3641,7 +3641,7 @@ _adminRouter.post(
 
 //9assignment routes for admin
 
-//9.1student group assignment routes for admin
+//9.1student group assignment to an account routes for admin
 
 _adminRouter.post("/assign/studentgroups/student", async (req, res) => {
   try {
@@ -3707,7 +3707,7 @@ _adminRouter.post("/assign/studentgroups/teacher", async (req, res) => {
   }
 });
 
-//9.2specialty assignment routes for admin
+//9.2specialty assignment to an account routes for admin
 
 _adminRouter.post("/assign/specialties/student", async (req, res) => {
   try {
@@ -3773,7 +3773,7 @@ _adminRouter.post("/assign/specialties/teacher", async (req, res) => {
   }
 });
 
-//9.3subject assignment routes for admin
+//9.3subject assignment to an account routes for admin
 
 _adminRouter.post("/assign/subjects/student", async (req, res) => {
   try {
@@ -3839,7 +3839,7 @@ _adminRouter.post("/assign/subjects/teacher", async (req, res) => {
   }
 });
 
-//9.4task assignment routes for admin
+//9.4task assignment routes to an account for admin
 
 _adminRouter.post("/assign/tasks/student", async (req, res) => {
   try {
