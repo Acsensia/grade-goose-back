@@ -7,6 +7,7 @@ import cors from "cors";
 import { auth } from "./src/middleware/auth.js";
 import { authRouter } from "./src/routers/authRouter.js";
 import { accountRouter } from "./src/routers/accountRouter.js";
+import { adminRouter } from "./src/routers/adminRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
 
 //.setup
@@ -45,6 +46,9 @@ async function startServer() {
 
   //applying the account router
   app.use("/api/account", auth, accountRouter);
+
+  //applying the admin router
+  app.use("/api/admin", auth, adminRouter);
 
   //starting the server
   app.listen(process.env.PORT, () => {
