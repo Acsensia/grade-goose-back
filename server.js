@@ -9,6 +9,7 @@ import { authRouter } from "./src/routers/authRouter.js";
 import { accountRouter } from "./src/routers/accountRouter.js";
 import { adminRouter } from "./src/routers/adminRouter.js";
 import * as mysqlManagement from "./src/startup/databases/mysql/mysqlManagement.js";
+import { teacherRouter } from "./src/routers/teacherRouter.js";
 
 //.setup
 const app = express();
@@ -46,6 +47,9 @@ async function startServer() {
 
   //applying the account router
   app.use("/api/account", auth, accountRouter);
+
+  //applying the teacher router
+  app.use("/api/teacher", auth, teacherRouter);
 
   //applying the admin router
   app.use("/api/admin", auth, adminRouter);
