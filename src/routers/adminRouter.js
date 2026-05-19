@@ -1131,6 +1131,124 @@ async function _updateStudentGroupDesc(
   }
 }
 
+async function _updateSubjectName(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSubjectName)Got a subject name update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.name = _newValue;
+    const updateResult = await entityManagement.updateSubject(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the subject with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed subject name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSubjectName)General error while processing a subject name update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSubjectDesc(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSubjectName)Got a subject description update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.description = _newValue;
+    const updateResult = await entityManagement.updateSubject(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the subject with the newly specified information!",
+      );
+
+    res
+      .status(200)
+      .json({ message: "Successfully changed subject description" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSubjectName)General error while processing a subject description update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -2063,6 +2181,68 @@ _adminRouter.post("/update/studentgroup/desc", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/update/studentgroup/desc)General error while processing a student group admin_update description request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.8specialty name update route for admin
+//5.9specialty abbreviation update route for admin
+//5.10specialty description update route for admin
+
+//5.11subject name update route for admin
+_adminRouter.post("/update/subject/name", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/subject/name)Got a subject admin_update name request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSubjectName(
+      req,
+      res,
+      "subjects",
+      "subject_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/subject/name)General error while processing a subject admin_update name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.12subject description update route for admin
+_adminRouter.post("/update/subject/desc", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/subject/desc)Got a subject admin_update description request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSubjectDesc(
+      req,
+      res,
+      "subjects",
+      "subject_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/subject/desc)General error while processing a subject admin_update description request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

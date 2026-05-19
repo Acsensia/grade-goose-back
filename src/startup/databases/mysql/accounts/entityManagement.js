@@ -249,6 +249,82 @@ export async function updateStudentGroup(
   }
 }
 
+export async function updateSubject(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _entityIdColumnName,
+  _entityIdColumnValue,
+  _updatedEntity,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "updateSubject",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "updateSubject",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnName",
+      "string",
+      _entityIdColumnName,
+      "updateSubject",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnValue !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnValue",
+      "number",
+      _entityIdColumnValue,
+      "updateSubject",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(`(updateSubject)Trying to update a subject...`);
+
+    const sql = `UPDATE \`${entityTableName}\`
+        SET name = ?, description = ?
+        WHERE ${_entityIdColumnName} = ?`;
+    const params = [
+      _updatedEntity.name,
+      _updatedEntity.description,
+      _entityIdColumnValue,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(updateSubject)Successfully updated a subject.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(updateSubject)Generally failed to update a subject! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // entity addition functions //
 
 export async function addStudentGroup(
