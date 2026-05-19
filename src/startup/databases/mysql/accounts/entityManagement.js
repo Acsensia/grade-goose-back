@@ -780,6 +780,681 @@ export async function addTask(
   }
 }
 
+// entity getAssigned functions //
+
+export async function getEntityAssignedEntities(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  childEntityTable_Name,
+  childEntityTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getEntityAssignedEntities",
+      );
+      return false;
+    }
+  }
+  if (typeof childEntityTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntityTable_Name",
+      "string",
+      childEntityTable_Name,
+      "getEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof childEntityTable_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntityTable_IdColumnName",
+      "string",
+      childEntityTable_IdColumnName,
+      "getEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_Name",
+      "string",
+      assignationTable_Name,
+      "getEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_childEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childEntity_IdColumnName",
+      "string",
+      assignationTable_childEntity_IdColumnName,
+      "getEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_parentEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_parentEntity_IdColumnName",
+      "string",
+      assignationTable_parentEntity_IdColumnName,
+      "getEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof _parentEntityId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntityId",
+      "number",
+      _parentEntityId,
+      "getEntityAssignedEntities",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getEntityAssignedEntities)Trying to find all entities assigned to a certain parent entity...`,
+      );
+    const sql = `
+    SELECT e.*, e.${childEntityTable_IdColumnName} AS id
+    FROM ${childEntityTable_Name} e
+    JOIN ${assignationTable_Name} a ON a.${assignationTable_childEntity_IdColumnName} = e.${childEntityTable_IdColumnName}
+    WHERE a.${assignationTable_parentEntity_IdColumnName} = ${_parentEntityId};
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getEntityAssignedEntities)Successfully found entities assigned to a certain parent entity!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getEntityAssignedEntities)Failed to find entities assigned to a certain parent entity!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getEntityAssignedEntities)Generally failed to find entities assigned to a certain parent entity!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getEntityAssignedAccounts(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  accountTable_Name,
+  accountTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_account_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getEntityAssignedAccounts",
+      );
+      return false;
+    }
+  }
+  if (typeof accountTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "accountTable_Name",
+      "string",
+      accountTable_Name,
+      "getEntityAssignedAccounts",
+    );
+    return false;
+  }
+  if (typeof accountTable_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "accountTable_IdColumnName",
+      "string",
+      accountTable_IdColumnName,
+      "getEntityAssignedAccounts",
+    );
+    return false;
+  }
+  if (typeof assignationTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_Name",
+      "string",
+      assignationTable_Name,
+      "getEntityAssignedAccounts",
+    );
+    return false;
+  }
+  if (typeof assignationTable_account_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_account_IdColumnName",
+      "string",
+      assignationTable_account_IdColumnName,
+      "getEntityAssignedAccounts",
+    );
+    return false;
+  }
+  if (typeof assignationTable_parentEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_parentEntity_IdColumnName",
+      "string",
+      assignationTable_parentEntity_IdColumnName,
+      "getEntityAssignedAccounts",
+    );
+    return false;
+  }
+  if (typeof _parentEntityId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntityId",
+      "number",
+      _parentEntityId,
+      "getEntityAssignedAccounts",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getEntityAssignedAccounts)Trying to find all accounts assigned to a certain parent entity...`,
+      );
+    const sql = `
+    SELECT e.${accountTable_IdColumnName} AS id,
+      e.${accountTable_IdColumnName}, e.email, e.first_name,
+      e.last_name, e.patronymic_name
+    FROM ${accountTable_Name} e
+    JOIN ${assignationTable_Name} a ON a.${assignationTable_account_IdColumnName} = e.${accountTable_IdColumnName}
+    WHERE a.${assignationTable_parentEntity_IdColumnName} = ${_parentEntityId};
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getEntityAssignedAccounts)Successfully found accounts assigned to a certain parent entity!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getEntityAssignedAccounts)Failed to find accounts assigned to a certain parent entity!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getEntityAssignedAccounts)Generally failed to find accounts assigned to a certain parent entity!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// entity getUnassigned functions //
+
+export async function getEntityUnassignedEntities(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  childEntityTable_Name,
+  childEntityTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getEntityUnassignedEntities",
+      );
+      return false;
+    }
+  }
+  if (typeof childEntityTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntityTable_Name",
+      "string",
+      childEntityTable_Name,
+      "getEntityUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof childEntityTable_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntityTable_IdColumnName",
+      "string",
+      childEntityTable_IdColumnName,
+      "getEntityUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_Name",
+      "string",
+      assignationTable_Name,
+      "getEntityUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_childEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childEntity_IdColumnName",
+      "string",
+      assignationTable_childEntity_IdColumnName,
+      "getEntityUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_parentEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_parentEntity_IdColumnName",
+      "string",
+      assignationTable_parentEntity_IdColumnName,
+      "getEntityUnassignedEntities",
+    );
+    return false;
+  }
+  if (typeof _parentEntityId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntityId",
+      "number",
+      _parentEntityId,
+      "getEntityUnassignedEntities",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getEntityUnassignedEntities)Trying to find all entities not assigned to a certain parent entity...`,
+      );
+    const sql = `
+    SELECT e.*, e.${childEntityTable_IdColumnName} AS id
+    FROM ${childEntityTable_Name} e
+    LEFT JOIN ${assignationTable_Name} et
+      ON et.${assignationTable_childEntity_IdColumnName} = e.${childEntityTable_IdColumnName}
+      AND et.${assignationTable_parentEntity_IdColumnName} = ${_parentEntityId}
+    WHERE et.${assignationTable_parentEntity_IdColumnName} IS NULL;
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getEntityUnassignedEntities)Successfully found entities not assigned to a certain parent entity!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getEntityUnassignedEntities)Failed to find entities not assigned to a certain parent entity!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getEntityUnassignedEntities)Generally failed to find entities not assigned to a certain parent entity!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getEntityUnassignedAccounts(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  accountTable_Name,
+  accountTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_account_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getEntityUnassignedAccounts",
+      );
+      return false;
+    }
+  }
+  if (typeof accountTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "accountTable_Name",
+      "string",
+      accountTable_Name,
+      "getEntityUnassignedAccounts",
+    );
+    return false;
+  }
+  if (typeof accountTable_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "accountTable_IdColumnName",
+      "string",
+      accountTable_IdColumnName,
+      "getEntityUnassignedAccounts",
+    );
+    return false;
+  }
+  if (typeof assignationTable_Name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_Name",
+      "string",
+      assignationTable_Name,
+      "getEntityUnassignedAccounts",
+    );
+    return false;
+  }
+  if (typeof assignationTable_account_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_account_IdColumnName",
+      "string",
+      assignationTable_account_IdColumnName,
+      "getEntityUnassignedAccounts",
+    );
+    return false;
+  }
+  if (typeof assignationTable_parentEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_parentEntity_IdColumnName",
+      "string",
+      assignationTable_parentEntity_IdColumnName,
+      "getEntityUnassignedAccounts",
+    );
+    return false;
+  }
+  if (typeof _parentEntityId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntityId",
+      "number",
+      _parentEntityId,
+      "getEntityUnassignedAccounts",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getEntityUnassignedAccounts)Trying to find all accounts not assigned to a certain parent entity...`,
+      );
+    const sql = `
+    SELECT e.${accountTable_IdColumnName} AS id,
+      e.${accountTable_IdColumnName}, e.email,
+      e.first_name, e.last_name, e.patronymic_name
+    FROM ${accountTable_Name} e
+    LEFT JOIN ${assignationTable_Name} et
+      ON et.${assignationTable_account_IdColumnName} = e.${accountTable_IdColumnName}
+      AND et.${assignationTable_parentEntity_IdColumnName} = ${_parentEntityId}
+    WHERE et.${assignationTable_parentEntity_IdColumnName} IS NULL;
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getEntityUnassignedAccounts)Successfully found accounts not assigned to a certain parent entity!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getEntityUnassignedAccounts)Failed to find accounts not assigned to a certain parent entity!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getEntityUnassignedAccounts)Generally failed to find accounts not assigned to a certain parent entity!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// entity assign function (works for accounts too) //
+export async function assignEntitiesToEntity(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTableName,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _childEntity_IdSelection,
+  _parentEntity_Id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "assignEntitiesToEntity",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTableName",
+      "string",
+      assignationTableName,
+      "assignEntitiesToEntity",
+    );
+    return false;
+  }
+  if (typeof assignationTable_childEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childEntity_IdColumnName",
+      "string",
+      assignationTable_childEntity_IdColumnName,
+      "assignEntitiesToEntity",
+    );
+    return false;
+  }
+  if (typeof assignationTable_parentEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_parentEntity_IdColumnName",
+      "string",
+      assignationTable_parentEntity_IdColumnName,
+      "assignEntitiesToEntity",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_Id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_Id",
+      "number",
+      _parentEntity_Id,
+      "assignEntitiesToEntity",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(assignEntitiesToEntity)Trying to assign a selection of entities in the "${assignationTableName}" table to a certain parent entity...`,
+      );
+
+    if (_childEntity_IdSelection.length === 0)
+      throw new Error("Child entity id selection array was empty!");
+
+    const placeholders = _childEntity_IdSelection.map(() => "(?,?)").join(",");
+    const sql = `
+    INSERT IGNORE INTO \`${assignationTableName}\`
+    (${assignationTable_childEntity_IdColumnName}, ${assignationTable_parentEntity_IdColumnName})
+    VALUES ${placeholders}
+    `;
+    const params = [];
+    for (const entityId of _childEntity_IdSelection) {
+      params.push(entityId, _parentEntity_Id);
+    }
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(assignEntitiesToEntity)Successfully assigned a selection of entities in the "${assignationTableName}" table table to a certain parent entity!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(assignEntitiesToEntity)Failed to assign a selection of entities in the "${assignationTableName}" table table to a certain parent entity!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(assignEntitiesToEntity)Generally failed to assign a selection of entities in the "${assignationTableName}" table table to a certain parent entity!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// entity unassign function (works for accounts too) //
+export async function unassignEntityAssignedEntities(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTableName,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _childEntity_IdSelection,
+  _parentEntity_Id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "unassignEntityAssignedEntities",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTableName",
+      "string",
+      assignationTableName,
+      "unassignEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_childEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childEntity_IdColumnName",
+      "string",
+      assignationTable_childEntity_IdColumnName,
+      "unassignEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof assignationTable_parentEntity_IdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_parentEntity_IdColumnName",
+      "string",
+      assignationTable_parentEntity_IdColumnName,
+      "unassignEntityAssignedEntities",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_Id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_Id",
+      "number",
+      _parentEntity_Id,
+      "unassignEntityAssignedEntities",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(unassignEntityAssignedEntities)Trying to unassign a selection of entities in the "${assignationTableName}" table from a certain parent entity...`,
+      );
+
+    if (_childEntity_IdSelection.length === 0)
+      throw new Error("Child entity id selection array was empty!");
+
+    const placeholders = _childEntity_IdSelection.map(() => "?").join(",");
+    const sql = `
+    DELETE FROM \`${assignationTableName}\`
+    WHERE \`${assignationTable_childEntity_IdColumnName}\` IN (${placeholders})
+    AND \`${assignationTable_parentEntity_IdColumnName}\` = ?
+    `;
+    const params = [..._childEntity_IdSelection, _parentEntity_Id];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(unassignEntityAssignedEntities)Successfully unassigned a selection of entities in the "${assignationTableName}" table from a certain parent entity!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(unassignEntityAssignedEntities)Failed to unassign a selection of entities in the "${assignationTableName}" table from a certain parent entity!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(unassignEntityAssignedEntities)Generally failed to unassign a selection of entities in the "${assignationTableName}" table from a certain parent entity!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 // entity selection functions //
 
 export async function deleteEntitySelection(

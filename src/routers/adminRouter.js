@@ -1661,6 +1661,317 @@ async function _updateTaskEnforceDue(
   }
 }
 
+async function _getEntityAssignedEntities(
+  req,
+  res,
+  childEntityTable_Name,
+  childEntityTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityAssignedEntities)Got an entity assigned entities request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getEntityAssignedEntities(
+      connectionPool,
+      true,
+      childEntityTable_Name,
+      childEntityTable_IdColumnName,
+      assignationTable_Name,
+      assignationTable_childEntity_IdColumnName,
+      assignationTable_parentEntity_IdColumnName,
+      _parentEntityId,
+    );
+    if (!result)
+      throw new Error(
+        "Failed to get all entities assigned to a certain entity!",
+      );
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityAssignedEntities)General error while processing an entity assigned entities request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getEntityAssignedAccounts(
+  req,
+  res,
+  accountTable_Name,
+  accountTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_account_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityAssignedAccounts)Got an entity assigned accounts request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getEntityAssignedAccounts(
+      connectionPool,
+      true,
+      accountTable_Name,
+      accountTable_IdColumnName,
+      assignationTable_Name,
+      assignationTable_account_IdColumnName,
+      assignationTable_parentEntity_IdColumnName,
+      _parentEntityId,
+    );
+    if (!result)
+      throw new Error(
+        "Failed to get all accounts assigned to a certain entity!",
+      );
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityAssignedAccounts)General error while processing an entity assigned accounts request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getEntityUnassignedEntities(
+  req,
+  res,
+  childEntityTable_Name,
+  childEntityTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityUnassignedEntities)Got an entity unassigned entities request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getEntityUnassignedEntities(
+      connectionPool,
+      true,
+      childEntityTable_Name,
+      childEntityTable_IdColumnName,
+      assignationTable_Name,
+      assignationTable_childEntity_IdColumnName,
+      assignationTable_parentEntity_IdColumnName,
+      _parentEntityId,
+    );
+    if (!result)
+      throw new Error(
+        "Failed to get all entities not assigned to a certain entity!",
+      );
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityUnassignedEntities)General error while processing an entity unassigned entities request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getEntityUnassignedAccounts(
+  req,
+  res,
+  accountTable_Name,
+  accountTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_account_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityUnassignedAccounts)Got an entity unassigned accounts request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getEntityUnassignedAccounts(
+      connectionPool,
+      true,
+      accountTable_Name,
+      accountTable_IdColumnName,
+      assignationTable_Name,
+      assignationTable_account_IdColumnName,
+      assignationTable_parentEntity_IdColumnName,
+      _parentEntityId,
+    );
+    if (!result)
+      throw new Error(
+        "Failed to get all accounts not assigned to a certain entity!",
+      );
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityUnassignedAccounts)General error while processing an entity unassigned accounts request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _unassignEntityAssignedEntities(
+  req,
+  res,
+  assignationTableName,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _childEntity_IdSelection,
+  _parentEntity_Id,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_unassignEntityAssignedEntities)Got an entity assigned entities selection unassignment request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const unassignmentResult =
+      await entityManagement.unassignEntityAssignedEntities(
+        connectionPool,
+        true,
+        assignationTableName,
+        assignationTable_childEntity_IdColumnName,
+        assignationTable_parentEntity_IdColumnName,
+        _childEntity_IdSelection,
+        _parentEntity_Id,
+      );
+    if (!unassignmentResult)
+      throw new Error(
+        "Failed to unassign the specified entity-assigned entities!",
+      );
+
+    res.json({ result: unassignmentResult });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_unassignEntityAssignedEntities)General error while processing an entity assigned entities selection unassignment request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _assignEntitiesToEntity(
+  req,
+  res,
+  assignationTableName,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _childEntity_IdSelection,
+  _parentEntity_Id,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_assignEntitiesToEntity)Got an entity assigned entities selection assignment request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const unassignmentResult = await entityManagement.assignEntitiesToEntity(
+      connectionPool,
+      true,
+      assignationTableName,
+      assignationTable_childEntity_IdColumnName,
+      assignationTable_parentEntity_IdColumnName,
+      _childEntity_IdSelection,
+      _parentEntity_Id,
+    );
+    if (!unassignmentResult)
+      throw new Error(
+        "Failed to assign the specified entity-assigned entities!",
+      );
+
+    res.json({ result: unassignmentResult });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_assignEntitiesToEntity)General error while processing an entity assigned entities selection assignment request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -2927,7 +3238,7 @@ _adminRouter.post(
   },
 );
 
-//6.specialties assigned to an account routes for admin
+//6.2specialties assigned to an account routes for admin
 
 _adminRouter.post(
   "/getinfo/account/assigned/specialties/student",
@@ -3113,6 +3424,102 @@ _adminRouter.post(
     } catch (error) {
       consoleLoggers.logError(
         `(_adminRouter/getinfo/account/assigned/tasks/teacher)General error while processing a teacher admin_getinfo assigned tasks request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//6.5accounts assigned to a student group routes for admin
+
+_adminRouter.post(
+  "/getinfo/studentgroup/assigned/accounts/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/studentgroup/assigned/accounts/teacher)Got a studentgroup admin_getinfo assigned teachers request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityAssignedAccounts(
+        req,
+        res,
+        "teachers",
+        "teacher_id",
+        "student_groups_assigned_to_a_teacher_for_supervision",
+        "teachers_teacher_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/studentgroup/assigned/accounts/teacher)General error while processing a studentgroup admin_getinfo assigned teachers request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_adminRouter.post(
+  "/getinfo/studentgroup/assigned/accounts/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/studentgroup/assigned/accounts/student)Got a studentgroup admin_getinfo assigned students request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityAssignedAccounts(
+        req,
+        res,
+        "students",
+        "student_id",
+        "students_assigned_to_a_student_group",
+        "students_student_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/studentgroup/assigned/accounts/student)General error while processing a studentgroup admin_getinfo assigned students request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//6.6specialties assigned to a student group route for admin
+_adminRouter.post(
+  "/getinfo/studentgroup/assigned/specialties",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/studentgroup/assigned/specialties)Got a studentgroup admin_getinfo assigned specialties request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityAssignedEntities(
+        req,
+        res,
+        "specialties",
+        "specialty_id",
+        "specialties_assigned_to_a_student_group",
+        "specialties_specialty_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/studentgroup/assigned/specialties)General error while processing a studentgroup admin_getinfo assigned specialties request, error message: "${error}".`,
       );
       res.status(500).json({ message: "Server error" });
     }
@@ -3381,6 +3788,109 @@ _adminRouter.post("/unassign/tasks/teacher", async (req, res) => {
   }
 });
 
+//7.5account unassignment from a student group routes for admin
+
+_adminRouter.post(
+  "/unassign/studentgroup/accounts/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/unassign/studentgroup/accounts/student)Got a studentgroup admin_unassign students request, processing...`,
+      );
+
+      const { child_id_selection, parent_id } = req.body;
+
+      if (!child_id_selection)
+        throw new Error(
+          "No child_id_selection parameter in the received JSON.",
+        );
+      if (!parent_id)
+        throw new Error("No parent_id parameter in the received JSON.");
+
+      return await _unassignEntityAssignedEntities(
+        req,
+        res,
+        "students_assigned_to_a_student_group",
+        "students_student_id",
+        "student_groups_student_group_id",
+        child_id_selection,
+        Number(parent_id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/unassign/studentgroup/accounts/student)General error while processing a studentgroup admin_unassign students request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_adminRouter.post(
+  "/unassign/studentgroup/accounts/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/unassign/studentgroup/accounts/teacher)Got a studentgroup admin_unassign teachers request, processing...`,
+      );
+
+      const { child_id_selection, parent_id } = req.body;
+
+      if (!child_id_selection)
+        throw new Error(
+          "No child_id_selection parameter in the received JSON.",
+        );
+      if (!parent_id)
+        throw new Error("No parent_id parameter in the received JSON.");
+
+      return await _unassignEntityAssignedEntities(
+        req,
+        res,
+        "student_groups_assigned_to_a_teacher_for_supervision",
+        "teachers_teacher_id",
+        "student_groups_student_group_id",
+        child_id_selection,
+        Number(parent_id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/unassign/studentgroup/accounts/teacher)General error while processing a studentgroup admin_unassign teachers request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//7.6specialty unassignment from a student group route for admin
+_adminRouter.post("/unassign/studentgroup/specialties", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/unassign/studentgroup/specialties)Got a studentgroup admin_unassign specialties request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _unassignEntityAssignedEntities(
+      req,
+      res,
+      "specialties_assigned_to_a_student_group",
+      "specialties_specialty_id",
+      "student_groups_student_group_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/unassign/studentgroup/specialties)General error while processing a studentgroup admin_unassign specialties request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //8unassigned routes for admin
 
 //8.1student groups not assigned to an account routes for admin
@@ -3633,6 +4143,102 @@ _adminRouter.post(
     } catch (error) {
       consoleLoggers.logError(
         `(_adminRouter/getinfo/account/unassigned/tasks/teacher)General error while processing a teacher admin_getinfo unassigned tasks request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//8.5accounts not assigned to a student group routes for admin
+
+_adminRouter.post(
+  "/getinfo/studentgroup/unassigned/accounts/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/studentgroup/unassigned/accounts/student)Got a studentgroup admin_getinfo unassigned students request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityUnassignedAccounts(
+        req,
+        res,
+        "students",
+        "student_id",
+        "students_assigned_to_a_student_group",
+        "students_student_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/studentgroup/unassigned/accounts/student)General error while processing a studentgroup admin_getinfo unassigned students request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_adminRouter.post(
+  "/getinfo/studentgroup/unassigned/accounts/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/studentgroup/unassigned/accounts/teacher)Got a studentgroup admin_getinfo unassigned teachers request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityUnassignedAccounts(
+        req,
+        res,
+        "teachers",
+        "teacher_id",
+        "student_groups_assigned_to_a_teacher_for_supervision",
+        "teachers_teacher_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/studentgroup/unassigned/accounts/teacher)General error while processing a studentgroup admin_getinfo unassigned teachers request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//8.6specialties not assigned to a student group route for admin
+_adminRouter.post(
+  "/getinfo/studentgroup/unassigned/specialties",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/studentgroup/assigned/specialties)Got a studentgroup admin_getinfo unassigned specialties request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityUnassignedEntities(
+        req,
+        res,
+        "specialties",
+        "specialty_id",
+        "specialties_assigned_to_a_student_group",
+        "specialties_specialty_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/studentgroup/unassigned/specialties)General error while processing a studentgroup admin_getinfo unassigned specialties request, error message: "${error}".`,
       );
       res.status(500).json({ message: "Server error" });
     }
@@ -3896,6 +4502,99 @@ _adminRouter.post("/assign/tasks/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter/assign/tasks/teacher)General error while processing a teacher admin_assign tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//9.5account assignment to a student group routes for admin
+
+_adminRouter.post("/assign/studentgroup/accounts/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/assign/studentgroup/accounts/student)Got a studentgroup admin_assign students request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _assignEntitiesToEntity(
+      req,
+      res,
+      "students_assigned_to_a_student_group",
+      "students_student_id",
+      "student_groups_student_group_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/assign/studentgroup/accounts/student)General error while processing a studentgroup admin_assign students request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/assign/studentgroup/accounts/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/assign/studentgroup/accounts/teacher)Got a studentgroup admin_assign teachers request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _assignEntitiesToEntity(
+      req,
+      res,
+      "student_groups_assigned_to_a_teacher_for_supervision",
+      "teachers_teacher_id",
+      "student_groups_student_group_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/assign/studentgroup/accounts/teacher)General error while processing a studentgroup admin_assign teachers request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//9.6specialty assignment to a student group route for admin
+_adminRouter.post("/assign/studentgroup/specialties", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/assign/studentgroup/specialties)Got a studentgroup admin_assign specialties request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _assignEntitiesToEntity(
+      req,
+      res,
+      "specialties_assigned_to_a_student_group",
+      "specialties_specialty_id",
+      "student_groups_student_group_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/assign/studentgroup/specialties)General error while processing a studentgroup admin_assign specialties request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
