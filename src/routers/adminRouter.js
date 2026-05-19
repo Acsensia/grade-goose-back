@@ -3773,6 +3773,99 @@ _adminRouter.post("/getinfo/subject/assigned/tasks", async (req, res) => {
   }
 });
 
+//6.13accounts assigned to a task routes for admin
+
+_adminRouter.post(
+  "/getinfo/task/assigned/accounts/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/task/assigned/accounts/student)Got a task admin_getinfo assigned students request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityAssignedAccounts(
+        req,
+        res,
+        "students",
+        "student_id",
+        "tasks_assigned_to_a_student_individually",
+        "students_student_id",
+        "tasks_task_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/task/assigned/accounts/student)General error while processing a task admin_getinfo assigned students request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_adminRouter.post(
+  "/getinfo/task/assigned/accounts/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/task/assigned/accounts/teacher)Got a task admin_getinfo assigned teachers request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityAssignedAccounts(
+        req,
+        res,
+        "teachers",
+        "teacher_id",
+        "tasks_assigned_to_a_teacher_for_supervision",
+        "teachers_teacher_id",
+        "tasks_task_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/task/assigned/accounts/teacher)General error while processing a task admin_getinfo assigned teachers request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//6.14subjects assigned to a task route for admin
+_adminRouter.post("/getinfo/task/assigned/subjects", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getinfo/task/assigned/subjects)Got a task admin_getinfo assigned subjects request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getEntityAssignedEntities(
+      req,
+      res,
+      "subjects",
+      "subject_id",
+      "tasks_assigned_to_a_subject",
+      "subjects_subject_id",
+      "tasks_task_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getinfo/task/assigned/subjects)General error while processing a task admin_getinfo assigned subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //7unassignment routes for admin
 
 //7.1student group unassignment from an account routes for admin
@@ -4386,6 +4479,99 @@ _adminRouter.post("/unassign/subject/tasks", async (req, res) => {
   }
 });
 
+//7.13account unassignment from a task routes for admin
+
+_adminRouter.post("/unassign/task/accounts/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/unassign/task/accounts/student)Got a task admin_unassign students request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _unassignEntityAssignedEntities(
+      req,
+      res,
+      "tasks_assigned_to_a_student_individually",
+      "students_student_id",
+      "tasks_task_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/unassign/task/accounts/student)General error while processing a task admin_unassign students request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/unassign/task/accounts/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/unassign/task/accounts/teacher)Got a task admin_unassign teachers request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _unassignEntityAssignedEntities(
+      req,
+      res,
+      "tasks_assigned_to_a_teacher_for_supervision",
+      "teachers_teacher_id",
+      "tasks_task_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/unassign/task/accounts/teacher)General error while processing a task admin_unassign teachers request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//7.14subject unassignment from a task route for admin
+_adminRouter.post("/unassign/task/subjects", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/unassign/task/subjects)Got a task admin_unassign subjects request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _unassignEntityAssignedEntities(
+      req,
+      res,
+      "tasks_assigned_to_a_subject",
+      "subjects_subject_id",
+      "tasks_task_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/unassign/task/subjects)General error while processing a task admin_unassign subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //8unassigned routes for admin
 
 //8.1student groups not assigned to an account routes for admin
@@ -4993,6 +5179,99 @@ _adminRouter.post("/getinfo/subject/unassigned/tasks", async (req, res) => {
   }
 });
 
+//8.13accounts not assigned to a task routes for admin
+
+_adminRouter.post(
+  "/getinfo/task/unassigned/accounts/student",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/task/unassigned/accounts/student)Got a task admin_getinfo unassigned students request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityUnassignedAccounts(
+        req,
+        res,
+        "students",
+        "student_id",
+        "tasks_assigned_to_a_student_individually",
+        "students_student_id",
+        "tasks_task_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/task/unassigned/accounts/student)General error while processing a task admin_getinfo unassigned students request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_adminRouter.post(
+  "/getinfo/task/unassigned/accounts/teacher",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter/getinfo/task/unassigned/accounts/teacher)Got a task admin_getinfo unassigned teachers request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      return await _getEntityUnassignedAccounts(
+        req,
+        res,
+        "teachers",
+        "teacher_id",
+        "tasks_assigned_to_a_teacher_for_supervision",
+        "teachers_teacher_id",
+        "tasks_task_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter/getinfo/task/unassigned/accounts/teacher)General error while processing a task admin_getinfo unassigned teachers request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//8.14subjects not assigned to a task route for admin
+_adminRouter.post("/getinfo/task/unassigned/subjects", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getinfo/task/unassigned/subjects)Got a task admin_getinfo unassigned subjects request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getEntityUnassignedEntities(
+      req,
+      res,
+      "subjects",
+      "subject_id",
+      "tasks_assigned_to_a_subject",
+      "subjects_subject_id",
+      "tasks_task_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getinfo/task/unassigned/subjects)General error while processing a task admin_getinfo unassigned subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //9assignment routes for admin
 
 //9.1student group assignment to an account routes for admin
@@ -5565,7 +5844,7 @@ _adminRouter.post("/assign/subject/specialties", async (req, res) => {
   }
 });
 
-//9.12task unassignment from a subject route for admin
+//9.12task assignment from a subject route for admin
 _adminRouter.post("/assign/subject/tasks", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
@@ -5591,6 +5870,99 @@ _adminRouter.post("/assign/subject/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter/assign/subject/tasks)General error while processing a subject admin_assign tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//9.13account assignment from a task routes for admin
+
+_adminRouter.post("/assign/task/accounts/student", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/assign/task/accounts/student)Got a task admin_assign students request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _assignEntitiesToEntity(
+      req,
+      res,
+      "tasks_assigned_to_a_student_individually",
+      "students_student_id",
+      "tasks_task_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/assign/task/accounts/student)General error while processing a task admin_assign students request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/assign/task/accounts/teacher", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/assign/task/accounts/teacher)Got a task admin_assign teachers request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _assignEntitiesToEntity(
+      req,
+      res,
+      "tasks_assigned_to_a_teacher_for_supervision",
+      "teachers_teacher_id",
+      "tasks_task_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/assign/task/accounts/teacher)General error while processing a task admin_assign teachers request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//9.14subject assignment from a task route for admin
+_adminRouter.post("/assign/task/subjects", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/assign/task/subjects)Got a task admin_assign subjects request, processing...`,
+    );
+
+    const { child_id_selection, parent_id } = req.body;
+
+    if (!child_id_selection)
+      throw new Error("No child_id_selection parameter in the received JSON.");
+    if (!parent_id)
+      throw new Error("No parent_id parameter in the received JSON.");
+
+    return await _assignEntitiesToEntity(
+      req,
+      res,
+      "tasks_assigned_to_a_subject",
+      "subjects_subject_id",
+      "tasks_task_id",
+      child_id_selection,
+      Number(parent_id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/assign/task/subjects)General error while processing a task admin_assign subjects request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
