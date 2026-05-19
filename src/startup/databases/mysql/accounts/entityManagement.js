@@ -404,6 +404,84 @@ export async function updateSubject(
   }
 }
 
+export async function updateTask(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _entityIdColumnName,
+  _entityIdColumnValue,
+  _updatedEntity,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "updateTask",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "updateTask",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnName",
+      "string",
+      _entityIdColumnName,
+      "updateTask",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnValue !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnValue",
+      "number",
+      _entityIdColumnValue,
+      "updateTask",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(`(updateTask)Trying to update a task...`);
+
+    const sql = `UPDATE \`${entityTableName}\`
+        SET name = ?, instructions = ?,
+        time_due = ?,
+        can_be_handed_in_past_due = ?
+        WHERE ${_entityIdColumnName} = ?`;
+    const params = [
+      _updatedEntity.name,
+      _updatedEntity.instructions,
+      _updatedEntity.time_due,
+      _updatedEntity.can_be_handed_in_past_due,
+      _entityIdColumnValue,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(`(updateTask)Successfully updated a task.`);
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(updateTask)Generally failed to update a task! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // entity addition functions //
 
 export async function addStudentGroup(

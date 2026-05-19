@@ -1427,6 +1427,240 @@ async function _updateSubjectDesc(
   }
 }
 
+async function _updateTaskName(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateTaskName)Got a task name update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.name = _newValue;
+    const updateResult = await entityManagement.updateTask(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the task with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed task name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateTaskName)General error while processing a task name update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateTaskInstr(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateTaskInstr)Got a task instructions update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.instructions = _newValue;
+    const updateResult = await entityManagement.updateTask(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the task with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed task instructions" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateTaskInstr)General error while processing a task instructions update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateTaskDue(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateTaskDue)Got a task due date update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.time_due = _newValue;
+    const updateResult = await entityManagement.updateTask(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the task with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed task due date" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateTaskDue)General error while processing a task due date update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateTaskEnforceDue(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateTaskEnforceDue)Got a task due date enforcement update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.can_be_handed_in_past_due = _newValue;
+    const updateResult = await entityManagement.updateTask(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the task with the newly specified information!",
+      );
+
+    res
+      .status(200)
+      .json({ message: "Successfully changed task due date enforcement" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateTaskEnforceDue)General error while processing a task due date enforcement update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -2504,6 +2738,124 @@ _adminRouter.post("/update/subject/desc", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/update/subject/desc)General error while processing a subject admin_update description request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.13task name update route for admin
+_adminRouter.post("/update/task/name", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/task/name)Got a task admin_update name request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateTaskName(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/task/name)General error while processing a task admin_update name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.14task instructions update route for admin
+_adminRouter.post("/update/task/instr", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/task/instr)Got a task admin_update instructions request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateTaskInstr(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/task/instr)General error while processing a task admin_update instructions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.15task due date update route for admin
+_adminRouter.post("/update/task/due", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/task/due)Got a task admin_update due date request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateTaskDue(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/task/due)General error while processing a task admin_update due date request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.16task due date enforcement update route for admin
+_adminRouter.post("/update/task/enforcedue", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/task/enforcedue)Got a task admin_update due date enforcement request, processing...`,
+    );
+
+    const { id, newBoolValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (typeof newBoolValue !== "boolean")
+      throw new Error(
+        "Typeof the newBoolValue parameter in the received JSON is not 'boolean'.",
+      );
+
+    return await _updateTaskEnforceDue(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      Number(id),
+      Number(newBoolValue),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/task/enforcedue)General error while processing a task admin_update due date enforcement request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
