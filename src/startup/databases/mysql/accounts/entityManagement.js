@@ -169,6 +169,86 @@ export async function getEntity(
   }
 }
 
+// entity update functions //
+
+export async function updateStudentGroup(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _entityIdColumnName,
+  _entityIdColumnValue,
+  _updatedEntity,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "updateStudentGroup",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "updateStudentGroup",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnName",
+      "string",
+      _entityIdColumnName,
+      "updateStudentGroup",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnValue !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnValue",
+      "number",
+      _entityIdColumnValue,
+      "updateStudentGroup",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(updateStudentGroup)Trying to update a student group...`,
+      );
+
+    const sql = `UPDATE \`${entityTableName}\`
+        SET name = ?, description = ?
+        WHERE ${_entityIdColumnName} = ?`;
+    const params = [
+      _updatedEntity.name,
+      _updatedEntity.description,
+      _entityIdColumnValue,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(updateStudentGroup)Successfully updated a student group.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(updateStudentGroup)Generally failed to update a student group! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // entity addition functions //
 
 export async function addStudentGroup(

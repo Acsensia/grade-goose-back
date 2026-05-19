@@ -1011,6 +1011,126 @@ async function _assignEntitiesToUserAccount(
   }
 }
 
+async function _updateStudentGroupName(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateStudentGroupName)Got a student group name update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.name = _newValue;
+    const updateResult = await entityManagement.updateStudentGroup(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the student group with the newly specified information!",
+      );
+
+    res
+      .status(200)
+      .json({ message: "Successfully changed student group name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateStudentGroupName)General error while processing a student group name update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateStudentGroupDesc(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateStudentGroupName)Got a student group description update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.description = _newValue;
+    const updateResult = await entityManagement.updateStudentGroup(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the student group with the newly specified information!",
+      );
+
+    res
+      .status(200)
+      .json({ message: "Successfully changed student group description" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateStudentGroupName)General error while processing a student group description update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -1598,7 +1718,7 @@ _adminRouter.post("/delete/tasks", async (req, res) => {
   }
 });
 
-//5account update routes for admin
+//5update routes for admin
 
 //5.1account pass update routes for admin
 
@@ -1885,6 +2005,64 @@ _adminRouter.post("/update/patronymicname/teacher", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/update/patronymicname/teacher)General error while processing a teacher admin_update patronymic name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.6student_group name update route for admin
+_adminRouter.post("/update/studentgroup/name", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/studentgroup/name)Got a student group admin_update name request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateStudentGroupName(
+      req,
+      res,
+      "student_groups",
+      "student_group_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/studentgroup/name)General error while processing a student group admin_update name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.7student_group description update route for admin
+_adminRouter.post("/update/studentgroup/desc", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/studentgroup/desc)Got a student group admin_update description request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateStudentGroupDesc(
+      req,
+      res,
+      "student_groups",
+      "student_group_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/studentgroup/desc)General error while processing a student group admin_update description request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
