@@ -1081,7 +1081,7 @@ async function _updateStudentGroupDesc(
 ) {
   try {
     consoleLoggers.logNeutral(
-      `(_updateStudentGroupName)Got a student group description update request, processing...`,
+      `(_updateStudentGroupDesc)Got a student group description update request, processing...`,
     );
 
     if (!req.user)
@@ -1125,7 +1125,7 @@ async function _updateStudentGroupDesc(
       .json({ message: "Successfully changed student group description" });
   } catch (error) {
     consoleLoggers.logError(
-      `(_updateStudentGroupName)General error while processing a student group description update request, error message: "${error}".`,
+      `(_updateStudentGroupDesc)General error while processing a student group description update request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
