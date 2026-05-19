@@ -249,6 +249,85 @@ export async function updateStudentGroup(
   }
 }
 
+export async function updateSpecialty(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _entityIdColumnName,
+  _entityIdColumnValue,
+  _updatedEntity,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "updateSpecialty",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "updateSpecialty",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnName",
+      "string",
+      _entityIdColumnName,
+      "updateSpecialty",
+    );
+    return false;
+  }
+  if (typeof _entityIdColumnValue !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityIdColumnValue",
+      "number",
+      _entityIdColumnValue,
+      "updateSpecialty",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(updateSpecialty)Trying to update a specialty...`,
+      );
+
+    const sql = `UPDATE \`${entityTableName}\`
+        SET name = ?, abbreviation = ?, description = ?
+        WHERE ${_entityIdColumnName} = ?`;
+    const params = [
+      _updatedEntity.name,
+      _updatedEntity.abbreviation,
+      _updatedEntity.description,
+      _entityIdColumnValue,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(updateSpecialty)Successfully updated a specialty.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(updateSpecialty)Generally failed to update a specialty! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 export async function updateSubject(
   databaseConnectionPool,
   areMessagesToBeDisplayed,

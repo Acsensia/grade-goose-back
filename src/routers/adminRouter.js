@@ -1131,6 +1131,184 @@ async function _updateStudentGroupDesc(
   }
 }
 
+async function _updateSpecialtyName(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSpecialtyName)Got a specialty name update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.name = _newValue;
+    const updateResult = await entityManagement.updateSpecialty(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the specialty with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed specialty name" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSpecialtyName)General error while processing a specialty name update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSpecialtyAbbr(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSpecialtyAbbr)Got a specialty abbreviation update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.abbreviation = _newValue;
+    const updateResult = await entityManagement.updateSpecialty(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the specialty with the newly specified information!",
+      );
+
+    res
+      .status(200)
+      .json({ message: "Successfully changed specialty abbreviation" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSpecialtyAbbr)General error while processing a specialty abbreviation update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSpecialtyDesc(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityIdColumnValue,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSpecialtyDesc)Got a specialty description update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.description = _newValue;
+    const updateResult = await entityManagement.updateSpecialty(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityIdColumnValue,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the specialty with the newly specified information!",
+      );
+
+    res
+      .status(200)
+      .json({ message: "Successfully changed specialty description" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSpecialtyDesc)General error while processing a specialty description update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 async function _updateSubjectName(
   req,
   res,
@@ -2187,8 +2365,91 @@ _adminRouter.post("/update/studentgroup/desc", async (req, res) => {
 });
 
 //5.8specialty name update route for admin
+_adminRouter.post("/update/specialty/name", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/specialty/name)Got a specialty admin_update name request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSpecialtyName(
+      req,
+      res,
+      "specialties",
+      "specialty_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/specialty/name)General error while processing a specialty admin_update name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //5.9specialty abbreviation update route for admin
+_adminRouter.post("/update/specialty/abbr", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/specialty/abbr)Got a specialty admin_update abbreviation request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSpecialtyAbbr(
+      req,
+      res,
+      "specialties",
+      "specialty_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/specialty/abbr)General error while processing an abbreviation admin_update name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //5.10specialty description update route for admin
+_adminRouter.post("/update/specialty/desc", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/specialty/desc)Got a specialty admin_update description request, processing...`,
+    );
+
+    const { id, newValue } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSpecialtyDesc(
+      req,
+      res,
+      "specialties",
+      "specialty_id",
+      Number(id),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/specialty/desc)General error while processing a description admin_update name request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 //5.11subject name update route for admin
 _adminRouter.post("/update/subject/name", async (req, res) => {
