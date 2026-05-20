@@ -1972,6 +1972,105 @@ async function _assignEntitiesToEntity(
   }
 }
 
+async function _deleteTwoKeyEntitySelection(
+  req,
+  res,
+  entityTableName,
+  entityIdColumn1_name,
+  entityIdColumn2_name,
+  _entityDoubleIdSelection,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_deleteTwoKeyEntitySelection)Got a two-key entity selection deletion request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const deletionResult = await entityManagement.deleteTwoKeyEntitySelection(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumn1_name,
+      entityIdColumn2_name,
+      _entityDoubleIdSelection,
+    );
+    if (!deletionResult)
+      throw new Error(
+        "Failed to delete the specified two-key entity selection!",
+      );
+
+    res.json({ result: deletionResult });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_deleteTwoKeyEntitySelection)General error while processing a two-key entity selection deletion request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _addNewSolution(
+  req,
+  res,
+  entityTableName,
+  _taskId,
+  _studentId,
+  _internet_file_link,
+  _mark,
+  _studentCommentary,
+  _teacherCommentary,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewSolution)Got a solution addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await entityManagement.addSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      _taskId,
+      _studentId,
+      _internet_file_link,
+      _mark,
+      _studentCommentary,
+      _teacherCommentary,
+    );
+    if (!additionResult) throw new Error("Failed to add the almost-new task!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewSolution)General error while processing a solution addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -2066,6 +2165,26 @@ _adminRouter.post("/getall/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/getall/tasks)General error while processing a task get all request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/getall/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/getall/solutions)Got a solution get all request, processing...`,
+    );
+
+    return await _getAllEntityInfo(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/getall/solutions)General error while processing a solution get all request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -2256,6 +2375,53 @@ _adminRouter.post("/add/task", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/add/task)General error while processing a task addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/add/solution", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/add/solution)Got a solution addition request, processing...`,
+    );
+
+    let {
+      tasks_task_id,
+      students_student_id,
+      internet_file_link,
+      mark,
+      student_commentary,
+      teacher_commentary,
+    } = req.body;
+
+    if (!tasks_task_id)
+      throw new Error("No tasks_task_id parameter in the received JSON.");
+    if (!students_student_id)
+      throw new Error("No students_student_id parameter in the received JSON.");
+    if (!internet_file_link)
+      throw new Error("No internet_file_link parameter in the received JSON.");
+    if (!mark || mark === "null") mark = null;
+    else mark = Number(mark);
+    if (!student_commentary || student_commentary === "null")
+      student_commentary = null;
+    if (!teacher_commentary || teacher_commentary === "null")
+      teacher_commentary = null;
+
+    return await _addNewSolution(
+      req,
+      res,
+      "done_tasks_status",
+      tasks_task_id,
+      students_student_id,
+      internet_file_link,
+      mark,
+      student_commentary,
+      teacher_commentary,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/add/solution)General error while processing a solution addition request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -2554,6 +2720,33 @@ _adminRouter.post("/delete/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/delete/tasks)General error while processing a tasks admin_delete request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/delete/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/delete/solutions)Got a solutions admin_delete request, processing...`,
+    );
+
+    const { id_pairs_selection } = req.body;
+
+    if (!id_pairs_selection)
+      throw new Error("No id_pairs_selection parameter in the received JSON.");
+
+    return await _deleteTwoKeyEntitySelection(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      id_pairs_selection,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/delete/solutions)General error while processing a solutions admin_delete request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

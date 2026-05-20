@@ -50,7 +50,7 @@ export async function getAllEntities(
   try {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logNeutral(
-        `(getAllStudentGroups)Trying to get all the entities from the "${entityTableName}"...`,
+        `(getAllEntities)Trying to get all the entities from the "${entityTableName}"...`,
       );
 
     let sql = `
@@ -61,13 +61,13 @@ export async function getAllEntities(
     if (results !== undefined) {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logSuccess(
-          `(getAllStudentGroups)Successfully got all the entities from the "${entityTableName}"!`,
+          `(getAllEntities)Successfully got all the entities from the "${entityTableName}"!`,
         );
       return results;
     } else {
       if (areMessagesToBeDisplayed)
         consoleLoggers.logError(
-          `(getAllStudentGroups)Failed to get all the entities from the "${entityTableName}"!
+          `(getAllEntities)Failed to get all the entities from the "${entityTableName}"!
           Query: "${sql}"
           Search results: "${results}"`,
         );
@@ -76,7 +76,7 @@ export async function getAllEntities(
   } catch (error) {
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
-        `(getAllStudentGroups)Generally failed to get all the entities from the "${entityTableName}"!
+        `(getAllEntities)Generally failed to get all the entities from the "${entityTableName}"!
         Error message: "${error}".`,
       );
     return false;
@@ -1570,6 +1570,126 @@ export async function addTask(
   }
 }
 
+export async function addSolution(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  _taskId,
+  _studentId,
+  _internet_file_link,
+  _mark,
+  _studentCommentary,
+  _teacherCommentary,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "addSolution",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "addSolution",
+    );
+    return false;
+  }
+  if (typeof _taskId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_taskId",
+      "number",
+      _taskId,
+      "addSolution",
+    );
+    return false;
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "addSolution",
+    );
+    return false;
+  }
+  if (typeof _internet_file_link !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "_internet_file_link",
+      "string",
+      _internet_file_link,
+      "addSolution",
+    );
+    return false;
+  }
+  if (typeof _mark !== "string" && _mark !== null) {
+    consoleLoggers.logParameterTypeError(
+      "_mark",
+      "string or null",
+      _mark,
+      "addSolution",
+    );
+    return false;
+  }
+  if (typeof _studentCommentary !== "string" && _studentCommentary !== null) {
+    consoleLoggers.logParameterTypeError(
+      "_studentCommentary",
+      "string or null",
+      _studentCommentary,
+      "addSolution",
+    );
+    return false;
+  }
+  if (typeof _teacherCommentary !== "string" && _teacherCommentary !== null) {
+    consoleLoggers.logParameterTypeError(
+      "_teacherCommentary",
+      "string or null",
+      _teacherCommentary,
+      "addSolution",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(addSolution)Trying to insert the new solution into the "${entityTableName}" table...`,
+      );
+    const sql = `
+    INSERT INTO \`${entityTableName}\`
+    (tasks_task_id, students_student_id, internet_file_link, mark, student_commentary, teacher_commentary)
+    VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const params = [
+      _taskId,
+      _studentId,
+      _internet_file_link,
+      _mark,
+      _studentCommentary,
+      _teacherCommentary,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(addSolution)Successfully inserted the new solution into the "${entityTableName}" table!`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(addSolution)Failed to insert the new solution into the "${entityTableName}" table! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // entity getAssigned functions //
 
 export async function getEntityAssignedEntities(
@@ -2321,6 +2441,97 @@ export async function deleteEntitySelection(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(deleteEntitySelection)Generally failed to delete a selection of entities in the "${entityTableName}" table!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function deleteTwoKeyEntitySelection(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityIdColumn1_name,
+  entityIdColumn2_name,
+  _entityDoubleIdSelection,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "deleteTwoKeyEntitySelection",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "deleteTwoKeyEntitySelection",
+    );
+    return false;
+  }
+  if (typeof entityIdColumn1_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityIdColumn1_name",
+      "string",
+      entityIdColumn1_name,
+      "deleteTwoKeyEntitySelection",
+    );
+    return false;
+  }
+  if (typeof entityIdColumn2_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityIdColumn2_name",
+      "string",
+      entityIdColumn2_name,
+      "deleteTwoKeyEntitySelection",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(deleteTwoKeyEntitySelection)Trying to delete a selection of two-key entities in the "${entityTableName}" table...`,
+      );
+
+    if (_entityDoubleIdSelection.length === 0)
+      throw new Error("Entity double id selection array was empty!");
+
+    const pairCount = _entityDoubleIdSelection.length;
+    const placeholders = new Array(pairCount).fill("(?,?)").join(",");
+    const params = _entityDoubleIdSelection.flat();
+    const sql = `
+      DELETE FROM \`${entityTableName}\`
+      WHERE (\`${entityIdColumn1_name}\`, \`${entityIdColumn2_name}\`) IN (${placeholders})
+    `;
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(deleteTwoKeyEntitySelection)Successfully a selection of two-key entities in the "${entityTableName}" table!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(deleteTwoKeyEntitySelection)Failed to delete a selection of two-key entities in the "${entityTableName}" table!
+          Query: "${sql}"
+          Parameters: "${params}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(deleteTwoKeyEntitySelection)Generally failed to delete a selection of two-key entities in the "${entityTableName}" table!
         Error message: "${error}".`,
       );
     return false;
