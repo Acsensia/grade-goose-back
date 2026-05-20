@@ -1448,42 +1448,39 @@ _teacherRouter.post("/getall/specialty/assigned/subjects", async (req, res) => {
 });
 
 //6.9students assigned to a subject routes for teacher
-_teacherRouter.post(
-  "/getall/subject/assigned/accounts/student",
-  async (req, res) => {
-    try {
-      consoleLoggers.logNeutral(
-        `(_teacherRouter/getall/subject/assigned/students)Got a subject teacher_getall assigned students request, processing...`,
-      );
+_teacherRouter.post("/getall/subject/assigned/students", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter/getall/subject/assigned/students)Got a subject teacher_getall assigned students request, processing...`,
+    );
 
-      const { id } = req.body;
+    const { id } = req.body;
 
-      if (!id) throw new Error("No id parameter in the received JSON.");
+    if (!id) throw new Error("No id parameter in the received JSON.");
 
-      if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
-        return res
-          .status(401)
-          .json({ message: "No access to the specified subject" });
-      }
-
-      return await _getEntityAssignedAccounts(
-        req,
-        res,
-        "students",
-        "student_id",
-        "subjects_assigned_to_a_student_individually",
-        "students_student_id",
-        "subjects_subject_id",
-        Number(id),
-      );
-    } catch (error) {
-      consoleLoggers.logError(
-        `(_teacherRouter/getall/subject/assigned/students)General error while processing a subject teacher_getall assigned students request, error message: "${error}".`,
-      );
-      res.status(500).json({ message: "Server error" });
+    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
     }
-  },
-);
+
+    return await _getEntityAssignedAccounts(
+      req,
+      res,
+      "students",
+      "student_id",
+      "subjects_assigned_to_a_student_individually",
+      "students_student_id",
+      "subjects_subject_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter/getall/subject/assigned/students)General error while processing a subject teacher_getall assigned students request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 //6.12tasks assigned to a subject route for admin
 _teacherRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
@@ -1597,7 +1594,7 @@ _teacherRouter.post("/unassign/subject/tasks", async (req, res) => {
 });
 
 //7.3student unassignment from a task route for teacher
-_teacherRouter.post("/unassign/task/accounts/student", async (req, res) => {
+_teacherRouter.post("/unassign/task/students", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
       `(_teacherRouter/unassign/task/students)Got a task teacher_unassign students request, processing...`,
@@ -1788,7 +1785,7 @@ _teacherRouter.post("/assign/subject/tasks", async (req, res) => {
 });
 
 //7.3student assignment to a task route for teacher
-_teacherRouter.post("/assign/task/accounts/student", async (req, res) => {
+_teacherRouter.post("/assign/task/students", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
       `(_teacherRouter/assign/task/students)Got a task teacher_assign students request, processing...`,
