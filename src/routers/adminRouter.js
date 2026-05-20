@@ -2239,7 +2239,7 @@ _adminRouter.post("/add/task", async (req, res) => {
       throw new Error("No instructions parameter in the received JSON.");
     if (!time_due)
       throw new Error("No time_due parameter in the received JSON.");
-    if (!can_be_handed_in_past_due)
+    if (typeof can_be_handed_in_past_due !== "boolean")
       throw new Error(
         "No can_be_handed_in_past_due parameter in the received JSON.",
       );

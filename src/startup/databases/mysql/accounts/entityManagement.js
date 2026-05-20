@@ -169,6 +169,796 @@ export async function getEntity(
   }
 }
 
+// checkAssigned functions //
+
+// child 1-->1 parent
+export async function checkAssigned1Fecta(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTable_name,
+  childEntity_idColumnName,
+  parentEntity_idColumnName,
+  _childEntity_id,
+  _parentEntity_id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "checkAssigned1Fecta",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTable_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_name",
+      "string",
+      assignationTable_name,
+      "checkAssigned1Fecta",
+    );
+    return false;
+  }
+  if (typeof childEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntity_idColumnName",
+      "string",
+      childEntity_idColumnName,
+      "checkAssigned1Fecta",
+    );
+    return false;
+  }
+  if (typeof parentEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "parentEntity_idColumnName",
+      "string",
+      parentEntity_idColumnName,
+      "checkAssigned1Fecta",
+    );
+    return false;
+  }
+  if (typeof _childEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_childEntity_id",
+      "string",
+      _childEntity_id,
+      "checkAssigned1Fecta",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_id",
+      "string",
+      _parentEntity_id,
+      "checkAssigned1Fecta",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(checkAssigned1Fecta)Trying to make a 1fecta assignation check...`,
+      );
+    const sql = `
+    SELECT EXISTS(
+      SELECT 1
+      FROM \`${assignationTable_name}\` t
+      WHERE t.${childEntity_idColumnName} = ${_childEntity_id}
+        AND t.${parentEntity_idColumnName} = ${_parentEntity_id}
+    ) AS is_assigned;
+    `;
+    const [results] = await databaseConnectionPool.query(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        if (results[0].is_assigned) {
+          consoleLoggers.logSuccess(
+            `(checkAssigned1Fecta)Check successful, result: "assigned"!`,
+          );
+        } else {
+          consoleLoggers.logSuccess(
+            `(checkAssigned1Fecta)Check successful, result: "not assigned"!`,
+          );
+        }
+      return results[0].is_assigned;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(checkAssigned1Fecta)Check unsuccessful!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(checkAssigned1Fecta)Generally failed to make a 1fecta assignation check!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// child 1-->middleman-->1 parent
+export async function checkAssigned2Fecta(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTable_childToMiddleman_name,
+  assignationTable_middlemanToParent_name,
+  childEntity_idColumnName,
+  middlemanEntity_idColumnName,
+  parentEntity_idColumnName,
+  _childEntity_id,
+  _parentEntity_id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "checkAssigned2Fecta",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTable_childToMiddleman_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childToMiddleman_name",
+      "string",
+      assignationTable_childToMiddleman_name,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middlemanToParent_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middlemanToParent_name",
+      "string",
+      assignationTable_middlemanToParent_name,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+  if (typeof childEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntity_idColumnName",
+      "string",
+      childEntity_idColumnName,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+  if (typeof middlemanEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middlemanEntity_idColumnName",
+      "string",
+      middlemanEntity_idColumnName,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+  if (typeof parentEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "parentEntity_idColumnName",
+      "string",
+      parentEntity_idColumnName,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+  if (typeof _childEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_childEntity_id",
+      "string",
+      _childEntity_id,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_id",
+      "string",
+      _parentEntity_id,
+      "checkAssigned2Fecta",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(checkAssigned2Fecta)Trying to make a 2fecta assignation check...`,
+      );
+
+    const sql = `
+    SELECT EXISTS(
+      SELECT 1
+      FROM \`${assignationTable_childToMiddleman_name}\` c2m
+      JOIN \`${assignationTable_middlemanToParent_name}\` m2p
+        ON c2m.\`${middlemanEntity_idColumnName}\` = m2p.\`${middlemanEntity_idColumnName}\`
+      WHERE c2m.\`${childEntity_idColumnName}\` = ${_childEntity_id}
+        AND m2p.\`${parentEntity_idColumnName}\` = ${_parentEntity_id}
+    ) AS is_assigned;
+    `;
+    const [results] = await databaseConnectionPool.query(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        if (results[0].is_assigned) {
+          consoleLoggers.logSuccess(
+            `(checkAssigned2Fecta)Check successful, result: "assigned"!`,
+          );
+        } else {
+          consoleLoggers.logSuccess(
+            `(checkAssigned2Fecta)Check successful, result: "not assigned"!`,
+          );
+        }
+      return results[0].is_assigned;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(checkAssigned2Fecta)Check unsuccessful!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(checkAssigned2Fecta)Generally failed to make a 2fecta assignation check!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// child 1-->middlemanOne-->middlemanTwo-->1 parent
+export async function checkAssigned3Fecta(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTable_childToMiddleman1_name,
+  assignationTable_middleman1ToMiddleman2_name,
+  assignationTable_middleman2ToParent_name,
+  childEntity_idColumnName,
+  middleman1Entity_idColumnName,
+  middleman2Entity_idColumnName,
+  parentEntity_idColumnName,
+  _childEntity_id,
+  _parentEntity_id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "checkAssigned3Fecta",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTable_childToMiddleman1_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childToMiddleman1_name",
+      "string",
+      assignationTable_childToMiddleman1_name,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman1ToMiddleman2_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman1ToMiddleman2_name",
+      "string",
+      assignationTable_middleman1ToMiddleman2_name,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman2ToParent_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman2ToParent_name",
+      "string",
+      assignationTable_middleman2ToParent_name,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof childEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntity_idColumnName",
+      "string",
+      childEntity_idColumnName,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman1Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman1Entity_idColumnName",
+      "string",
+      middleman1Entity_idColumnName,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman2Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman2Entity_idColumnName",
+      "string",
+      middleman2Entity_idColumnName,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof parentEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "parentEntity_idColumnName",
+      "string",
+      parentEntity_idColumnName,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof _childEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_childEntity_id",
+      "string",
+      _childEntity_id,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_id",
+      "string",
+      _parentEntity_id,
+      "checkAssigned3Fecta",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(checkAssigned3Fecta)Trying to make a 3fecta assignation check...`,
+      );
+
+    const sql = `
+    SELECT EXISTS(
+      SELECT 1
+      FROM \`${assignationTable_childToMiddleman1_name}\` c2m1
+      JOIN \`${assignationTable_middleman1ToMiddleman2_name}\` m12
+        ON c2m1.\`${middleman1Entity_idColumnName}\` = m12.\`${middleman1Entity_idColumnName}\`
+      JOIN \`${assignationTable_middleman2ToParent_name}\` m23
+        ON m12.\`${middleman2Entity_idColumnName}\` = m23.\`${middleman2Entity_idColumnName}\`
+      WHERE c2m1.\`${childEntity_idColumnName}\` = ${_childEntity_id}
+        AND m23.\`${parentEntity_idColumnName}\` = ${_parentEntity_id}
+    ) AS is_assigned;
+    `;
+    const [results] = await databaseConnectionPool.query(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        if (results[0].is_assigned) {
+          consoleLoggers.logSuccess(
+            `(checkAssigned3Fecta)Check successful, result: "assigned"!`,
+          );
+        } else {
+          consoleLoggers.logSuccess(
+            `(checkAssigned3Fecta)Check successful, result: "not assigned"!`,
+          );
+        }
+      return results[0].is_assigned;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(checkAssigned3Fecta)Check unsuccessful!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(checkAssigned3Fecta)Generally failed to make a 3fecta assignation check!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// child 1-->middlemanOne-->middlemanTwo-->middlemanThree-->1 parent
+export async function checkAssigned4Fecta(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTable_childToMiddleman1_name,
+  assignationTable_middleman1ToMiddleman2_name,
+  assignationTable_middleman2ToMiddleman3_name,
+  assignationTable_middleman3ToParent_name,
+  childEntity_idColumnName,
+  middleman1Entity_idColumnName,
+  middleman2Entity_idColumnName,
+  middleman3Entity_idColumnName,
+  parentEntity_idColumnName,
+  _childEntity_id,
+  _parentEntity_id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "checkAssigned4Fecta",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTable_childToMiddleman1_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childToMiddleman1_name",
+      "string",
+      assignationTable_childToMiddleman1_name,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman1ToMiddleman2_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman1ToMiddleman2_name",
+      "string",
+      assignationTable_middleman1ToMiddleman2_name,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman2ToMiddleman3_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman2ToMiddleman3_name",
+      "string",
+      assignationTable_middleman2ToMiddleman3_name,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman3ToParent_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman3ToParent_name",
+      "string",
+      assignationTable_middleman3ToParent_name,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof childEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntity_idColumnName",
+      "string",
+      childEntity_idColumnName,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman1Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman1Entity_idColumnName",
+      "string",
+      middleman1Entity_idColumnName,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman2Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman2Entity_idColumnName",
+      "string",
+      middleman2Entity_idColumnName,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman3Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman3Entity_idColumnName",
+      "string",
+      middleman3Entity_idColumnName,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof parentEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "parentEntity_idColumnName",
+      "string",
+      parentEntity_idColumnName,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof _childEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_childEntity_id",
+      "string",
+      _childEntity_id,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_id",
+      "string",
+      _parentEntity_id,
+      "checkAssigned4Fecta",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(checkAssigned4Fecta)Trying to make a 4fecta assignation check...`,
+      );
+
+    const sql = `
+    SELECT EXISTS(
+      FROM \`${assignationTable_childToMiddleman1_name}\` t1
+      JOIN \`${assignationTable_middleman1ToMiddleman2_name}\` t2
+        ON t1.\`${middleman1Entity_idColumnName}\` = t2.\`${middleman1Entity_idColumnName}\`
+      JOIN \`${assignationTable_middleman2ToMiddleman3_name}\` t3
+        ON t2.\`${middleman2Entity_idColumnName}\` = t3.\`${middleman2Entity_idColumnName}\`
+      JOIN \`${assignationTable_middleman3ToParent_name}\` t4
+        ON t3.\`${middleman3Entity_idColumnName}\` = t4.\`${middleman3Entity_idColumnName}\`
+      WHERE t1.\`${childEntity_idColumnName}\` = ${_childEntity_id}
+        AND t4.\`${parentEntity_idColumnName}\` = ${_parentEntity_id}
+    ) AS is_assigned;
+    `;
+    const [results] = await databaseConnectionPool.query(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        if (results[0].is_assigned) {
+          consoleLoggers.logSuccess(
+            `(checkAssigned4Fecta)Check successful, result: "assigned"!`,
+          );
+        } else {
+          consoleLoggers.logSuccess(
+            `(checkAssigned4Fecta)Check successful, result: "not assigned"!`,
+          );
+        }
+      return results[0].is_assigned;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(checkAssigned4Fecta)Check unsuccessful!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(checkAssigned4Fecta)Generally failed to make a 4fecta assignation check!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+// child 1-->middlemanOne-->middlemanTwo-->middlemanThree-->middlemanFour-->1 parent
+export async function checkAssigned5Fecta(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  assignationTable_childToMiddleman1_name,
+  assignationTable_middleman1ToMiddleman2_name,
+  assignationTable_middleman2ToMiddleman3_name,
+  assignationTable_middleman3ToMiddleman4_name,
+  assignationTable_middleman4ToParent_name,
+  childEntity_idColumnName,
+  middleman1Entity_idColumnName,
+  middleman2Entity_idColumnName,
+  middleman3Entity_idColumnName,
+  middleman4Entity_idColumnName,
+  parentEntity_idColumnName,
+  _childEntity_id,
+  _parentEntity_id,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "checkAssigned5Fecta",
+      );
+      return false;
+    }
+  }
+  if (typeof assignationTable_childToMiddleman1_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_childToMiddleman1_name",
+      "string",
+      assignationTable_childToMiddleman1_name,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman1ToMiddleman2_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman1ToMiddleman2_name",
+      "string",
+      assignationTable_middleman1ToMiddleman2_name,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman2ToMiddleman3_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman2ToMiddleman3_name",
+      "string",
+      assignationTable_middleman2ToMiddleman3_name,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman3ToMiddleman4_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman3ToMiddleman4_name",
+      "string",
+      assignationTable_middleman3ToMiddleman4_name,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof assignationTable_middleman4ToParent_name !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "assignationTable_middleman4ToParent_name",
+      "string",
+      assignationTable_middleman4ToParent_name,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof childEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "childEntity_idColumnName",
+      "string",
+      childEntity_idColumnName,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman1Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman1Entity_idColumnName",
+      "string",
+      middleman1Entity_idColumnName,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman2Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman2Entity_idColumnName",
+      "string",
+      middleman2Entity_idColumnName,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman3Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman3Entity_idColumnName",
+      "string",
+      middleman3Entity_idColumnName,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof middleman4Entity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "middleman4Entity_idColumnName",
+      "string",
+      middleman4Entity_idColumnName,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof parentEntity_idColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "parentEntity_idColumnName",
+      "string",
+      parentEntity_idColumnName,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof _childEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_childEntity_id",
+      "string",
+      _childEntity_id,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+  if (typeof _parentEntity_id !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_parentEntity_id",
+      "string",
+      _parentEntity_id,
+      "checkAssigned5Fecta",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(checkAssigned5Fecta)Trying to make a 5fecta assignation check...`,
+      );
+
+    const sql = `
+    SELECT EXISTS(
+      SELECT 1
+      FROM \`${assignationTable_childToMiddleman1_name}\` t1
+      JOIN \`${assignationTable_middleman1ToMiddleman2_name}\` t2
+        ON t1.\`${middleman1Entity_idColumnName}\` = t2.\`${middleman1Entity_idColumnName}\`
+      JOIN \`${assignationTable_middleman2ToMiddleman3_name}\` t3
+        ON t2.\`${middleman2Entity_idColumnName}\` = t3.\`${middleman2Entity_idColumnName}\`
+      JOIN \`${assignationTable_middleman3ToMiddleman4_name}\` t4
+        ON t3.\`${middleman3Entity_idColumnName}\` = t4.\`${middleman3Entity_idColumnName}\`
+      JOIN \`${assignationTable_middleman4ToParent_name}\` t5
+        ON t4.\`${middleman4Entity_idColumnName}\` = t5.\`${middleman4Entity_idColumnName}\`
+      WHERE t1.\`${childEntity_idColumnName}\` = ${_childEntity_id}
+        AND t5.\`${parentEntity_idColumnName}\` = ${_parentEntity_id}
+    ) AS is_assigned;
+    `;
+    const [results] = await databaseConnectionPool.query(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        if (results[0].is_assigned) {
+          consoleLoggers.logSuccess(
+            `(checkAssigned5Fecta)Check successful, result: "assigned"!`,
+          );
+        } else {
+          consoleLoggers.logSuccess(
+            `(checkAssigned5Fecta)Check successful, result: "not assigned"!`,
+          );
+        }
+      return results[0].is_assigned;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(checkAssigned5Fecta)Check unsuccessful!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(checkAssigned5Fecta)Generally failed to make a 5fecta assignation check!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 // entity update functions //
 
 export async function updateStudentGroup(
