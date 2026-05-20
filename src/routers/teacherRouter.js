@@ -227,7 +227,7 @@ async function _unassignUserAccountAssignedEntities(
         connectionPool,
         true,
         assignedEntityTableName,
-        assignedEntityTable_accountIdColumnName,
+        assignedEntityTable_entityIdColumnName,
         assignedEntityTable_accountIdColumnName,
         _entityIdSelection,
         _accountId,
@@ -972,6 +972,59 @@ async function _getEntityUnassignedEntities(
   }
 }
 
+async function _getUserAccountUnassignedEntities(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  assignedEntityTableName,
+  assignedEntityTable_entityIdColumnName,
+  assignedEntityTable_accountIdColumnName,
+  _accountId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getUserAccountUnassignedEntities)Got a user account unassigned entities request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAccountUnassignedEntities(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      assignedEntityTableName,
+      assignedEntityTable_entityIdColumnName,
+      assignedEntityTable_accountIdColumnName,
+      _accountId,
+    );
+    if (!result)
+      throw new Error(
+        "Failed to get all entities not assigned to a user account!",
+      );
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getUserAccountUnassignedEntities)General error while processing a user account unassigned entities request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
 
 //1getall routes for teacher
@@ -1482,7 +1535,7 @@ _teacherRouter.post("/getall/subject/assigned/students", async (req, res) => {
   }
 });
 
-//6.12tasks assigned to a subject route for admin
+//6.10tasks assigned to a subject route for admin
 _teacherRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
@@ -1512,6 +1565,41 @@ _teacherRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_teacherRouter/getall/subject/assigned/tasks)General error while processing a subject teacher_getall assigned tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//6.11tasks assigned to a student route for teacher
+_teacherRouter.post("/getall/student/assigned/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getall/student/assigned/tasks)Got a student teacher_getall assigned tasks request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student" });
+    }
+
+    return await _getUserAccountAssignedEntities(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      "tasks_assigned_to_a_student_individually",
+      "tasks_task_id",
+      "students_student_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getall/student/assigned/tasks)General error while processing a student teacher_getall assigned tasks request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -1708,6 +1796,41 @@ _teacherRouter.post("/getall/subject/unassigned/tasks", async (req, res) => {
   }
 });
 
+//8.2tasks not assigned to a student route for teacher
+_teacherRouter.post("/getall/student/unassigned/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getall/student/unassigned/tasks)Got a student teacher_getall unassigned tasks request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student" });
+    }
+
+    return await _getUserAccountUnassignedEntities(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      "tasks_assigned_to_a_student_individually",
+      "tasks_task_id",
+      "students_student_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getall/student/unassigned/tasks)General error while processing a student teacher_getall unassigned tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //9assignment routes for teacher
 
 //9.1task assignment to a student account route for teacher
@@ -1747,7 +1870,7 @@ _teacherRouter.post("/assign/student/tasks", async (req, res) => {
   }
 });
 
-//7.2task assignment to a subject route for teacher
+//9.2task assignment to a subject route for teacher
 _teacherRouter.post("/assign/subject/tasks", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
@@ -1784,7 +1907,7 @@ _teacherRouter.post("/assign/subject/tasks", async (req, res) => {
   }
 });
 
-//7.3student assignment to a task route for teacher
+//9.3student assignment to a task route for teacher
 _teacherRouter.post("/assign/task/students", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
@@ -1823,7 +1946,7 @@ _teacherRouter.post("/assign/task/students", async (req, res) => {
   }
 });
 
-//7.4subject assignment to a task route for teacher
+//9.4subject assignment to a task route for teacher
 _teacherRouter.post("/assign/task/subjects", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
