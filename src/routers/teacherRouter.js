@@ -1259,6 +1259,327 @@ async function _updateTaskEnforceDue(
   }
 }
 
+async function _getAllSubjectMarkedSolutions(req, res, _subjectId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllSubjectMarkedSolutions)Got an all subject marked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllSubjectMarkedSolutions(
+      connectionPool,
+      true,
+      _subjectId,
+    );
+    if (!result) throw new Error("Failed to get all subject marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllSubjectMarkedSolutions)General error while processing an all subject marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllSubjectUnmarkedSolutions(req, res, _subjectId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllSubjectUnmarkedSolutions)Got an all subject unmarked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllSubjectUnmarkedSolutions(
+      connectionPool,
+      true,
+      _subjectId,
+    );
+    if (!result) throw new Error("Failed to get all subject marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllSubjectUnmarkedSolutions)General error while processing an all subject unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentMarkedSolutions(req, res, _studentId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentMarkedSolutions)Got an all student marked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllStudentMarkedSolutions(
+      connectionPool,
+      true,
+      _studentId,
+    );
+    if (!result) throw new Error("Failed to get all student marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentMarkedSolutions)General error while processing an all student marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentUnmarkedSolutions(req, res, _studentId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentUnmarkedSolutions)Got an all student unmarked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllStudentUnmarkedSolutions(
+      connectionPool,
+      true,
+      _studentId,
+    );
+    if (!result)
+      throw new Error("Failed to get all student unmarked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentUnmarkedSolutions)General error while processing an all student unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getTwoKeyEntityInfo(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getTwoKeyEntityInfo)Got a two-key entity info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity) throw new Error("Could not find an entity with specified ID!");
+
+    res.json({
+      entity: entity,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getTwoKeyEntityInfo)General error while processing a two-key entity info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSolutionMark(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionMark)Got a solution mark update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.mark = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution mark" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionMark)General error while processing a solution mark update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSolutionTeComm(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionTeComm)Got a solution teacher commentary update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("teacher" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not teacher (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.teacher_commentary = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution mark" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionTeComm)General error while processing a solution teacher commentary update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
 
 //1getall routes for teacher
@@ -1458,6 +1779,41 @@ _teacherRouter.post("/getinfo/task", async (req, res) => {
   }
 });
 
+_teacherRouter.post("/getinfo/solution", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter:/getinfo/solution)Got a solution teacher_getinfo request, processing...`,
+    );
+
+    const { taskId, studentId } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(studentId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student account" });
+    }
+
+    return await _getTwoKeyEntityInfo(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter:/getinfo/solution)General error while processing a solution teacher_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //4delete routes for teacher
 
 _teacherRouter.post("/delete/tasks", async (req, res) => {
@@ -1601,6 +1957,84 @@ _teacherRouter.post("/update/task/enforcedue", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_teacherRouter:/update/task/enforcedue)General error while processing a task teacher_update due date enforcement request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.5solution mark update route for teacher
+_teacherRouter.post("/update/solution/mark", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter:/update/solution/mark)Got a solution teacher_update mark request, processing...`,
+    );
+
+    const { taskId, studentId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+    if (typeof newValue !== "number")
+      throw new Error("No newValue parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(studentId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student" });
+    }
+
+    return await _updateSolutionMark(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+      Number(newValue),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter:/update/solution/mark)General error while processing a solution teacher_update mark request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.6solution teacher commentary update route for teacher
+_teacherRouter.post("/update/solution/tecomm", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter:/update/solution/tecomm)Got a solution teacher_update teacher commentary request, processing...`,
+    );
+
+    const { taskId, studentId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(studentId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student" });
+    }
+
+    return await _updateSolutionTeComm(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter:/update/solution/tecomm)General error while processing a solution teacher_update teacher commentary request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
@@ -2334,6 +2768,108 @@ _teacherRouter.post("/assign/task/subjects", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_teacherRouter/assign/task/subjects)General error while processing a task teacher_assign subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//10solution routes for teacher
+
+_teacherRouter.post("/getall/subject/marked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter/getall/subject/marked/solutions)Got a subject teacher_getall marked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getAllSubjectMarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter/getall/subject/marked/solutions)General error while processing a subject teacher_getall marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_teacherRouter.post("/getall/subject/unmarked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter/getall/subject/unmarked/solutions)Got a subject teacher_getall unmarked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getAllSubjectUnmarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter/getall/subject/unmarked/solutions)General error while processing a subject teacher_getall unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_teacherRouter.post("/getall/student/marked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter/getall/student/marked/solutions)Got a student teacher_getall marked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student" });
+    }
+
+    return await _getAllStudentMarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter/getall/student/marked/solutions)General error while processing a student teacher_getall marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_teacherRouter.post("/getall/student/unmarked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_teacherRouter/getall/student/unmarked/solutions)Got a student teacher_getall unmarked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified student" });
+    }
+
+    return await _getAllStudentUnmarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_teacherRouter/getall/student/unmarked/solutions)General error while processing a student teacher_getall unmarked solutions request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
