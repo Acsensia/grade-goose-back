@@ -2071,6 +2071,54 @@ async function _addNewSolution(
   }
 }
 
+async function _getTwoKeyEntityInfo(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getTwoKeyEntityInfo)Got a two-key entity info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity) throw new Error("Could not find an entity with specified ID!");
+
+    res.json({
+      entity: entity,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getTwoKeyEntityInfo)General error while processing a two-key entity info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -2562,6 +2610,35 @@ _adminRouter.post("/getinfo/task", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/getinfo/task)General error while processing a task admin_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/getinfo/solution", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/getinfo/solution)Got a solution admin_getinfo request, processing...`,
+    );
+
+    const { taskId, studentId } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+
+    return await _getTwoKeyEntityInfo(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/getinfo/solution)General error while processing a solution admin_getinfo request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

@@ -83,7 +83,8 @@ export async function getAllEntities(
   }
 }
 
-// select one function
+// select one functions
+
 export async function getEntity(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
@@ -163,6 +164,112 @@ export async function getEntity(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(getEntity)Generally failed to get an entity with the id "${_entityId}" from the "${entityTableName}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getTwoKeyEntity(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getTwoKeyEntity",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "getTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof entityKeyOneColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityKeyOneColumnName",
+      "string",
+      entityKeyOneColumnName,
+      "getTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof entityKeyTwoColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityKeyTwoColumnName",
+      "string",
+      entityKeyTwoColumnName,
+      "getTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof _entityKeyOne !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityKeyOne",
+      "string",
+      _entityKeyOne,
+      "getTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof _entityKeyTwo !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityKeyTwo",
+      "string",
+      _entityKeyTwo,
+      "getTwoKeyEntity",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getTwoKeyEntity)Trying to get a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}"...`,
+      );
+
+    let sql = `
+    SELECT t.*, t.${entityKeyOneColumnName} AS id
+    FROM \`${entityTableName}\` t
+    WHERE t.${entityKeyOneColumnName} = ?
+      AND t.${entityKeyTwoColumnName} = ?
+    `;
+    const params = [_entityKeyOne, _entityKeyTwo];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getTwoKeyEntity)Successfully got a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}"!`,
+        );
+      return results[0];
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getTwoKeyEntity)Failed to get a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getTwoKeyEntity)Generally failed to get a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}"!
         Error message: "${error}".`,
       );
     return false;
