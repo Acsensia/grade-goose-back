@@ -8,7 +8,7 @@ async function _shutdown(message) {
   }
   consoleLoggers.logError(message);
 
-  const connectionPool = mysqlManagement.getConnectionPool(true);
+  const connectionPool = await mysqlManagement.getConnectionPool(true, true);
   if (connectionPool) await connectionPool.end();
 
   process.exit(1);

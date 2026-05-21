@@ -723,7 +723,7 @@ async function __checkForDatabaseExistence(
 
 // EXPORTED FUNCTIONS //
 
-async function _getConnectionPool(areMessagesToBeDisplayed) {
+async function _getConnectionPool(areMessagesToBeDisplayed, doNotCreate) {
   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
   else {
     if (typeof areMessagesToBeDisplayed !== "boolean") {
@@ -731,7 +731,19 @@ async function _getConnectionPool(areMessagesToBeDisplayed) {
         "areMessagesToBeDisplayed",
         "boolean",
         areMessagesToBeDisplayed,
-        "__checkAdministratorCount",
+        "_getConnectionPool",
+      );
+      return undefined;
+    }
+  }
+  if (doNotCreate === undefined) doNotCreate = false;
+  else {
+    if (typeof doNotCreate !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "doNotCreate",
+        "boolean",
+        doNotCreate,
+        "_getConnectionPool",
       );
       return undefined;
     }
@@ -743,16 +755,18 @@ async function _getConnectionPool(areMessagesToBeDisplayed) {
         `(0/_getConnectionPool)Trying to get the mysql connection pool...`,
       );
     if (!__connectionPool) {
-      if (areMessagesToBeDisplayed)
-        consoleLoggers.logWarning(
-          `(0/_getConnectionPool) Connection pool not yet created. Trying to create...`,
-        );
-      if (await _connect()) {
+      if (!doNotCreate) {
         if (areMessagesToBeDisplayed)
-          consoleLoggers.logSuccess(
-            `(0/_getConnectionPool) Connection pool successfully accessed.`,
+          consoleLoggers.logWarning(
+            `(0/_getConnectionPool) Connection pool not yet created. Trying to create...`,
           );
-        return __connectionPool;
+        if (await _connect()) {
+          if (areMessagesToBeDisplayed)
+            consoleLoggers.logSuccess(
+              `(0/_getConnectionPool) Connection pool successfully accessed.`,
+            );
+          return __connectionPool;
+        }
       }
     } else {
       if (areMessagesToBeDisplayed)

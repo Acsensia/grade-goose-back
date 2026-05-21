@@ -329,7 +329,11 @@ async function _addAccount(
       );
     const _passwordHash = await _hashPassword(_password, true);
     if (_passwordHash === undefined) return false;
-    const sql = `INSERT INTO \`${tableName}\` (email, password_hash, first_name, last_name, patronymic_name) VALUES (?, ?, ?, ?, ?)`;
+    const sql = `
+    INSERT INTO \`${tableName}\`
+      (email, password_hash, first_name, last_name, patronymic_name)
+    VALUES (?, ?, ?, ?, ?)
+    `;
     const params = [
       _email,
       _passwordHash,
