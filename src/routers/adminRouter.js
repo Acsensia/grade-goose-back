@@ -2375,6 +2375,151 @@ async function _updateSolutionTeComm(
   }
 }
 
+async function _getAllSubjectMarkedSolutions(req, res, _subjectId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllSubjectMarkedSolutions)Got an all subject marked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllSubjectMarkedSolutions(
+      connectionPool,
+      true,
+      _subjectId,
+    );
+    if (!result) throw new Error("Failed to get all subject marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllSubjectMarkedSolutions)General error while processing an all subject marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllSubjectUnmarkedSolutions(req, res, _subjectId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllSubjectUnmarkedSolutions)Got an all subject unmarked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllSubjectUnmarkedSolutions(
+      connectionPool,
+      true,
+      _subjectId,
+    );
+    if (!result) throw new Error("Failed to get all subject marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllSubjectUnmarkedSolutions)General error while processing an all subject unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentMarkedSolutions(req, res, _studentId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentMarkedSolutions)Got an all student marked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllStudentMarkedSolutions(
+      connectionPool,
+      true,
+      _studentId,
+    );
+    if (!result) throw new Error("Failed to get all student marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentMarkedSolutions)General error while processing an all student marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentUnmarkedSolutions(req, res, _studentId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentUnmarkedSolutions)Got an all student unmarked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllStudentUnmarkedSolutions(
+      connectionPool,
+      true,
+      _studentId,
+    );
+    if (!result)
+      throw new Error("Failed to get all student unmarked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentUnmarkedSolutions)General error while processing an all student unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -6621,6 +6766,84 @@ _adminRouter.post("/assign/task/subjects", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter/assign/task/subjects)General error while processing a task admin_assign subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//10solution routes for admin
+
+_adminRouter.post("/getall/subject/marked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getall/subject/marked/solutions)Got a subject admin_getall marked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getAllSubjectMarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getall/subject/marked/solutions)General error while processing a subject admin_getall marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/getall/subject/unmarked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getall/subject/unmarked/solutions)Got a subject admin_getall unmarked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getAllSubjectUnmarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getall/subject/unmarked/solutions)General error while processing a subject admin_getall unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/getall/student/marked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getall/student/marked/solutions)Got a student admin_getall marked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getAllStudentMarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getall/student/marked/solutions)General error while processing a student admin_getall marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/getall/student/unmarked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter/getall/student/unmarked/solutions)Got a student admin_getall unmarked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    return await _getAllStudentUnmarkedSolutions(req, res, Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter/getall/student/unmarked/solutions)General error while processing a student admin_getall unmarked solutions request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

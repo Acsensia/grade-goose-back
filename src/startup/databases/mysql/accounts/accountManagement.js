@@ -490,7 +490,7 @@ async function _deleteAccountSelection(
   }
 }
 
-// select all function //
+// select all functions //
 
 async function _getAllAccounts(
   databaseConnectionPool,
@@ -547,6 +547,136 @@ async function _getAllAccounts(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(_getAllAccounts)Generally failed to get all accounts from the "${tableName}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllStudentMarkedSolutions(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _studentId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllStudentMarkedSolutions",
+      );
+      return false;
+    }
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "getAllStudentMarkedSolutions",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentMarkedSolutions)Trying to get all the marked solutions for the student with id "${_studentId}"...`,
+      );
+
+    let sql = `
+    SELECT dt.*, dt.tasks_task_id AS id
+    FROM \`done_tasks_status\` dt
+    WHERE dt.students_student_id = ${_studentId}
+      AND dt.mark IS NOT NULL
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentMarkedSolutions)Successfully got all the marked solutions for the student with id "${_studentId}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentMarkedSolutions)Failed to get all the marked solutions for the student with id "${_studentId}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentMarkedSolutions)Generally failed to get all the marked solutions for the student with id "${_studentId}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllStudentUnmarkedSolutions(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _studentId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllStudentUnmarkedSolutions",
+      );
+      return false;
+    }
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "getAllStudentUnmarkedSolutions",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentUnmarkedSolutions)Trying to get all the unmarked solutions for the student with id "${_studentId}"...`,
+      );
+
+    let sql = `
+    SELECT dt.*, dt.tasks_task_id AS id
+    FROM \`done_tasks_status\` dt
+    WHERE dt.students_student_id = ${_studentId}
+      AND dt.mark IS NULL
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentUnmarkedSolutions)Successfully got all the unmarked solutions for the student with id "${_studentId}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentUnmarkedSolutions)Failed to get all the unmarked solutions for the student with id "${_studentId}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentUnmarkedSolutions)Generally failed to get all the unmarked solutions for the student with id "${_studentId}"!
         Error message: "${error}".`,
       );
     return false;

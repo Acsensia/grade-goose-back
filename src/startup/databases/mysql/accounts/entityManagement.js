@@ -9,7 +9,8 @@ import * as consoleLoggers from "../../../console/consoleLoggers.js";
 
 // EXPORTED FUNCTIONS //
 
-// select all function
+// select all functions
+
 export async function getAllEntities(
   databaseConnectionPool,
   areMessagesToBeDisplayed,
@@ -77,6 +78,122 @@ export async function getAllEntities(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(getAllEntities)Generally failed to get all the entities from the "${entityTableName}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllSubjectMarkedSolutions(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _subjectId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllSubjectMarkedSolutions",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllSubjectMarkedSolutions)Trying to get all the marked solutions for the subject with id "${_subjectId}"...`,
+      );
+
+    let sql = `
+    SELECT dt.*, dt.tasks_task_id AS id
+    FROM \`done_tasks_status\` dt
+    JOIN \`tasks_assigned_to_a_subject\` ta
+      ON ta.tasks_task_id = dt.tasks_task_id
+    WHERE ta.subjects_subject_id = ${_subjectId}
+      AND dt.mark IS NOT NULL
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllSubjectMarkedSolutions)Successfully got all the marked solutions for the subject with id "${_subjectId}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllSubjectMarkedSolutions)Failed to get all the marked solutions for the subject with id "${_subjectId}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllSubjectMarkedSolutions)Generally failed to get all the marked solutions for the subject with id "${_subjectId}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllSubjectUnmarkedSolutions(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _subjectId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllSubjectUnmarkedSolutions",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllSubjectUnmarkedSolutions)Trying to get all the unmarked solutions for the subject with id "${_subjectId}"...`,
+      );
+
+    let sql = `
+    SELECT dt.*, dt.tasks_task_id AS id
+    FROM \`done_tasks_status\` dt
+    JOIN \`tasks_assigned_to_a_subject\` ta
+      ON ta.tasks_task_id = dt.tasks_task_id
+    WHERE ta.subjects_subject_id = ${_subjectId}
+      AND dt.mark IS NULL
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllSubjectUnmarkedSolutions)Successfully got all the unmarked solutions for the subject with id "${_subjectId}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllSubjectUnmarkedSolutions)Failed to get all the unmarked solutions for the subject with id "${_subjectId}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllSubjectUnmarkedSolutions)Generally failed to get all the unmarked solutions for the subject with id "${_subjectId}"!
         Error message: "${error}".`,
       );
     return false;
