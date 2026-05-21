@@ -2119,6 +2119,262 @@ async function _getTwoKeyEntityInfo(
   }
 }
 
+async function _updateSolutionLink(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionLink)Got a solution link update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.internet_file_link = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution link" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionLink)General error while processing a solution link update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSolutionMark(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionMark)Got a solution mark update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.mark = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution mark" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionMark)General error while processing a solution mark update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSolutionStComm(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionStComm)Got a solution student commentary update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.student_commentary = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution mark" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionStComm)General error while processing a solution student commentary update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSolutionTeComm(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionTeComm)Got a solution teacher commentary update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.teacher_commentary = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution mark" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionTeComm)General error while processing a solution teacher commentary update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -3437,6 +3693,138 @@ _adminRouter.post("/update/task/enforcedue", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter:/update/task/enforcedue)General error while processing a task admin_update due date enforcement request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.17solution mark update route for admin
+_adminRouter.post("/update/solution/mark", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/solution/mark)Got a solution admin_update mark request, processing...`,
+    );
+
+    const { taskId, studentId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+    if (typeof newValue !== "number")
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSolutionMark(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+      Number(newValue),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/solution/mark)General error while processing a solution admin_update mark request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.18solution link update route for admin
+_adminRouter.post("/update/solution/link", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/solution/link)Got a solution admin_update link request, processing...`,
+    );
+
+    const { taskId, studentId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSolutionLink(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/solution/link)General error while processing a solution admin_update link request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.19solution student commentary update route for admin
+_adminRouter.post("/update/solution/stcomm", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/solution/stcomm)Got a solution admin_update student commentary request, processing...`,
+    );
+
+    const { taskId, studentId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSolutionStComm(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/solution/stcomm)General error while processing a solution admin_update student commentary request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5.20solution teacher commentary update route for admin
+_adminRouter.post("/update/solution/tecomm", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/update/solution/tecomm)Got a solution admin_update teacher commentary request, processing...`,
+    );
+
+    const { taskId, studentId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!studentId)
+      throw new Error("No studentId parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    return await _updateSolutionTeComm(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      Number(studentId),
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/update/solution/tecomm)General error while processing a solution admin_update teacher commentary request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

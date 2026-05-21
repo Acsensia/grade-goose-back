@@ -1379,6 +1379,112 @@ export async function updateTask(
   }
 }
 
+export async function updateSolution(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _updatedEntity,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "updateSolution",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "updateSolution",
+    );
+    return false;
+  }
+  if (typeof entityKeyOneColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityKeyOneColumnName",
+      "string",
+      entityKeyOneColumnName,
+      "updateSolution",
+    );
+    return false;
+  }
+  if (typeof entityKeyTwoColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityKeyTwoColumnName",
+      "string",
+      entityKeyTwoColumnName,
+      "updateSolution",
+    );
+    return false;
+  }
+  if (typeof _entityKeyOne !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityKeyOne",
+      "number",
+      _entityKeyOne,
+      "updateSolution",
+    );
+    return false;
+  }
+  if (typeof _entityKeyTwo !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityKeyTwo",
+      "number",
+      _entityKeyTwo,
+      "updateSolution",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(updateSolution)Trying to update a solution...`,
+      );
+
+    const sql = `
+        UPDATE \`${entityTableName}\`
+        SET internet_file_link = ?,
+          mark = ?, student_commentary = ?,
+          teacher_commentary = ?
+        WHERE ${entityKeyOneColumnName} = ?
+          AND ${entityKeyTwoColumnName} = ?
+        `;
+    const params = [
+      _updatedEntity.internet_file_link,
+      _updatedEntity.mark,
+      _updatedEntity.student_commentary,
+      _updatedEntity.teacher_commentary,
+      _entityKeyOne,
+      _entityKeyTwo,
+    ];
+    await databaseConnectionPool.execute(sql, params);
+
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logSuccess(
+        `(updateSolution)Successfully updated a solution.`,
+      );
+    return true;
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(updateSolution)Generally failed to update a solution! Error message: ${error}`,
+      );
+    return false;
+  }
+}
+
 // entity addition functions //
 
 export async function addStudentGroup(
