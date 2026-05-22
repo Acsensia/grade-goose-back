@@ -818,6 +818,90 @@ async function _getAllStudentUnmarkedSolutions(req, res, _studentId) {
   }
 }
 
+async function _getAllStudentSubjectDoneTasks(
+  req,
+  res,
+  _subjectId,
+  _studentId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentSubjectDoneTasks)Got an all student-subject done tasks request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllStudentSubjectDoneTasks(
+      connectionPool,
+      true,
+      _studentId,
+      _subjectId,
+    );
+    if (!result) throw new Error("Failed to get all subject done tasks!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentSubjectDoneTasks)General error while processing an all student-subject done tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentSubjectUndoneTasks(
+  req,
+  res,
+  _subjectId,
+  _studentId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentSubjectUndoneTasks)Got an all student-subject undone tasks request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllStudentSubjectUndoneTasks(
+      connectionPool,
+      true,
+      _studentId,
+      _subjectId,
+    );
+    if (!result) throw new Error("Failed to get all subject done tasks!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentSubjectUndoneTasks)General error while processing an all student-subject undone tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
 
 //2add routes for student
@@ -1416,6 +1500,68 @@ _studentRouter.post("/checkexists/solution", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_studentRouter:/checkexists/solution)General error while processing a solution student_checkexists request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//12doneTasks routes for student
+
+_studentRouter.post("/getall/subject/done/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/subject/done/tasks)Got a subject student_getall done tasks request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getAllStudentSubjectDoneTasks(
+      req,
+      res,
+      Number(id),
+      req.user.id,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/subject/done/tasks)General error while processing a subject student_getall done tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getall/subject/undone/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/subject/undone/tasks)Got a subject student_getall undone tasks request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getAllStudentSubjectUndoneTasks(
+      req,
+      res,
+      Number(id),
+      req.user.id,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/subject/undone/tasks)General error while processing a subject student_getall undone tasks request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

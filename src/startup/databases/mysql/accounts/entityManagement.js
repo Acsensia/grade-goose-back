@@ -374,6 +374,276 @@ export async function getAllStudentSubjectUnmarkedSolutions(
   }
 }
 
+// export async function getAllStudentDoneTasks(
+//   databaseConnectionPool,
+//   areMessagesToBeDisplayed,
+//   _studentId,
+// ) {
+//   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+//   else {
+//     if (typeof areMessagesToBeDisplayed !== "boolean") {
+//       consoleLoggers.logParameterTypeError(
+//         "areMessagesToBeDisplayed",
+//         "boolean",
+//         areMessagesToBeDisplayed,
+//         "getAllStudentDoneTasks",
+//       );
+//       return false;
+//     }
+//   }
+//   if (typeof _studentId !== "number") {
+//     consoleLoggers.logParameterTypeError(
+//       "_studentId",
+//       "number",
+//       _studentId,
+//       "getAllStudentDoneTasks",
+//     );
+//     return false;
+//   }
+
+//   try {
+//     if (areMessagesToBeDisplayed)
+//       consoleLoggers.logNeutral(
+//         `(getAllStudentDoneTasks)Trying to get all the done tasks for the student with id "${_studentId}"...`,
+//       );
+//     let sql = `
+//     SELECT t.*, t.task_id AS id
+//     FROM \`tasks\` t
+//     JOIN \`done_tasks_status\` dt
+//       ON t.task_id = dt.tasks_task_id
+//     WHERE dt.students_student_id = ${_studentId}
+//     `;
+//     const [results] = await databaseConnectionPool.execute(sql);
+//     if (results !== undefined) {
+//       if (areMessagesToBeDisplayed)
+//         consoleLoggers.logSuccess(
+//           `(getAllStudentDoneTasks)Successfully got all the done tasks for the student with id "${_studentId}""!`,
+//         );
+//       return results;
+//     } else {
+//       if (areMessagesToBeDisplayed)
+//         consoleLoggers.logError(
+//           `(getAllStudentDoneTasks)Failed to get all the done tasks for the student with id "${_studentId}""!
+//           Query: "${sql}"
+//           Search results: "${results}"`,
+//         );
+//       return false;
+//     }
+//   } catch (error) {
+//     if (areMessagesToBeDisplayed)
+//       consoleLoggers.logError(
+//         `(getAllStudentDoneTasks)Generally failed to get all the done tasks for the student with id "${_studentId}""!
+//         Error message: "${error}".`,
+//       );
+//     return false;
+//   }
+// }
+
+// export async function getAllStudentUndoneTasks(
+//   databaseConnectionPool,
+//   areMessagesToBeDisplayed,
+//   _studentId,
+// ) {
+//   if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+//   else {
+//     if (typeof areMessagesToBeDisplayed !== "boolean") {
+//       consoleLoggers.logParameterTypeError(
+//         "areMessagesToBeDisplayed",
+//         "boolean",
+//         areMessagesToBeDisplayed,
+//         "getAllStudentUndoneTasks",
+//       );
+//       return false;
+//     }
+//   }
+//   if (typeof _studentId !== "number") {
+//     consoleLoggers.logParameterTypeError(
+//       "_studentId",
+//       "number",
+//       _studentId,
+//       "getAllStudentUndoneTasks",
+//     );
+//     return false;
+//   }
+
+//   try {
+//     if (areMessagesToBeDisplayed)
+//       consoleLoggers.logNeutral(
+//         `(getAllStudentUndoneTasks)Trying to get all the not done tasks for the student with id "${_studentId}"...`,
+//       );
+//     let sql = `
+//     SELECT t.*, t.task_id AS id
+//     FROM \`tasks\` t
+//     LEFT JOIN \`done_tasks_status\` d
+//       ON t.task_id = d.tasks_task_id
+//       AND d.students_student_id = ${_studentId}
+//     WHERE d.students_student_id IS NULL;
+//     `;
+//     const [results] = await databaseConnectionPool.execute(sql);
+//     if (results !== undefined) {
+//       if (areMessagesToBeDisplayed)
+//         consoleLoggers.logSuccess(
+//           `(getAllStudentUndoneTasks)Successfully got all the not done tasks for the student with id "${_studentId}""!`,
+//         );
+//       return results;
+//     } else {
+//       if (areMessagesToBeDisplayed)
+//         consoleLoggers.logError(
+//           `(getAllStudentUndoneTasks)Failed to get all the not done tasks for the student with id "${_studentId}""!
+//           Query: "${sql}"
+//           Search results: "${results}"`,
+//         );
+//       return false;
+//     }
+//   } catch (error) {
+//     if (areMessagesToBeDisplayed)
+//       consoleLoggers.logError(
+//         `(getAllStudentUndoneTasks)Generally failed to get all the not done tasks for the student with id "${_studentId}""!
+//         Error message: "${error}".`,
+//       );
+//     return false;
+//   }
+// }
+
+export async function getAllStudentSubjectDoneTasks(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _studentId,
+  _subjectId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllStudentSubjectDoneTasks",
+      );
+      return false;
+    }
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "getAllStudentSubjectDoneTasks",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentSubjectDoneTasks)Trying to get all the done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"...`,
+      );
+    let sql = `
+    SELECT t.*, t.task_id AS id
+    FROM \`tasks\` t
+    JOIN \`tasks_assigned_to_a_subject\` ta
+      ON t.task_id = ta.tasks_task_id
+    JOIN \`done_tasks_status\` d
+      ON t.task_id = d.tasks_task_id
+    WHERE ta.subjects_subject_id = ${_subjectId}
+      AND d.students_student_id = ${_studentId}
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentSubjectDoneTasks)Successfully got all the done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentSubjectDoneTasks)Failed to get all the done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentSubjectDoneTasks)Generally failed to get all the done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllStudentSubjectUndoneTasks(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _studentId,
+  _subjectId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllStudentSubjectUndoneTasks",
+      );
+      return false;
+    }
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "getAllStudentSubjectUndoneTasks",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentSubjectUndoneTasks)Trying to get all the not done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"...`,
+      );
+    let sql = `
+    SELECT t.*, t.task_id AS id
+    FROM \`tasks\` t
+    JOIN \`tasks_assigned_to_a_subject\` ta
+      ON t.task_id = ta.tasks_task_id
+    LEFT JOIN \`done_tasks_status\` d
+      ON t.task_id = d.tasks_task_id
+      AND d.students_student_id = ${_studentId}
+    WHERE ta.subjects_subject_id = ${_subjectId}
+      AND d.students_student_id IS NULL;
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentSubjectUndoneTasks)Successfully got all the not done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentSubjectUndoneTasks)Failed to get all the not done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentSubjectUndoneTasks)Generally failed to get all the not done tasks for the student with id "${_studentId}" and for the subject with id "${_subjectId}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 // select one functions
 
 export async function getEntity(
