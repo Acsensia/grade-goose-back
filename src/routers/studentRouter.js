@@ -1356,6 +1356,36 @@ _studentRouter.post("/getall/subject/unmarked/solutions", async (req, res) => {
   }
 });
 
+_studentRouter.post("/getall/marked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/student/marked/solutions)Got a student_getall own marked solutions request, processing...`,
+    );
+
+    return await _getAllStudentMarkedSolutions(req, res, req.user.id);
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/student/marked/solutions)General error while processing a student_getall own marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getall/unmarked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/student/unmarked/solutions)Got a student_getall own unmarked solutions request, processing...`,
+    );
+
+    return await _getAllStudentUnmarkedSolutions(req, res, req.user.id);
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/student/unmarked/solutions)General error while processing a student_getall own unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 //11checkExists routes for student
 
 _studentRouter.post("/checkexists/solution", async (req, res) => {
