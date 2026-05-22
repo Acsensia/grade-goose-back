@@ -608,6 +608,59 @@ async function _updateSolutionStComm(
   }
 }
 
+async function _getEntityAssignedEntities(
+  req,
+  res,
+  childEntityTable_Name,
+  childEntityTable_IdColumnName,
+  assignationTable_Name,
+  assignationTable_childEntity_IdColumnName,
+  assignationTable_parentEntity_IdColumnName,
+  _parentEntityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityAssignedEntities)Got an entity assigned entities request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getEntityAssignedEntities(
+      connectionPool,
+      true,
+      childEntityTable_Name,
+      childEntityTable_IdColumnName,
+      assignationTable_Name,
+      assignationTable_childEntity_IdColumnName,
+      assignationTable_parentEntity_IdColumnName,
+      _parentEntityId,
+    );
+    if (!result)
+      throw new Error(
+        "Failed to get all entities assigned to a certain entity!",
+      );
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityAssignedEntities)General error while processing an entity assigned entities request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
 
 //2add routes for student
@@ -971,6 +1024,114 @@ _studentRouter.post("/getall/assigned/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_studentRouter/getall/assigned/tasks)General error while processing a student_getall assigned tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//6.5specialties assigned to a student group route for student
+_studentRouter.post(
+  "/getall/studentgroup/assigned/specialties",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_studentRouter/getall/studentgroup/assigned/specialties)Got a studentgroup student_getall assigned specialties request, processing...`,
+      );
+
+      const { id } = req.body;
+
+      if (!id) throw new Error("No id parameter in the received JSON.");
+
+      if (!__checkStudentAccessToStudentGroup(req.user.id, Number(id))) {
+        return res
+          .status(401)
+          .json({ message: "No access to the specified studentgroup" });
+      }
+
+      return await _getEntityAssignedEntities(
+        req,
+        res,
+        "specialties",
+        "specialty_id",
+        "specialties_assigned_to_a_student_group",
+        "specialties_specialty_id",
+        "student_groups_student_group_id",
+        Number(id),
+      );
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_studentRouter/getall/studentgroup/assigned/specialties)General error while processing a studentgroup student_getall assigned specialties request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+//6.6subjects assigned to a specialty route for student
+_studentRouter.post("/getall/specialty/assigned/subjects", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/specialty/assigned/subjects)Got a specialty student_getall assigned subjects request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSpecialty(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified specialty" });
+    }
+
+    return await _getEntityAssignedEntities(
+      req,
+      res,
+      "subjects",
+      "subject_id",
+      "subjects_assigned_to_a_specialty",
+      "subjects_subject_id",
+      "specialties_specialty_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/specialty/assigned/subjects)General error while processing a specialty student_getall assigned subjects request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//6.10tasks assigned to a subject route for student
+_studentRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/subject/assigned/tasks)Got a subject student_getall assigned tasks request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getEntityAssignedEntities(
+      req,
+      res,
+      "tasks",
+      "task_id",
+      "tasks_assigned_to_a_subject",
+      "tasks_task_id",
+      "subjects_subject_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/subject/assigned/tasks)General error while processing a subject student_getall assigned tasks request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }

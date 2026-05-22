@@ -2323,7 +2323,7 @@ _teacherRouter.post("/getall/subject/assigned/students", async (req, res) => {
   }
 });
 
-//6.10tasks assigned to a subject route for admin
+//6.10tasks assigned to a subject route for teacher
 _teacherRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
   try {
     consoleLoggers.logNeutral(
