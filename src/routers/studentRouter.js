@@ -480,6 +480,134 @@ async function _addNewSolution(
   }
 }
 
+async function _updateSolutionLink(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionLink)Got a solution link update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.internet_file_link = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution link" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionLink)General error while processing a solution link update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _updateSolutionStComm(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+  _newValue,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_updateSolutionStComm)Got a solution student commentary update request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity)
+      throw new Error("Could not find user account with specified ID!");
+
+    entity.student_commentary = _newValue;
+    const updateResult = await entityManagement.updateSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+      entity,
+    );
+    if (!updateResult)
+      throw new Error(
+        "Failed to update the solution with the newly specified information!",
+      );
+
+    res.status(200).json({ message: "Successfully changed solution mark" });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_updateSolutionStComm)General error while processing a solution student commentary update request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
 
 //2add routes for student
@@ -666,6 +794,81 @@ _studentRouter.post("/getinfo/solution", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_studentRouter:/getinfo/solution)General error while processing a solution student_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//5update routes for student
+
+//5.1solution link update route for student
+_studentRouter.post("/update/solution/link", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/update/solution/link)Got a solution student_update link request, processing...`,
+    );
+
+    const { taskId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified task" });
+    }
+
+    return await _updateSolutionLink(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      req.user.id,
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/update/solution/link)General error while processing a solution student_update link request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/update/solution/stcomm", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/update/solution/stcomm)Got a solution student_update student commentary request, processing...`,
+    );
+
+    const { taskId, newValue } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+    if (!newValue)
+      throw new Error("No newValue parameter in the received JSON.");
+
+    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified task" });
+    }
+
+    return await _updateSolutionStComm(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      req.user.id,
+      newValue,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/update/solution/stcomm)General error while processing a solution student_update student commentary request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
