@@ -101,6 +101,15 @@ export async function getAllSubjectMarkedSolutions(
       return false;
     }
   }
+  if (typeof _subjectId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_subjectId",
+      "number",
+      _subjectId,
+      "getAllSubjectMarkedSolutions",
+    );
+    return false;
+  }
 
   try {
     if (areMessagesToBeDisplayed)
@@ -159,6 +168,15 @@ export async function getAllSubjectUnmarkedSolutions(
       return false;
     }
   }
+  if (typeof _subjectId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_subjectId",
+      "number",
+      _subjectId,
+      "getAllSubjectUnmarkedSolutions",
+    );
+    return false;
+  }
 
   try {
     if (areMessagesToBeDisplayed)
@@ -194,6 +212,162 @@ export async function getAllSubjectUnmarkedSolutions(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         `(getAllSubjectUnmarkedSolutions)Generally failed to get all the unmarked solutions for the subject with id "${_subjectId}"!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllStudentSubjectMarkedSolutions(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _subjectId,
+  _studentId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllStudentSubjectMarkedSolutions",
+      );
+      return false;
+    }
+  }
+  if (typeof _subjectId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_subjectId",
+      "number",
+      _subjectId,
+      "getAllStudentSubjectMarkedSolutions",
+    );
+    return false;
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "getAllStudentSubjectMarkedSolutions",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentSubjectMarkedSolutions)Trying to get all the marked solutions for the subject with id "${_subjectId}" for the student with id "${_studentId}"...`,
+      );
+
+    let sql = `
+    SELECT dt.*, dt.tasks_task_id AS id
+    FROM \`done_tasks_status\` dt
+    JOIN \`tasks_assigned_to_a_subject\` ta
+      ON ta.tasks_task_id = dt.tasks_task_id
+    WHERE ta.subjects_subject_id = ${_subjectId}
+      AND dt.students_student_id = ${_studentId}
+      AND dt.mark IS NOT NULL
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentSubjectMarkedSolutions)Successfully got all the marked solutions for the subject with id "${_subjectId} for the student with id "${_studentId}""!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentSubjectMarkedSolutions)Failed to get all the marked solutions for the subject with id "${_subjectId} for the student with id "${_studentId}""!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentSubjectMarkedSolutions)Generally failed to get all the marked solutions for the subject with id "${_subjectId} for the student with id "${_studentId}""!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getAllStudentSubjectUnmarkedSolutions(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  _subjectId,
+  _studentId,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getAllStudentSubjectUnmarkedSolutions",
+      );
+      return false;
+    }
+  }
+  if (typeof _subjectId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_subjectId",
+      "number",
+      _subjectId,
+      "getAllStudentSubjectUnmarkedSolutions",
+    );
+    return false;
+  }
+  if (typeof _studentId !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_studentId",
+      "number",
+      _studentId,
+      "getAllStudentSubjectUnmarkedSolutions",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getAllStudentSubjectUnmarkedSolutions)Trying to get all the unmarked solutions for the subject with id "${_subjectId}" for the student with id "${_studentId}"...`,
+      );
+
+    let sql = `
+    SELECT dt.*, dt.tasks_task_id AS id
+    FROM \`done_tasks_status\` dt
+    JOIN \`tasks_assigned_to_a_subject\` ta
+      ON ta.tasks_task_id = dt.tasks_task_id
+    WHERE ta.subjects_subject_id = ${_subjectId}
+      AND dt.students_student_id = ${_studentId}
+      AND dt.mark IS NULL
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getAllStudentSubjectUnmarkedSolutions)Successfully got all the unmarked solutions for the subject with id "${_subjectId} for the student with id "${_studentId}""!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getAllStudentSubjectUnmarkedSolutions)Failed to get all the unmarked solutions for the subject with id "${_subjectId} for the student with id "${_studentId}""!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getAllStudentSubjectUnmarkedSolutions)Generally failed to get all the unmarked solutions for the subject with id "${_subjectId} for the student with id "${_studentId}""!
         Error message: "${error}".`,
       );
     return false;

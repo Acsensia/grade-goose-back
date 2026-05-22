@@ -661,6 +661,163 @@ async function _getEntityAssignedEntities(
   }
 }
 
+async function _getAllStudentSubjectMarkedSolutions(
+  req,
+  res,
+  _subjectId,
+  _studentId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentSubjectMarkedSolutions)Got an all student-subject marked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllStudentSubjectMarkedSolutions(
+      connectionPool,
+      true,
+      _subjectId,
+      _studentId,
+    );
+    if (!result) throw new Error("Failed to get all subject marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentSubjectMarkedSolutions)General error while processing an all student-subject marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentSubjectUnmarkedSolutions(
+  req,
+  res,
+  _subjectId,
+  _studentId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentSubjectUnmarkedSolutions)Got an all student-subject unmarked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getAllStudentSubjectUnmarkedSolutions(
+      connectionPool,
+      true,
+      _subjectId,
+      _studentId,
+    );
+    if (!result) throw new Error("Failed to get all subject marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentSubjectUnmarkedSolutions)General error while processing an all student-subject unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentMarkedSolutions(req, res, _studentId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentMarkedSolutions)Got an all student marked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllStudentMarkedSolutions(
+      connectionPool,
+      true,
+      _studentId,
+    );
+    if (!result) throw new Error("Failed to get all student marked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentMarkedSolutions)General error while processing an all student marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getAllStudentUnmarkedSolutions(req, res, _studentId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getAllStudentUnmarkedSolutions)Got an all student unmarked solutions request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await accountManagement.getAllStudentUnmarkedSolutions(
+      connectionPool,
+      true,
+      _studentId,
+    );
+    if (!result)
+      throw new Error("Failed to get all student unmarked solutions!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getAllStudentUnmarkedSolutions)General error while processing an all student unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
 
 //2add routes for student
@@ -1132,6 +1289,68 @@ _studentRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_studentRouter/getall/subject/assigned/tasks)General error while processing a subject student_getall assigned tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//10solution routes for student
+
+_studentRouter.post("/getall/subject/marked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/subject/marked/solutions)Got a subject student_getall marked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getAllStudentSubjectMarkedSolutions(
+      req,
+      res,
+      Number(id),
+      req.user.id,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/subject/marked/solutions)General error while processing a subject student_getall marked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getall/subject/unmarked/solutions", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter/getall/subject/unmarked/solutions)Got a subject student_getall unmarked solutions request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getAllStudentSubjectUnmarkedSolutions(
+      req,
+      res,
+      Number(id),
+      req.user.id,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter/getall/subject/unmarked/solutions)General error while processing a subject student_getall unmarked solutions request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
