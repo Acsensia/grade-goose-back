@@ -3419,3 +3419,194 @@ export async function deleteTwoKeyEntitySelection(
     return false;
   }
 }
+
+// entity stats functions //
+
+export async function getStudentGroupsSpecialtiesCounts(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getStudentGroupsSpecialtiesCounts",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getStudentGroupsSpecialtiesCounts)Trying to get the count of all the specialties assigned to each student group...`,
+      );
+
+    let sql = `
+    SELECT 
+        COUNT(sasg.specialties_specialty_id) AS count,
+        sg.student_group_id AS id,
+        sg.name AS name
+    FROM 
+        student_groups sg
+    LEFT JOIN 
+        specialties_assigned_to_a_student_group sasg 
+        ON sg.student_group_id = sasg.student_groups_student_group_id
+    GROUP BY 
+        sg.student_group_id, 
+        sg.name;
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getStudentGroupsSpecialtiesCounts)Successfully got the count of all the specialties assigned to each student group!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getStudentGroupsSpecialtiesCounts)Failed to get the count of all the specialties assigned to each student group!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getStudentGroupsSpecialtiesCounts)Generally failed to get the count of all the specialties assigned to each student group!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getSpecialtiesSubjectsCounts(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getSpecialtiesSubjectsCounts",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getSpecialtiesSubjectsCounts)Trying to get the count of all the subjects assigned to each specialty...`,
+      );
+
+    let sql = `
+    SELECT 
+        COUNT(sas.subjects_subject_id) AS count,
+        sp.specialty_id AS id,
+        sp.name AS name
+    FROM 
+        specialties sp
+    LEFT JOIN 
+        subjects_assigned_to_a_specialty sas 
+        ON sp.specialty_id = sas.specialties_specialty_id
+    GROUP BY 
+        sp.specialty_id, 
+        sp.name;
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getSpecialtiesSubjectsCounts)Successfully got the count of all the subjects assigned to each specialty!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getSpecialtiesSubjectsCounts)Failed to get the count of all the subjects assigned to each specialty!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getSpecialtiesSubjectsCounts)Generally failed to get the count of all the subjects assigned to each specialty!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
+export async function getSubjectsTasksCounts(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "getSubjectsTasksCounts",
+      );
+      return false;
+    }
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(getSubjectsTasksCounts)Trying to get the count of all the tasks assigned to each subject...`,
+      );
+
+    let sql = `
+    SELECT 
+        COUNT(tas.tasks_task_id) AS count,
+        su.subject_id AS id,
+        su.name AS name
+    FROM 
+        subjects su
+    LEFT JOIN 
+        tasks_assigned_to_a_subject tas 
+        ON su.subject_id = tas.subjects_subject_id
+    GROUP BY 
+        su.subject_id, 
+        su.name;
+    `;
+    const [results] = await databaseConnectionPool.execute(sql);
+    if (results !== undefined) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(getSubjectsTasksCounts)Successfully got the count of all the tasks assigned to each subject!`,
+        );
+      return results;
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(getSubjectsTasksCounts)Failed to get the count of all the tasks assigned to each subject!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(getSubjectsTasksCounts)Generally failed to get the count of all the tasks assigned to each subject!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}

@@ -2520,6 +2520,111 @@ async function _getAllStudentUnmarkedSolutions(req, res, _studentId) {
   }
 }
 
+async function _getStudentGroupsSpecialtiesCount(req, res) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getStudentGroupsSpecialtiesCount)Got a student groups specialties count request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getStudentGroupsSpecialtiesCounts(
+      connectionPool,
+      true,
+    );
+    if (!result) throw new Error("Failed to get all entities!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getStudentGroupsSpecialtiesCount)General error while processing a student groups specialties count request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getSpecialtiesSubjectsCount(req, res) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getSpecialtiesSubjectsCount)Got a specialties subjects count request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getSpecialtiesSubjectsCounts(
+      connectionPool,
+      true,
+    );
+    if (!result) throw new Error("Failed to get all entities!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getSpecialtiesSubjectsCount)General error while processing a specialties subjects count request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getSubjectsTasksCount(req, res) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getSubjectsTasksCount)Got a subjects tasks count request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("administrator" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not administrator (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const result = await entityManagement.getSubjectsTasksCounts(
+      connectionPool,
+      true,
+    );
+    if (!result) throw new Error("Failed to get all entities!");
+
+    res.json({
+      result: result,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getSubjectsTasksCount)General error while processing a subjects tasks count request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //otherAccount routes
 
 //1getall routes for admin
@@ -6844,6 +6949,56 @@ _adminRouter.post("/getall/student/unmarked/solutions", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_adminRouter/getall/student/unmarked/solutions)General error while processing a student admin_getall unmarked solutions request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//11stats routes for admin
+
+_adminRouter.post(
+  "/getstats/assignedcounts/studentgroups",
+  async (req, res) => {
+    try {
+      consoleLoggers.logNeutral(
+        `(_adminRouter:/getstats/assignedcounts/studentgroups)Got a student groups getassignedcounts request, processing...`,
+      );
+
+      return await _getStudentGroupsSpecialtiesCount(req, res);
+    } catch (error) {
+      consoleLoggers.logError(
+        `(_adminRouter:/getstats/assignedcounts/studentgroups)General error while processing a student groups getassignedcounts request, error message: "${error}".`,
+      );
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
+_adminRouter.post("/getstats/assignedcounts/specialties", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/getstats/assignedcounts/specialties)Got a specialties getassignedcounts request, processing...`,
+    );
+
+    return await _getSpecialtiesSubjectsCount(req, res);
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/getstats/assignedcounts/specialties)General error while processing a specialties getassignedcounts request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_adminRouter.post("/getstats/assignedcounts/subjects", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_adminRouter:/getstats/assignedcounts/subjects)Got a subjects getassignedcounts request, processing...`,
+    );
+
+    return await _getSubjectsTasksCount(req, res);
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_adminRouter:/getstats/assignedcounts/subjects)General error while processing a subjects getassignedcounts request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
