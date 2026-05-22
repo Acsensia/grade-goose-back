@@ -393,6 +393,114 @@ export async function getTwoKeyEntity(
   }
 }
 
+// checkExists functions
+
+export async function checkExistsTwoKeyEntity(
+  databaseConnectionPool,
+  areMessagesToBeDisplayed,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+) {
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "checkExistsTwoKeyEntity",
+      );
+      return false;
+    }
+  }
+  if (typeof entityTableName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityTableName",
+      "string",
+      entityTableName,
+      "checkExistsTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof entityKeyOneColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityKeyOneColumnName",
+      "string",
+      entityKeyOneColumnName,
+      "checkExistsTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof entityKeyTwoColumnName !== "string") {
+    consoleLoggers.logParameterTypeError(
+      "entityKeyTwoColumnName",
+      "string",
+      entityKeyTwoColumnName,
+      "checkExistsTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof _entityKeyOne !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityKeyOne",
+      "string",
+      _entityKeyOne,
+      "checkExistsTwoKeyEntity",
+    );
+    return false;
+  }
+  if (typeof _entityKeyTwo !== "number") {
+    consoleLoggers.logParameterTypeError(
+      "_entityKeyTwo",
+      "string",
+      _entityKeyTwo,
+      "checkExistsTwoKeyEntity",
+    );
+    return false;
+  }
+
+  try {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(checkExistsTwoKeyEntity)Trying to check if a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}" exists...`,
+      );
+
+    const sql = `
+      SELECT EXISTS(
+        SELECT 1 FROM \`${entityTableName}\`
+        WHERE \`${entityKeyOneColumnName}\` = ? AND \`${entityKeyTwoColumnName}\` = ?
+      ) AS exists_flag
+    `;
+    const params = [_entityKeyOne, _entityKeyTwo];
+    const [results] = await databaseConnectionPool.execute(sql, params);
+    if (results !== undefined && results.length !== 0) {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          `(checkExistsTwoKeyEntity)Successfully checked if a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}" exists!`,
+        );
+      return results[0];
+    } else {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logError(
+          `(checkExistsTwoKeyEntity)Failed to check if a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}" exists!
+          Query: "${sql}"
+          Search results: "${results}"`,
+        );
+      return false;
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        `(checkExistsTwoKeyEntity)Generally failed to check if a two-key entity with the ids "${_entityKeyOne}" and "${_entityKeyTwo}" from the "${entityTableName}" exists!
+        Error message: "${error}".`,
+      );
+    return false;
+  }
+}
+
 // checkAssigned functions //
 
 // child 1-->1 parent

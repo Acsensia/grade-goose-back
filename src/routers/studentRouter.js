@@ -63,7 +63,613 @@ async function _getUserAccountAssignedEntities(
   }
 }
 
+async function __checkStudentAccessToStudentGroup(_studentId, _childId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(__checkStudentAccessToStudentGroup)Checking for student access to a student group...`,
+    );
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+    if (
+      //student_group->student
+      await entityManagement.checkAssigned1Fecta(
+        connectionPool,
+        true,
+        "students_assigned_to_a_student_group",
+        "student_groups_student_group_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else return false;
+  } catch (error) {
+    consoleLoggers.logError(
+      `(__checkStudentAccessToStudentGroup)General error while checking for student access to a student group, error message: "${error}".`,
+    );
+    return undefined;
+  }
+}
+
+async function __checkStudentAccessToSpecialty(_studentId, _childId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(__checkStudentAccessToSpecialty)Checking for student access to a specialty...`,
+    );
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+    if (
+      //specialty->student
+      await entityManagement.checkAssigned1Fecta(
+        connectionPool,
+        true,
+        "specialties_assigned_to_a_student_individually",
+        "specialties_specialty_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else if (
+      //specialty->student_group->student
+      await entityManagement.checkAssigned2Fecta(
+        connectionPool,
+        true,
+        "specialties_assigned_to_a_student_group",
+        "students_assigned_to_a_student_group",
+        "specialties_specialty_id",
+        "student_groups_student_group_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else return false;
+  } catch (error) {
+    consoleLoggers.logError(
+      `(__checkStudentAccessToSpecialty)General error while checking for student access to a specialty, error message: "${error}".`,
+    );
+    return undefined;
+  }
+}
+
+async function __checkStudentAccessToSubject(_studentId, _childId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(__checkStudentAccessToSubject)Checking for student access to a subject...`,
+    );
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+    if (
+      //subject->student
+      await entityManagement.checkAssigned1Fecta(
+        connectionPool,
+        true,
+        "subjects_assigned_to_a_student_individually",
+        "subjects_subject_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else if (
+      //subject->specialty->student
+      await entityManagement.checkAssigned2Fecta(
+        connectionPool,
+        true,
+        "subjects_assigned_to_a_specialty",
+        "specialties_assigned_to_a_student_individually",
+        "subjects_subject_id",
+        "specialties_specialty_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else if (
+      //subject->specialty->student_group->student
+      await entityManagement.checkAssigned3Fecta(
+        connectionPool,
+        true,
+        "subjects_assigned_to_a_specialty",
+        "specialties_assigned_to_a_student_group",
+        "students_assigned_to_a_student_group",
+        "subjects_subject_id",
+        "specialties_specialty_id",
+        "student_groups_student_group_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else return false;
+  } catch (error) {
+    consoleLoggers.logError(
+      `(__checkStudentAccessToSubject)General error while checking for student access to a subject, error message: "${error}".`,
+    );
+    return undefined;
+  }
+}
+
+async function __checkStudentAccessToTask(_studentId, _childId) {
+  try {
+    consoleLoggers.logNeutral(
+      `(__checkStudentAccessToTask)Checking for student access to a task...`,
+    );
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+    if (
+      //task->student
+      await entityManagement.checkAssigned1Fecta(
+        connectionPool,
+        true,
+        "tasks_assigned_to_a_student_individually",
+        "tasks_task_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else if (
+      //task->subject->student
+      await entityManagement.checkAssigned2Fecta(
+        connectionPool,
+        true,
+        "tasks_assigned_to_a_subject",
+        "subjects_assigned_to_a_student_individually",
+        "tasks_task_id",
+        "subjects_subject_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else if (
+      //task->subject->specialty->student
+      await entityManagement.checkAssigned3Fecta(
+        connectionPool,
+        true,
+        "tasks_assigned_to_a_subject",
+        "subjects_assigned_to_a_specialty",
+        "specialties_assigned_to_a_student_individually",
+        "tasks_task_id",
+        "subjects_subject_id",
+        "specialties_specialty_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    } else if (
+      //task->subject->specialty->student_group->student
+      await entityManagement.checkAssigned4Fecta(
+        connectionPool,
+        true,
+        "tasks_assigned_to_a_subject",
+        "subjects_assigned_to_a_specialty",
+        "specialties_assigned_to_a_student_group",
+        "students_assigned_to_a_student_group",
+        "tasks_task_id",
+        "subjects_subject_id",
+        "specialties_specialty_id",
+        "student_groups_student_group_id",
+        "students_student_id",
+        _childId,
+        _studentId,
+      )
+    ) {
+      return true;
+    }
+  } catch (error) {
+    consoleLoggers.logError(
+      `(__checkStudentAccessToTask)General error while checking for student access to a task, error message: "${error}".`,
+    );
+    return undefined;
+  }
+}
+
+async function _getEntityInfo(
+  req,
+  res,
+  entityTableName,
+  entityIdColumnName,
+  _entityId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getEntityInfo)Got an entity info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityIdColumnName,
+      _entityId,
+    );
+    if (!entity) throw new Error("Could not find an entity with specified ID!");
+
+    res.json({
+      entity: entity,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getEntityInfo)General error while processing an entity info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _getTwoKeyEntityInfo(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_getTwoKeyEntityInfo)Got a two-key entity info request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const entity = await entityManagement.getTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!entity) throw new Error("Could not find an entity with specified ID!");
+
+    res.json({
+      entity: entity,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_getTwoKeyEntityInfo)General error while processing a two-key entity info request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _checkExistsTwoKeyEntity(
+  req,
+  res,
+  entityTableName,
+  entityKeyOneColumnName,
+  entityKeyTwoColumnName,
+  _entityKeyOne,
+  _entityKeyTwo,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_checkExistsTwoKeyEntity)Got a two-key entity check_exists request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const checkResult = await entityManagement.checkExistsTwoKeyEntity(
+      connectionPool,
+      true,
+      entityTableName,
+      entityKeyOneColumnName,
+      entityKeyTwoColumnName,
+      _entityKeyOne,
+      _entityKeyTwo,
+    );
+    if (!checkResult)
+      throw new Error(
+        "Could not check if an entity with the specified IDs exists!",
+      );
+
+    res.json({
+      exists_flag: checkResult.exists_flag,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_checkExistsTwoKeyEntity)General error while processing a two-key entity check_exists request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function _addNewSolution(
+  req,
+  res,
+  entityTableName,
+  _taskId,
+  _studentId,
+  _internet_file_link,
+  _mark,
+  _studentCommentary,
+  _teacherCommentary,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(_addNewSolution)Got a solution addition request, processing...`,
+    );
+
+    if (!req.user)
+      throw new Error("No user object in request! Check auth middleware code.");
+
+    if ("student" !== req.user.type)
+      return res.status(401).json({
+        message: `Unauthorized: not student (current user type: ${req.user.type})`,
+      });
+
+    const connectionPool = await mysqlManagement.getConnectionPool(true);
+    if (!connectionPool)
+      throw new Error("Failed to access the connection pool!");
+
+    const additionResult = await entityManagement.addSolution(
+      connectionPool,
+      true,
+      entityTableName,
+      _taskId,
+      _studentId,
+      _internet_file_link,
+      _mark,
+      _studentCommentary,
+      _teacherCommentary,
+    );
+    if (!additionResult) throw new Error("Failed to add the almost-new task!");
+
+    res.json({
+      result: additionResult,
+    });
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_addNewSolution)General error while processing a solution addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 //routes
+
+//2add routes for student
+
+_studentRouter.post("/add/solution", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/add/solution)Got a solution addition request, processing...`,
+    );
+
+    let { tasks_task_id, internet_file_link, student_commentary } = req.body;
+
+    if (!tasks_task_id)
+      throw new Error("No tasks_task_id parameter in the received JSON.");
+    if (!internet_file_link)
+      throw new Error("No internet_file_link parameter in the received JSON.");
+    if (!student_commentary || student_commentary === "null")
+      student_commentary = null;
+
+    if (!__checkStudentAccessToTask(req.user.id, Number(tasks_task_id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified task" });
+    }
+
+    return await _addNewSolution(
+      req,
+      res,
+      "done_tasks_status",
+      Number(tasks_task_id),
+      req.user.id,
+      internet_file_link,
+      null,
+      student_commentary,
+      null,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/add/solution)General error while processing a solution addition request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//3getinfo routes for student
+
+_studentRouter.post("/getinfo/studentgroup", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/getinfo/studentgroup)Got a studentgroup student_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToStudentGroup(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified studentgroup" });
+    }
+
+    return await _getEntityInfo(
+      req,
+      res,
+      "student_groups",
+      "student_group_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/getinfo/studentgroup)General error while processing a studentgroup student_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getinfo/specialty", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/getinfo/specialty)Got a specialty student_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSpecialty(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified specialty" });
+    }
+
+    return await _getEntityInfo(
+      req,
+      res,
+      "specialties",
+      "specialty_id",
+      Number(id),
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/getinfo/specialty)General error while processing a specialty student_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getinfo/subject", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/getinfo/subject)Got a subject student_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified subject" });
+    }
+
+    return await _getEntityInfo(req, res, "subjects", "subject_id", Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/getinfo/subject)General error while processing a subject student_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getinfo/task", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/getinfo/task)Got a task student_getinfo request, processing...`,
+    );
+
+    const { id } = req.body;
+
+    if (!id) throw new Error("No id parameter in the received JSON.");
+
+    if (!__checkStudentAccessToTask(req.user.id, Number(id))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified task" });
+    }
+
+    return await _getEntityInfo(req, res, "tasks", "task_id", Number(id));
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/getinfo/task)General error while processing a task student_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+_studentRouter.post("/getinfo/solution", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/getinfo/solution)Got a solution student_getinfo request, processing...`,
+    );
+
+    const { taskId } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+
+    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified task" });
+    }
+
+    return await _getTwoKeyEntityInfo(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      req.user.id,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/getinfo/solution)General error while processing a solution student_getinfo request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 //6assigned routes for student
 
@@ -162,6 +768,41 @@ _studentRouter.post("/getall/assigned/tasks", async (req, res) => {
   } catch (error) {
     consoleLoggers.logError(
       `(_studentRouter/getall/assigned/tasks)General error while processing a student_getall assigned tasks request, error message: "${error}".`,
+    );
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+//11checkExists routes for student
+
+_studentRouter.post("/checkexists/solution", async (req, res) => {
+  try {
+    consoleLoggers.logNeutral(
+      `(_studentRouter:/checkExists/solution)Got a solution student_checkexists request, processing...`,
+    );
+
+    const { taskId } = req.body;
+
+    if (!taskId) throw new Error("No taskId parameter in the received JSON.");
+
+    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+      return res
+        .status(401)
+        .json({ message: "No access to the specified task" });
+    }
+
+    return await _checkExistsTwoKeyEntity(
+      req,
+      res,
+      "done_tasks_status",
+      "tasks_task_id",
+      "students_student_id",
+      Number(taskId),
+      req.user.id,
+    );
+  } catch (error) {
+    consoleLoggers.logError(
+      `(_studentRouter:/checkexists/solution)General error while processing a solution student_checkexists request, error message: "${error}".`,
     );
     res.status(500).json({ message: "Server error" });
   }
