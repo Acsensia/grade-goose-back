@@ -6,7 +6,7 @@ import * as consoleLoggers from "../../../console/consoleLoggers.js";
 
 //default access token duration
 //TODO increase duration
-const ACCESS_TTL = "15m";
+const ACCESS_TTL = "3h";
 
 function _signAccessToken(user, userType, userId, areMessagesToBeDisplayed) {
   if (areMessagesToBeDisplayed)
