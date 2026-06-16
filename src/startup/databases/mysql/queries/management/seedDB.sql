@@ -38,12 +38,75 @@ VALUES
     (0, "SDE-22", "A group that supposedly was registered in 2022 with a specific goal of studying the specialty of Software Development and Engineering (SDE)."),
     (1, "CS-22", "Another group that was supposedly registered in 2022, but now with a different goal - namely, that of learning and researching Computer Science (CS) in general.");
 
+--Assigning students to student groups
+INSERT INTO `students_assigned_to_a_student_group`
+    (students_student_id, student_groups_student_group_id)
+VALUES
+    (0, 0),
+    (1, 0),
+    (2, 0),
+    (3, 0),
+    (4, 0),
+    (5, 1),
+    (6, 1),
+    (7, 1),
+    (8, 1),
+
+    (0, 1),
+    (1, 1),
+    (5, 0),
+    (6, 0);--double-group students
+
+--Assigning teachers to student groups
+INSERT INTO `student_groups_assigned_to_a_teacher_for_supervision`
+    (teachers_teacher_id, student_groups_student_group_id)
+VALUES
+    (0, 0),
+    (1, 0),
+    (2, 0),
+    (3, 0),
+    (4, 0),
+    (5, 1),
+    (6, 1),
+    (7, 1),
+    (8, 1),
+
+    (0, 1),
+    (1, 1),
+    (5, 0),
+    (6, 0);--double-group teachers
+
 --Populating specialties
 INSERT INTO `specialties`
     (specialty_id, name, abbreviation, description)
 VALUES
     (0, "Software Development and Engineering", "SDE", "A specialty that encompasses everything to do with the development and engineering of computer software."),
     (1, "Computer Science", "CS", "A different specialty that makes its goal the learning and research of computer science in general.");
+
+--Assigning specialties to student groups
+INSERT INTO `specialties_assigned_to_a_student_group`
+    (specialties_specialty_id, student_groups_student_group_id)
+VALUES
+    (0, 0),
+    (1, 1);
+
+--Assigning specialties to students
+INSERT INTO `specialties_assigned_to_a_student_individually`
+    (specialties_specialty_id, students_student_id)
+VALUES
+    (1, 0),
+    (1, 1),
+    (0, 5),
+    (0, 6);
+
+--Assigning specialties to teachers
+INSERT INTO specialties_assigned_to_a_teacher_for_supervision
+    (specialties_specialty_id, teachers_teacher_id)
+VALUES
+    (1, 0),
+    (1, 1),
+    (0, 5),
+    (0, 6);
 
 --Populating subjects
 INSERT INTO `subjects`
@@ -58,6 +121,43 @@ VALUES
     (6, "User interface design", "Yet another subject that, just like Software testing, turns something that seems simple into a difficult mess. Also it's not quite like the Higher mathematics, as most of the information provided is not too precise and forces the student to kind of guess if the design that's being developed is good or not."),
     (7, "Python development", "An interesting subject that kind of teaches the students about the 1s and 0s of Python. The students will look back on this subject with warmth in their hearts, as studying it would end up having been much easier than writing a Course project or, God forbid, a diploma."),
     (8, "Database development", "A funky little subject that might look quite simple, but usually ends up as one of the most difficult, frustrating and time-consuming subjects for all the students that, in one way or another, find themselves forced to come in contact with it.");
+
+--Assigning subjects to specialties
+INSERT INTO `subjects_assigned_to_a_specialty`
+    (subjects_subject_id, specialties_specialty_id)
+VALUES
+    (0, 0),
+    (1, 0),
+    (2, 0),
+    (3, 0),
+    (4, 0),
+    (5, 1),
+    (6, 1),
+    (7, 1),
+    (8, 1),
+
+    (0, 1),
+    (1, 1),
+    (5, 0),
+    (6, 0);--double-specialty subjects
+
+--Assigning subjects to students
+INSERT INTO `subjects_assigned_to_a_student_individually`
+    (subjects_subject_id, students_student_id)
+VALUES
+    (2, 1),
+    (3, 1),
+    (7, 0),
+    (8, 0);
+
+--Assigning subjects to teachers
+INSERT INTO `subjects_assigned_to_a_teacher_for_supervision`
+    (subjects_subject_id, teachers_teacher_id)
+VALUES
+    (2, 1),
+    (3, 1),
+    (7, 0),
+    (8, 0);
 
 --Populating tasks
 INSERT INTO `tasks`
@@ -162,3 +262,199 @@ VALUES
     (87, "Universal task 7", "This is the description of a universal task number 7. Since I could not think of anything more creative, you will have to look at this description while viewing this and every other created universal task. Sorry.", "2026-06-17 07:00:00", 0),
     (88, "Universal task 8", "This is the description of a universal task number 8. Since I could not think of anything more creative, you will have to look at this description while viewing this and every other created universal task. Sorry.", "2026-06-18 08:00:00", 0),
     (89, "Universal task 9", "This is the description of a universal task number 9. Since I could not think of anything more creative, you will have to look at this description while viewing this and every other created universal task. Sorry.", "2026-06-19 09:00:00", 0),--set10(universal tasks)
+
+--Assigning tasks to subjects
+INSERT INTO `tasks_assigned_to_a_subject`
+    (tasks_task_id, subjects_subject_id)
+VALUES
+    (0, 0),
+    (1, 0),
+    (2, 0),
+    (3, 0),
+    (4, 0),
+    (5, 0),
+    (6, 0),
+    (7, 0),
+    (8, 0),--subject 0
+
+    (9, 1),
+    (10, 1),
+    (11, 1),
+    (12, 1),
+    (13, 1),
+    (14, 1),
+    (15, 1),
+    (16, 1),
+    (17, 1),--subject 1
+
+    (18, 2),
+    (19, 2),
+    (20, 2),
+    (21, 2),
+    (22, 2),
+    (23, 2),
+    (24, 2),
+    (25, 2),
+    (26, 2),--subject 2
+
+    (27, 3),
+    (28, 3),
+    (29, 3),
+    (30, 3),
+    (31, 3),
+    (32, 3),
+    (33, 3),
+    (34, 3),
+    (35, 3),--subject 3
+
+    (36, 4),
+    (37, 4),
+    (38, 4),
+    (39, 4),
+    (40, 4),
+    (41, 4),
+    (42, 4),
+    (43, 4),
+    (44, 4),--subject 4
+
+    (45, 5),
+    (46, 5),
+    (47, 5),
+    (48, 5),
+    (49, 5),
+    (50, 5),
+    (51, 5),
+    (52, 5),
+    (53, 5),--subject 5
+
+    (54, 6),
+    (55, 6),
+    (56, 6),
+    (57, 6),
+    (58, 6),
+    (59, 6),
+    (60, 6),
+    (61, 6),
+    (62, 6),--subject 6
+
+    (63, 7),
+    (64, 7),
+    (65, 7),
+    (66, 7),
+    (67, 7),
+    (68, 7),
+    (69, 7),
+    (70, 7),
+    (71, 7),--subject 7
+
+    (72, 8),
+    (73, 8),
+    (74, 8),
+    (75, 8),
+    (76, 8),
+    (77, 8),
+    (78, 8),
+    (79, 8),
+    (80, 8),--subject 8
+
+    (81, 0),
+    (82, 1),
+    (83, 2),
+    (84, 3),
+    (85, 4),
+    (86, 5),
+    (87, 6),
+    (88, 7),
+    (89, 8),--universal tasks batch 1
+
+    (81, 8),
+    (82, 7),
+    (83, 6),
+    (84, 5),
+    --
+    (85, 5),
+    (84, 4),
+    (86, 4),
+    (85, 3),
+    --
+    (86, 3),
+    (87, 2),
+    (88, 1),
+    (89, 0),--universal tasks batch 2
+
+--Populating solutions
+INSERT INTO `done_tasks_status`
+    (tasks_task_id, students_student_id, internet_file_link, mark, student_commentary, teacher_commentary)
+VALUES
+    (0, 0, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (9, 0, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (18, 0, "disc.google.dummy.cum/423423423", 60, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (27, 0, "disc.google.dummy.cum/5345345354", 80, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 0
+
+    (1, 1, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (10, 1, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (19, 1, "disc.google.dummy.cum/423423423", 70, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (28, 1, "disc.google.dummy.cum/5345345354", 90, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 1
+
+    (2, 2, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (11, 2, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (20, 2, "disc.google.dummy.cum/423423423", 75, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (29, 2, "disc.google.dummy.cum/5345345354", 85, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 2
+
+    (3, 3, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (12, 3, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (21, 3, "disc.google.dummy.cum/423423423", 60, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (30, 3, "disc.google.dummy.cum/5345345354", 75, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 3
+
+    (4, 4, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (13, 4, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (22, 4, "disc.google.dummy.cum/423423423", 66, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (31, 4, "disc.google.dummy.cum/5345345354", 40, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 4
+
+    (45, 5, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (54, 5, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (63, 5, "disc.google.dummy.cum/423423423", 66, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (72, 5, "disc.google.dummy.cum/5345345354", 34, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 5
+
+    (46, 6, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (55, 6, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (64, 6, "disc.google.dummy.cum/423423423", 42, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (73, 6, "disc.google.dummy.cum/5345345354", 64, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 6
+
+    (47, 7, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (56, 7, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (65, 7, "disc.google.dummy.cum/423423423", 76, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (74, 7, "disc.google.dummy.cum/5345345354", 67, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 7
+
+    (48, 8, "disc.google.dummy.cum/2352340299", NULL, "This is my humble commentary for this humble task...", NULL),
+    (57, 8, "disc.google.dummy.cum/4324324234", NULL, "This is my humble commentary for this humble task...", NULL),
+    (66, 8, "disc.google.dummy.cum/423423423", 56, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),
+    (75, 8, "disc.google.dummy.cum/5345345354", 65, "This is my humble commentary for this humble task...", "You are so dumb that I can barely stand marking your solutions!!!"),--student 8
+
+--Assigning tasks to students
+INSERT INTO `tasks_assigned_to_a_student_individually`
+    (tasks_task_id, students_student_id)
+VALUES
+    (81, 0),
+    (82, 1),
+    (83, 2),
+    (84, 3),
+    (85, 4),
+    (86, 5),
+    (87, 6),
+    (88, 7),
+    (89, 8),
+
+--Assigning tasks to teachers
+INSERT INTO `tasks_assigned_to_a_teacher_for_supervision`
+    (tasks_task_id, teachers_teacher_id)
+VALUES
+    (81, 8),
+    (82, 7),
+    (83, 6),
+    (84, 5),
+    (85, 4),
+    (86, 3),
+    (87, 2),
+    (88, 1),
+    (89, 0),
