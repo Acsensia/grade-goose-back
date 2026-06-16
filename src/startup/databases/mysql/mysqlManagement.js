@@ -144,6 +144,31 @@ async function __suggestCreatingDatabase(
     ) {
       await serverManagement.shutdown();
     } else {
+      if (consoleAskers.askTwoOptions("Seed the target database?", "Y", "N")) {
+        if (
+          !(await __seedDatabase(
+            host,
+            user,
+            password,
+            database,
+            areMessagesToBeDisplayed,
+          ))
+        ) {
+          consoleLoggers.logError(
+            `(__suggestCreatingDatabase)Failed to seed the database!`,
+          );
+          if (
+            consoleAskers.askTwoOptions(
+              "Delete and shut down (Y) or proceed (N)?",
+              "Y",
+              "N",
+            )
+          ) {
+            serverManagement.shutdown();
+          }
+        }
+      }
+
       if (areMessagesToBeDisplayed)
         consoleLoggers.logNeutral(
           `(0/__suggestCreatingDatabase)Trying to connect to the newly created database...`,
@@ -429,6 +454,160 @@ async function __createDatabase(
     if (areMessagesToBeDisplayed)
       consoleLoggers.logError(
         "Database creation failed in general:\n" + error.message,
+      );
+    return false;
+  }
+}
+
+async function __seedDatabase(
+  host,
+  user,
+  password,
+  database,
+  areMessagesToBeDisplayed,
+) {
+  if (
+    host === undefined ||
+    user === undefined ||
+    password === undefined ||
+    database === undefined
+  ) {
+    host = process.env.DB_HOST;
+    user = process.env.DB_USER;
+    password = process.env.DB_PASS;
+    database = process.env.DB_NAME;
+  } else {
+    if (typeof host !== "string") {
+      consoleLoggers.logParameterTypeError(
+        "host",
+        "string",
+        host,
+        "__seedDatabase",
+      );
+      return undefined;
+    }
+    if (typeof user !== "string") {
+      consoleLoggers.logParameterTypeError(
+        "user",
+        "string",
+        user,
+        "__seedDatabase",
+      );
+      return undefined;
+    }
+    if (typeof password !== "string") {
+      consoleLoggers.logParameterTypeError(
+        "password",
+        "string",
+        password,
+        "__seedDatabase",
+      );
+      return undefined;
+    }
+    if (typeof database !== "string") {
+      consoleLoggers.logParameterTypeError(
+        "database",
+        "string",
+        database,
+        "__seedDatabase",
+      );
+      return undefined;
+    }
+  }
+  if (areMessagesToBeDisplayed === undefined) areMessagesToBeDisplayed = true;
+  else {
+    if (typeof areMessagesToBeDisplayed !== "boolean") {
+      consoleLoggers.logParameterTypeError(
+        "areMessagesToBeDisplayed",
+        "boolean",
+        areMessagesToBeDisplayed,
+        "__seedDatabase",
+      );
+      return undefined;
+    }
+  }
+
+  if (areMessagesToBeDisplayed)
+    consoleLoggers.logNeutral(
+      "(0/__seedDatabase)Trying to seed the target database...",
+    );
+  try {
+    //connecting without specifying the database
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logNeutral(
+        `(1/__seedDatabase)Trying to create a general MYSQL connection...`,
+      );
+    const connection = await mysql.createConnection({
+      host: host,
+      user: user,
+      password: password,
+      multipleStatements: true,
+    });
+    try {
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          "(1/__seedDatabase)MYSQL general connection successful",
+        );
+
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logNeutral(
+          `(1/__seedDatabase)Trying to load the database seeding query from an sql file...`,
+        );
+      //
+      var queryString = await queryUtilities.readQuery(
+        "management/seedDB.sql",
+        true,
+      );
+      if (queryString === undefined) {
+        if (areMessagesToBeDisplayed)
+          consoleLoggers.logError(
+            `(!/__seedDatabase)Failed to load the database seeding query from an sql file!`,
+          );
+        return false;
+      } else {
+        if (areMessagesToBeDisplayed)
+          `(1/__seedDatabase)Successfully loaded the database seeding query from an sql file.`;
+      }
+
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logNeutral(
+          `(2/__seedDatabase)Trying to change the name of the database inside the loaded query...`,
+        );
+      queryString = queryUtilities.changeDatabaseNameInQueryString(
+        queryString,
+        database,
+        true,
+      );
+      if (queryString === undefined) {
+        if (areMessagesToBeDisplayed)
+          consoleLoggers.logError(
+            `(2/__seedDatabase)Failed to change the name of the database inside the loaded query!`,
+          );
+        return false;
+      } else {
+        if (areMessagesToBeDisplayed)
+          consoleLoggers.logSuccess(
+            "(2/__seedDatabase)Successfully changed the name of the database inside the loaded query.",
+          );
+      }
+
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logNeutral(
+          `(3/__seedDatabase)Trying to run the modified query...`,
+        );
+      await connection.query(queryString);
+      if (areMessagesToBeDisplayed)
+        consoleLoggers.logSuccess(
+          "(3/__seedDatabase)Successfully changed ran the query, database seeded successfully.",
+        );
+      return true;
+    } finally {
+      connection.end();
+    }
+  } catch (error) {
+    if (areMessagesToBeDisplayed)
+      consoleLoggers.logError(
+        "Database seeding failed in general:\n" + error.message,
       );
     return false;
   }
