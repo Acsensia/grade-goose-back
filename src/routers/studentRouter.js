@@ -921,7 +921,9 @@ _studentRouter.post("/add/solution", async (req, res) => {
     if (!student_commentary || student_commentary === "null")
       student_commentary = null;
 
-    if (!__checkStudentAccessToTask(req.user.id, Number(tasks_task_id))) {
+    if (
+      !(await __checkStudentAccessToTask(req.user.id, Number(tasks_task_id)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified task" });
@@ -958,7 +960,7 @@ _studentRouter.post("/getinfo/studentgroup", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToStudentGroup(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToStudentGroup(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified studentgroup" });
@@ -989,7 +991,7 @@ _studentRouter.post("/getinfo/specialty", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToSpecialty(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToSpecialty(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified specialty" });
@@ -1020,7 +1022,7 @@ _studentRouter.post("/getinfo/subject", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -1045,7 +1047,7 @@ _studentRouter.post("/getinfo/task", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToTask(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToTask(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified task" });
@@ -1070,7 +1072,7 @@ _studentRouter.post("/getinfo/solution", async (req, res) => {
 
     if (!taskId) throw new Error("No taskId parameter in the received JSON.");
 
-    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+    if (!(await __checkStudentAccessToTask(req.user.id, Number(taskId)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified task" });
@@ -1108,7 +1110,7 @@ _studentRouter.post("/update/solution/link", async (req, res) => {
     if (!newValue)
       throw new Error("No newValue parameter in the received JSON.");
 
-    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+    if (!(await __checkStudentAccessToTask(req.user.id, Number(taskId)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified task" });
@@ -1144,7 +1146,7 @@ _studentRouter.post("/update/solution/stcomm", async (req, res) => {
     if (!newValue)
       throw new Error("No newValue parameter in the received JSON.");
 
-    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+    if (!(await __checkStudentAccessToTask(req.user.id, Number(taskId)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified task" });
@@ -1390,7 +1392,7 @@ _studentRouter.post("/getall/subject/marked/solutions", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -1420,7 +1422,7 @@ _studentRouter.post("/getall/subject/unmarked/solutions", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -1482,7 +1484,7 @@ _studentRouter.post("/checkexists/solution", async (req, res) => {
 
     if (!taskId) throw new Error("No taskId parameter in the received JSON.");
 
-    if (!__checkStudentAccessToTask(req.user.id, Number(taskId))) {
+    if (!(await __checkStudentAccessToTask(req.user.id, Number(taskId)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified task" });
@@ -1517,7 +1519,7 @@ _studentRouter.post("/getall/subject/done/tasks", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -1547,7 +1549,7 @@ _studentRouter.post("/getall/subject/undone/tasks", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkStudentAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkStudentAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });

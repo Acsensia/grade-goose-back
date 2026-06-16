@@ -1649,7 +1649,7 @@ _teacherRouter.post("/getinfo/student", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToStudent(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified student account" });
@@ -1680,7 +1680,7 @@ _teacherRouter.post("/getinfo/studentgroup", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudentGroup(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToStudentGroup(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified studentgroup" });
@@ -1711,7 +1711,7 @@ _teacherRouter.post("/getinfo/specialty", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSpecialty(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSpecialty(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified specialty" });
@@ -1742,7 +1742,7 @@ _teacherRouter.post("/getinfo/subject", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -1791,7 +1791,9 @@ _teacherRouter.post("/getinfo/solution", async (req, res) => {
     if (!studentId)
       throw new Error("No studentId parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(studentId))) {
+    if (
+      !(await __checkTeacherAccessToStudent(req.user.id, Number(studentId)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified student account" });
@@ -1977,7 +1979,9 @@ _teacherRouter.post("/update/solution/mark", async (req, res) => {
     if (typeof newValue !== "number")
       throw new Error("No newValue parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(studentId))) {
+    if (
+      !(await __checkTeacherAccessToStudent(req.user.id, Number(studentId)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified student" });
@@ -2016,7 +2020,9 @@ _teacherRouter.post("/update/solution/tecomm", async (req, res) => {
     if (!newValue)
       throw new Error("No newValue parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(studentId))) {
+    if (
+      !(await __checkTeacherAccessToStudent(req.user.id, Number(studentId)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified student" });
@@ -2155,7 +2161,9 @@ _teacherRouter.post(
 
       if (!id) throw new Error("No id parameter in the received JSON.");
 
-      if (!__checkTeacherAccessToStudentGroup(req.user.id, Number(id))) {
+      if (
+        !(await __checkTeacherAccessToStudentGroup(req.user.id, Number(id)))
+      ) {
         return res
           .status(401)
           .json({ message: "No access to the specified studentgroup" });
@@ -2193,7 +2201,9 @@ _teacherRouter.post(
 
       if (!id) throw new Error("No id parameter in the received JSON.");
 
-      if (!__checkTeacherAccessToStudentGroup(req.user.id, Number(id))) {
+      if (
+        !(await __checkTeacherAccessToStudentGroup(req.user.id, Number(id)))
+      ) {
         return res
           .status(401)
           .json({ message: "No access to the specified studentgroup" });
@@ -2229,7 +2239,7 @@ _teacherRouter.post("/getall/specialty/assigned/students", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSpecialty(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSpecialty(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified specialty" });
@@ -2264,7 +2274,7 @@ _teacherRouter.post("/getall/specialty/assigned/subjects", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSpecialty(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSpecialty(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified specialty" });
@@ -2299,7 +2309,7 @@ _teacherRouter.post("/getall/subject/assigned/students", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2334,7 +2344,7 @@ _teacherRouter.post("/getall/subject/assigned/tasks", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2369,7 +2379,7 @@ _teacherRouter.post("/getall/student/assigned/tasks", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToStudent(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified student" });
@@ -2409,7 +2419,9 @@ _teacherRouter.post("/unassign/student/tasks", async (req, res) => {
     if (!account_id)
       throw new Error("No account_id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(account_id))) {
+    if (
+      !(await __checkTeacherAccessToStudent(req.user.id, Number(account_id)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified student account" });
@@ -2446,7 +2458,9 @@ _teacherRouter.post("/unassign/subject/tasks", async (req, res) => {
     if (!parent_id)
       throw new Error("No parent_id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(parent_id))) {
+    if (
+      !(await __checkTeacherAccessToSubject(req.user.id, Number(parent_id)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2483,8 +2497,10 @@ _teacherRouter.post("/unassign/task/students", async (req, res) => {
     if (!parent_id)
       throw new Error("No parent_id parameter in the received JSON.");
 
-    child_id_selection.forEach((child_id) => {
-      if (!__checkTeacherAccessToStudent(req.user.id, Number(child_id))) {
+    child_id_selection.forEach(async (child_id) => {
+      if (
+        !(await __checkTeacherAccessToStudent(req.user.id, Number(child_id)))
+      ) {
         return res.status(401).json({
           message: "No access to one or more of the specified students",
         });
@@ -2522,8 +2538,10 @@ _teacherRouter.post("/unassign/task/subjects", async (req, res) => {
     if (!parent_id)
       throw new Error("No parent_id parameter in the received JSON.");
 
-    child_id_selection.forEach((child_id) => {
-      if (!__checkTeacherAccessToSubject(req.user.id, Number(child_id))) {
+    child_id_selection.forEach(async (child_id) => {
+      if (
+        !(await __checkTeacherAccessToSubject(req.user.id, Number(child_id)))
+      ) {
         return res.status(401).json({
           message: "No access to one or more of the specified subjects",
         });
@@ -2560,7 +2578,7 @@ _teacherRouter.post("/getall/subject/unassigned/tasks", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2595,7 +2613,7 @@ _teacherRouter.post("/getall/student/unassigned/tasks", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToStudent(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified student" });
@@ -2635,7 +2653,9 @@ _teacherRouter.post("/assign/student/tasks", async (req, res) => {
     if (!account_id)
       throw new Error("No account_id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(account_id))) {
+    if (
+      !(await __checkTeacherAccessToStudent(req.user.id, Number(account_id)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified student account" });
@@ -2672,7 +2692,9 @@ _teacherRouter.post("/assign/subject/tasks", async (req, res) => {
     if (!parent_id)
       throw new Error("No parent_id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(parent_id))) {
+    if (
+      !(await __checkTeacherAccessToSubject(req.user.id, Number(parent_id)))
+    ) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2709,8 +2731,10 @@ _teacherRouter.post("/assign/task/students", async (req, res) => {
     if (!parent_id)
       throw new Error("No parent_id parameter in the received JSON.");
 
-    child_id_selection.forEach((child_id) => {
-      if (!__checkTeacherAccessToStudent(req.user.id, Number(child_id))) {
+    child_id_selection.forEach(async (child_id) => {
+      if (
+        !(await __checkTeacherAccessToStudent(req.user.id, Number(child_id)))
+      ) {
         return res.status(401).json({
           message: "No access to one or more of the specified students",
         });
@@ -2748,8 +2772,10 @@ _teacherRouter.post("/assign/task/subjects", async (req, res) => {
     if (!parent_id)
       throw new Error("No parent_id parameter in the received JSON.");
 
-    child_id_selection.forEach((child_id) => {
-      if (!__checkTeacherAccessToSubject(req.user.id, Number(child_id))) {
+    child_id_selection.forEach(async (child_id) => {
+      if (
+        !(await __checkTeacherAccessToSubject(req.user.id, Number(child_id)))
+      ) {
         return res.status(401).json({
           message: "No access to one or more of the specified subjects",
         });
@@ -2785,7 +2811,7 @@ _teacherRouter.post("/getall/subject/marked/solutions", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2810,7 +2836,7 @@ _teacherRouter.post("/getall/subject/unmarked/solutions", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToSubject(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToSubject(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified subject" });
@@ -2835,7 +2861,7 @@ _teacherRouter.post("/getall/student/marked/solutions", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToStudent(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified student" });
@@ -2860,7 +2886,7 @@ _teacherRouter.post("/getall/student/unmarked/solutions", async (req, res) => {
 
     if (!id) throw new Error("No id parameter in the received JSON.");
 
-    if (!__checkTeacherAccessToStudent(req.user.id, Number(id))) {
+    if (!(await __checkTeacherAccessToStudent(req.user.id, Number(id)))) {
       return res
         .status(401)
         .json({ message: "No access to the specified student" });

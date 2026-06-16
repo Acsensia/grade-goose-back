@@ -164,7 +164,14 @@ async function __suggestCreatingDatabase(
               "N",
             )
           ) {
-            serverManagement.shutdown();
+            await __removeDatabase(
+              host,
+              user,
+              password,
+              database,
+              areMessagesToBeDisplayed,
+            );
+            await serverManagement.shutdown();
           }
         }
       }

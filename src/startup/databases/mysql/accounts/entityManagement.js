@@ -1490,6 +1490,7 @@ export async function checkAssigned4Fecta(
 
     const sql = `
     SELECT EXISTS(
+      SELECT 1
       FROM \`${assignationTable_childToMiddleman1_name}\` t1
       JOIN \`${assignationTable_middleman1ToMiddleman2_name}\` t2
         ON t1.\`${middleman1Entity_idColumnName}\` = t2.\`${middleman1Entity_idColumnName}\`
