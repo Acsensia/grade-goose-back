@@ -12,6 +12,48 @@ const _studentRouter = Router();
 
 //utility: student-only functions
 
+async function __checkIfPastTaskDueDate(
+  connectionPool,
+  taskTableName,
+  taskTable_idColumnName,
+  _taskId,
+) {
+  try {
+    consoleLoggers.logNeutral(
+      `(__checkIfPastTaskDueDate)Trying to check if a task's due date has been passed...`,
+    );
+    const relatedTask = await entityManagement.getEntity(
+      connectionPool,
+      true,
+      taskTableName,
+      taskTable_idColumnName,
+      _taskId,
+    );
+    if (!relatedTask) throw new Error("Failed to get the related task!");
+    if (!relatedTask.time_due || !relatedTask.can_be_handed_in_past_due)
+      throw new Error(
+        "Due date or due date enforcement fields not included in the related task object: look into the code!",
+      );
+    const dueDateIsEnforced =
+      relatedTask.can_be_handed_in_past_due.lastIndexOf(1) === -1;
+    //console.log(dueDateIsEnforced);
+    if (dueDateIsEnforced) {
+      const dueDate = new Date(relatedTask.time_due);
+      const now = new Date();
+      //console.log(relatedTask.time_due);
+      //console.log(dueDate);
+      //console.log(now);
+      if (now > dueDate) return true;
+      else return false;
+    } else return true;
+  } catch (error) {
+    consoleLoggers.logError(
+      `(__checkIfPastTaskDueDate)General error while trying to check if a task's due date has been passed, error message: "${error}".`,
+    );
+    return undefined;
+  }
+}
+
 async function _getUserAccountAssignedEntities(
   req,
   res,
@@ -456,6 +498,23 @@ async function _addNewSolution(
     if (!connectionPool)
       throw new Error("Failed to access the connection pool!");
 
+    const isPastDueDate = await __checkIfPastTaskDueDate(
+      connectionPool,
+      "tasks",
+      "task_id",
+      _taskId,
+    );
+    if (typeof isPastDueDate === "undefined")
+      throw new Error(
+        "Failed to check if the server time is past the related task's due date!",
+      );
+    else if (isPastDueDate) {
+      res
+        .status(401)
+        .json({ message: "The related task has already passed its due date!" });
+      return;
+    }
+
     const additionResult = await entityManagement.addSolution(
       connectionPool,
       true,
@@ -467,7 +526,8 @@ async function _addNewSolution(
       _studentCommentary,
       _teacherCommentary,
     );
-    if (!additionResult) throw new Error("Failed to add the almost-new task!");
+    if (!additionResult)
+      throw new Error("Failed to add the almost-new solution!");
 
     res.json({
       result: additionResult,
@@ -506,6 +566,24 @@ async function _updateSolutionLink(
     const connectionPool = await mysqlManagement.getConnectionPool(true);
     if (!connectionPool)
       throw new Error("Failed to access the connection pool!");
+
+    const _taskId = entityKeyOneColumnName;
+    const isPastDueDate = await __checkIfPastTaskDueDate(
+      connectionPool,
+      "tasks",
+      "task_id",
+      _taskId,
+    );
+    if (typeof isPastDueDate === "undefined")
+      throw new Error(
+        "Failed to check if the server time is past the related task's due date!",
+      );
+    else if (isPastDueDate) {
+      res
+        .status(401)
+        .json({ message: "The related task has already passed its due date!" });
+      return;
+    }
 
     const entity = await entityManagement.getTwoKeyEntity(
       connectionPool,
@@ -570,6 +648,24 @@ async function _updateSolutionStComm(
     const connectionPool = await mysqlManagement.getConnectionPool(true);
     if (!connectionPool)
       throw new Error("Failed to access the connection pool!");
+
+    const _taskId = entityKeyOneColumnName;
+    const isPastDueDate = await __checkIfPastTaskDueDate(
+      connectionPool,
+      "tasks",
+      "task_id",
+      _taskId,
+    );
+    if (typeof isPastDueDate === "undefined")
+      throw new Error(
+        "Failed to check if the server time is past the related task's due date!",
+      );
+    else if (isPastDueDate) {
+      res
+        .status(401)
+        .json({ message: "The related task has already passed its due date!" });
+      return;
+    }
 
     const entity = await entityManagement.getTwoKeyEntity(
       connectionPool,
